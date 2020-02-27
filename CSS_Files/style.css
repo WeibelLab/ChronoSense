@@ -28,9 +28,38 @@ h1 {
   color: var(--secondaryDarkConstrastColor);
 }
 
+#navigation-bar {
+  background-color: var(--primaryDarkContrastColor);
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  top: 32px;
+  height: 32px;
+  width: 100%;
+}
+
+#navigation-bar li {
+  float: left;
+}
+
+#navigation-bar li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 5px 16px;
+  text-decoration: none;
+}
+
+#navigation-bar li a:hover {
+  background-color: var(--secondaryDarkConstrastColor);
+
+}
+
 p {
   margin-top: 10px;
-  color: var(--primaryLightContrastColor);
+  color: white;
 }
 
 /* Styling of window frame and titlebar */
@@ -54,8 +83,8 @@ body {
 }
 
 #main {
-  height: calc(100% - 32px);
-  margin-top: 32px;
+  height: calc(100% - 64px); 
+  margin-top: 64px;
   padding: 20px;
   overflow-y: auto;
 }
