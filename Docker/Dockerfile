@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     nasm \
     cmake \
     libgl1-mesa-dev \
+    libgtk2.0-0 \
+    libgconf-2-4 \
     libsoundio-dev \
     libvulkan-dev \
     libx11-dev \
@@ -35,14 +37,11 @@ RUN apt-get update && apt-get install -y \
     libopencv-dev \
 	x11-apps
 
-# Install node.js, npm, yarn, and electron
+# Install node.js, npm, yarn, net-tools (for client-server kinect) and electron
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash -
 RUN apt-get install -y nodejs
 RUN curl -sL https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN apt-get update && apt-get install -y yarn
 RUN apt-get install -y net-tools 
-# ^^ Install net tools to communicate with host machine (client-server kinect)
-
-RUN npm install electron-prebuilt@latest --save-dev
 
 RUN bash

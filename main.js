@@ -2,13 +2,14 @@ const electron = require('electron');
 const url = require('url');
 const path = require('path');
 
-const {app, BrowserWindow, screen} = electron;
+const {app, BrowserWindow} = electron;
 
 let mainWindow;
+let electronScreen;
 
 function createWindow() {
     //Fill size of the monitor natively
-    const { width, height } = screen.getPrimaryDisplay().workAreaSize
+    const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
     //Create new window
     mainWindow = new BrowserWindow({ 
         width: width, 
@@ -29,7 +30,10 @@ function createWindow() {
 }
 
 // Listen for application to be ready
-app.on('ready', createWindow);
+app.on('ready', () => {
+  electronScreen = electron.screen
+  createWindow()
+})
 
 //If Mac, only close fully when all windows closed
 app.on('window-all-closed', function() {
@@ -41,7 +45,7 @@ app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
-        createWindow();
+      createWindow()
     }
 });
 
