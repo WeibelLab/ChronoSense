@@ -12,3 +12,14 @@
 ## Test Electron
 - To test the sample Electron Quickstart app, go to `cd /chronosense/electron-quick-start`
 - Install and run the example `npm install && npm start`
+
+## Run ChronoSense Electron App:
+- CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies/electron.
+- Next enter `npm start` and the application window will open up.
+
+
+## Change Notes:
+- In Docker build file, added the installation of network tools in order to allow for client/server connection between Host and Docker Container. 
+- Added PowerShell script for easy container startup. Look up how to add a shortcut to run the script in Windows 10.
+- Added Webcam selection and webcam live stream to application functionality
+- Added ability to record current stream from a camera to an MP4 file with decent quality bitrate while taking into consideration quality vs. storage.
