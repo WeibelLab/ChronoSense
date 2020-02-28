@@ -9,6 +9,9 @@
   "author": "Alexander Schonken",
   "license": "ISC",
   "dependencies": {
-    "electron": "^8.0.2"
+    "autogypi": "^0.2.2",
+    "electron": "^8.0.2",
+    "kinect-azure": "0.0.12",
+    "node_kinect": "^2.0.1"
   }
 }
