@@ -15,7 +15,10 @@ function createWindow() {
         width: width, 
         height: height, 
         frame: false,
-        webPreferences: { nodeIntegration: true},
+        webPreferences: {
+          nodeIntegration: true,
+          webviewTag: true
+        },
         show: false
      });
     mainWindow.once('ready-to-show', () => {

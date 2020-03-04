@@ -1,9 +1,17 @@
-const KinectAzure = require('kinect-azure');
-const kinect = new KinectAzure();
+const KinectAzure = require('../node_modules/kinect-azure/lib/kinect-azure.js');
+const kinect = new KinectAzure();  
+
+//!!!! ABOVE IS CURRENTLY FAILING AND NOT ALLOWING BELOW TO RUN !!//
+alert("WORKED");
 
 const displayCanvas = document.getElementById('kinect_feed');
-    outputCtx = displayCanvas.getContext('2d');
-let outputImageData;
+var outputCtx = displayCanvas.getContext('2d');
+
+
+//Draw rectangle to TEST canvas drawing capabilities
+outputCtx.fillRect(20, 20, 200, 500);
+
+
 
 if(kinect.open()) {
     //If the kinect properly opens continue
