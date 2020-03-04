@@ -26,6 +26,8 @@ function createWindow() {
       })
     // Load html into window
     mainWindow.loadFile('HTML_Files/index.html');
+    //For debugging
+    mainWindow.webContents.openDevTools();
     //Close window when closed
     mainWindow.on('closed', function() {
         mainWindow = null;
