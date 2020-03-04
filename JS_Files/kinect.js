@@ -1,4 +1,4 @@
-const KinectAzure = require('../node_modules/kinect-azure/lib/kinect-azure.js');
+const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();  
 
 //!!!! ABOVE IS CURRENTLY FAILING AND NOT ALLOWING BELOW TO RUN !!//
