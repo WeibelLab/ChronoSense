@@ -1,5 +1,7 @@
 const KinectAzure = require('kinect-azure');
-const kinect = new KinectAzure();  
+const kinect = new KinectAzure();
+const nodeConsole = require('console');
+const myConsole = new nodeConsole.Console(process.stdout, process.stderr);
 
 const displayCanvas = document.getElementById('kinect_feed');
 const outputCtx = displayCanvas.getContext('2d');
@@ -10,7 +12,9 @@ const init = () => {
 };
 
 const startKinect = () => {
-  if(kinect.open()) {
+  var kinect_status = kinect.open(); //this doesn't work like we thought (always returns true)
+  myConsole.log(kinect_status);
+  if(kinect_status) {
     kinect.startCameras({
       color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
       color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
