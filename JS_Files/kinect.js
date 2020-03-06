@@ -1,4 +1,3 @@
-const require = parent.require;
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();  
 
@@ -12,14 +11,11 @@ const init = () => {
 
 const startKinect = () => {
   if(kinect.open()) {
-    console.log("Kinect.open() successfully called");
     kinect.startCameras({
       color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
       color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
       camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
     });
-
-    console.log("startCameras() successfully called");
 
     kinect.startListening((data) => {
       if (!outputImageData && data.colorImageFrame.width > 0) {
@@ -27,13 +23,11 @@ const startKinect = () => {
         displayCanvas.height = data.colorImageFrame.height;
         outputImageData = outputCtx.createImageData(displayCanvas.width, displayCanvas.height);
       }
+
       if (outputImageData) {
         renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
       }
-      //Currently this is not reached
-      console.log("END of startListening() reached");
     });
-    console.log("End of kinect.open() reached");
   }
 };
 
@@ -48,8 +42,6 @@ const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
     pixelArray[i+3] = 0xff;
   }
   ctx.putImageData(canvasImageData, 0, 0);
-  //Currently this is NOT reached
-  console.log("End of renderBGRA32ColorFrame() reached");
 };
 
 init();

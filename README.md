@@ -10,7 +10,7 @@
 - Enter the docker image `docker run -it -e DISPLAY=host.docker.internal:0 -v /tmp/.X11-unix:/tmp/.X11-unix -v </absolute/path/to/git/repo/>:/chronosense chronosense`
 
 ## Run ChronoSense Electron App:
-- CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies/electron.
+- CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies/electron (node-gyp, kinect-azure, production windows build tools, etc.).
 - Next enter `npm start` and the application window will open up.
 - If you get a `electron: cannot execute binary file` error, run `npm install electron@^8.0.2` then try again
 
