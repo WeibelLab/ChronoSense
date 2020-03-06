@@ -1,5 +1,6 @@
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();
+//Acquire ability to print to terminal directly. Use myConsole instead of console.
 const nodeConsole = require('console');
 const myConsole = new nodeConsole.Console(process.stdout, process.stderr);
 
