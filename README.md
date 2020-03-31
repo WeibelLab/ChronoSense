@@ -19,3 +19,28 @@
 - Added PowerShell script for easy container startup. Look up how to add a shortcut to run the script in Windows 10.
 - Added Webcam selection and webcam live stream to application functionality
 - Added ability to record current stream from a camera to an MP4 file with decent quality bitrate while taking into consideration quality vs. storage.
+
+## Get Up and Running for Developing:
+1.  Clone the repository to a location of your choosing using the command:
+    `git clone https://github.com/WeibelLab/ChronoSenseV3.git`
+2.  Make sure you have [Node.js](https://nodejs.org/en/) installed (includes node and npm commands):
+3.  Navigate to where you cloned the ChronoSenseV3 folder and run the command:
+    `npm install`
+4.  **(Optional)** If there are submodules not fully cloned in the ChronoSenseV3 folder, run the command:
+    `git submodule update --init --recursive`
+5.  **(If on Windows)** Install node-gyp to fix some errors that may occur:
+    `npm install -g node-gyp`
+6.  Once you have the submodule installed for the 'kinect-azure' module (or in the node_modules folder), go to kinect-azure/scripts/ and enter the following command:
+    `node install.js`
+    - The above command will download the sensor dlls and other necessary files to use the Kinect in development and application use.
+7.  Move the files that were created with the above command into the main ChronoSenseV3 folder. 
+    List of Files to move:
+    * cublas64_100.dll
+    * cudart64_100.dll
+    * cudnn64_7.dll
+    * dnn_model_2_0.onnx
+    * onnxruntime.dll
+    * vcomp140.dll
+8. Test to see if the application (as it is) can now run by going to the main ChronoSenseV3 folder and typing the following command to start the application:
+    `npm start`
+9. Start developing!
