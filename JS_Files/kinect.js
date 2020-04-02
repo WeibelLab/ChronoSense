@@ -1,8 +1,8 @@
+console.log("Just entered kinect.js");
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();
-//Acquire ability to print to terminal directly. Use myConsole instead of console.
-const nodeConsole = require('console');
-const myConsole = new nodeConsole.Console(process.stdout, process.stderr);
+
+console.log("Finished getting KinectAzure");
 
 const displayCanvas = document.getElementById('kinect_feed');
 const outputCtx = displayCanvas.getContext('2d');
@@ -13,8 +13,9 @@ const init = () => {
 };
 
 const startKinect = () => {
+  console.log("startKinect() called ");
   var kinect_status = kinect.open(); //this doesn't work like we thought (always returns true)
-  myConsole.log(kinect_status);
+  console.log(kinect_status);
   if(kinect_status) {
     kinect.startCameras({
       color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
