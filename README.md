@@ -43,4 +43,4 @@
     * vcomp140.dll
 8. Test to see if the application (as it is) can now run by going to the main ChronoSenseV3 folder and typing the following command to start the application:  
     `npm start`
-9. Start developing!
+9. Ready to Develop!
