@@ -1,5 +1,5 @@
 console.log("Just entered kinect.js");
-const KinectAzure = require('kinect-azure');
+const KinectAzure = require('../kinect-azure/');
 const kinect = new KinectAzure();
 
 console.log("Finished getting KinectAzure");

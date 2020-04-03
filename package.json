@@ -9,7 +9,6 @@
   "author": "Alexander Schonken",
   "license": "ISC",
   "dependencies": {
-    "electron": "^8.0.3",
-    "kinect-azure": "file:./kinect-azure/"
+    "electron": "^8.0.3"
   }
 }
