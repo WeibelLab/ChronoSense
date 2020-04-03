@@ -1,8 +1,5 @@
-console.log("Just entered kinect.js");
-const KinectAzure = require('../kinect-azure/');
-const kinect = new KinectAzure();
-
-console.log("Finished getting KinectAzure");
+const KinectAzure = require('kinect-azure');
+const kinect = new KinectAzure();  
 
 const displayCanvas = document.getElementById('kinect_feed');
 const outputCtx = displayCanvas.getContext('2d');
@@ -13,10 +10,7 @@ const init = () => {
 };
 
 const startKinect = () => {
-  console.log("startKinect() called ");
-  var kinect_status = kinect.open(); //this doesn't work like we thought (always returns true)
-  console.log(kinect_status);
-  if(kinect_status) {
+  if(kinect.open()) {
     kinect.startCameras({
       color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
       color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
