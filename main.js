@@ -25,7 +25,7 @@ function createWindow() {
         mainWindow.show()
       })
     // Load html into window
-    mainWindow.loadFile('HTML_Files/index.html');
+    mainWindow.loadFile('HTML_Files/index.html');   //Change back to index.html before ready
     //For debugging
     mainWindow.webContents.openDevTools();
     //Close window when closed

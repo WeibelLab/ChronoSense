@@ -9,6 +9,7 @@
       <li id="nav-bar-item"><a href="#home">Home</a></li>
       <li id="nav-bar-item"><a href="#webcamPage">Webcam</a></li>
       <li id="nav-bar-item"><a href="#kinectPage">Kinect</a></li>
+      <li id="nav-bar-item"><a href="#kinectBodyPage">Kinect Body Tracking</a></li>
       <li id="nav-bar-item"><a href="#AboutPage">About</a></li>
     </ul>
 
@@ -45,7 +46,17 @@
     <div id="main">
       <p>
         <!-- <embed width="100%" height="95%" src="../HTML_Files/webcam.html"> -->
-        <webview id='content-selection' style="width:100%; height:85%" src="./kinect.html" nodeintegration></webview>
+        <webview id='content-selection' style="width:100%; height:95%" src="./kinect_body.html" nodeintegration preload="../JS_Files/kinect-preload.js"></webview>
+        <script>
+          /* DOESNT WORK
+          const viewer = document.getElementById('content-selection');
+              
+          this.addEventListener('unload', function(event){ 
+            const contents = viewer.getWebContents();
+            contents.send('close-kinect'); 
+          });
+          */
+        </script>
       </p>
     </div>
 
