@@ -45,18 +45,3 @@ function handleWindowControls() {
     }
 }
 
-//Maybe use the below later in order to dynamically scare windows
-//and their properties in order to have a better designed UI
-/*
-$(window).bind('resize', function(event) {      
-    //Whenever the window is resized, update the values for the following 
-    //window related variables
-    windowHeight = $(window).height(); 
-    windowWidth = $(window).width(); 
-    documentHeight = $(document).height(); 
-    documentWidth = $(document).width(); 
-    screenHeight = screen.height; 
-    screenWidth = screen.width; 
-    
-    });
-*/

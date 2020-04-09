@@ -6,11 +6,11 @@
 
     <!-- Window Properties: Close, expand, etc. -->
     <ul id="navigation-bar">
-      <li id="nav-bar-item"><a href="#home">Home</a></li>
-      <li id="nav-bar-item"><a href="#webcamPage">Webcam</a></li>
-      <li id="nav-bar-item"><a href="#kinectPage">Kinect</a></li>
-      <li id="nav-bar-item"><a href="#kinectBodyPage">Kinect Body Tracking</a></li>
-      <li id="nav-bar-item"><a href="#AboutPage">About</a></li>
+      <li class="nav-bar-item"><a id="home">Home</a></li>
+      <li class="nav-bar-item"><a id="webcamPage">Webcam</a></li>
+      <li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
+      <li class="nav-bar-item"><a id="kinectBodyPage">Kinect Body Tracking</a></li>
+      <li class="nav-bar-item"><a id="AboutPage">About</a></li>
     </ul>
 
       <header id="titlebar">
@@ -45,18 +45,7 @@
     <!-- Central Window Attributes and Embeded HTML -->
     <div id="main">
       <p>
-        <!-- <embed width="100%" height="95%" src="../HTML_Files/webcam.html"> -->
         <webview id='content-selection' style="width:100%; height:95%" src="./kinect_body.html" nodeintegration preload="../JS_Files/kinect-preload.js"></webview>
-        <script>
-          /* DOESNT WORK
-          const viewer = document.getElementById('content-selection');
-              
-          this.addEventListener('unload', function(event){ 
-            const contents = viewer.getWebContents();
-            contents.send('close-kinect'); 
-          });
-          */
-        </script>
       </p>
     </div>
 
