@@ -35,7 +35,8 @@
 5.  **(If on Windows)** Install node-gyp to fix some errors that may occur:  
     `npm install -g node-gyp`
     
-6.  **(If on Windows)** Install all the required tools and configurations using Microsoft's windows-build-tools using `npm install --global --production windows-build-tools` from an elevated PowerShell or CMD.exe (run as Administrator).
+6.  **(If on Windows)** Install all the required tools and configurations using Microsoft's windows-build-tools using  
+    `npm install --global --production windows-build-tools` from an elevated PowerShell or CMD.exe (run as Administrator).
 
 7.  Once you have the submodule installed for the 'kinect-azure' module (or in the node_modules folder), go to kinect-azure/scripts/ and enter the following command:  
     `node install.js`
