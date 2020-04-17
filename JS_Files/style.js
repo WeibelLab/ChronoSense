@@ -78,37 +78,27 @@ function handleWindowControls() {
     */
     btnHome.addEventListener("click", event => {
         console.log("YOU ARE HOME");
-        checkClosingWindow(HOME_PAGE_NUM);
-        currentlyOpenPage = HOME_PAGE_NUM;
-        //Add HTML for Home page as source for the web viewer
+        checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
     });
 
     btnWebcam.addEventListener("click", event => {
         console.log("YOU ARE WEBCAM");
-        checkClosingWindow(WEBCAM_PAGE_NUM);
-        currentlyOpenPage = WEBCAM_PAGE_NUM;
-        viewerWindow.src = "../HTML_Files/webcam.html";
+        checkClosingWindowAndChangeContent(WEBCAM_PAGE_NUM);
     });
 
     btnKinect.addEventListener("click", event => {
         console.log("YOU ARE KINECT CAM");
-        checkClosingWindow(KINECT_PAGE_NUM);
-        currentlyOpenPage = KINECT_PAGE_NUM;
-        viewerWindow.src = "../HTML_Files/kinect.html";
+        checkClosingWindowAndChangeContent(KINECT_PAGE_NUM);
     });
 
     btnKinectBodyTracking.addEventListener("click", event => {
         console.log("YOU ARE BODY TRACKING");
-        checkClosingWindow(KINECT_BODY_PAGE_NUM);
-        currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-        viewerWindow.src = "../HTML_Files/kinect_body.html";
+        checkClosingWindowAndChangeContent(KINECT_BODY_PAGE_NUM);
     });
 
     btnAbout.addEventListener("click", event => {
         console.log("YOU ARE ABOUT");
-        checkClosingWindow(ABOUT_PAGE_NUM);
-        currentlyOpenPage = ABOUT_PAGE_NUM;
-        //Add HTML for an about page to the src of webviewer
+        checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
     });
 
 } //End of handleWindowControls()
@@ -118,14 +108,17 @@ function handleWindowControls() {
  * the correct functions from their respective js files to close out running
  * device functionality before switching.
  * 
+ * Also serves as the function that manipulates the webviewer!
+ * 
  */
-function checkClosingWindow(newPageNum) {
+async function checkClosingWindowAndChangeContent(newPageNum) {
     //Check which window is closing; if changing to same as before, don't 
     //refresh
     if(currentlyOpenPage == newPageNum) {
         return;
     }
 
+    //Manipulate last page due to change
     switch (currentlyOpenPage) {
         case HOME_PAGE_NUM:
             break;
@@ -137,12 +130,41 @@ function checkClosingWindow(newPageNum) {
             break;
 
         case KINECT_BODY_PAGE_NUM:
+            //TODO: Set up a 'promise' system so it has enough time to reset!!
+            viewerWindow.send('stop-kinect');
             break;
 
         case ABOUT_PAGE_NUM:
             break;
 
-    }  //End of switch 
+    }  //End of OLD page switch
+
+    //Manipulate webviewer to change for NEW window parameters.
+    switch (newPageNum) {
+        case HOME_PAGE_NUM:
+            currentlyOpenPage = HOME_PAGE_NUM;
+            break;
+
+        case WEBCAM_PAGE_NUM:
+            currentlyOpenPage = WEBCAM_PAGE_NUM;
+            viewerWindow.src = "../HTML_Files/webcam.html";
+            break;
+
+        case KINECT_PAGE_NUM:
+            currentlyOpenPage = KINECT_PAGE_NUM;
+            viewerWindow.src = "../HTML_Files/kinect.html";
+            break;
+
+        case KINECT_BODY_PAGE_NUM:
+            currentlyOpenPage = KINECT_BODY_PAGE_NUM;
+            viewerWindow.src = "../HTML_Files/kinect_body.html";
+            break;
+
+        case ABOUT_PAGE_NUM:
+            currentlyOpenPage = ABOUT_PAGE_NUM;
+            break;
+
+    }  //End of NEW page switch
 
 
 }

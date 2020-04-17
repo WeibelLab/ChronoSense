@@ -1,6 +1,6 @@
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();  
-
+const { ipcRenderer } = require('electron')
 
 
 const outputCanvas = document.getElementById('kinect_feed');
@@ -8,7 +8,7 @@ const outputCtx = outputCanvas.getContext('2d');
 let outputImageData, depthModeRange;
 
 const init = () => {
-    startKinect();
+  startKinect();
 };
 
 const startKinect = () => {
@@ -79,5 +79,24 @@ const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
   }
   ctx.putImageData(canvasImageData, 0, 0);
 };
+
+/**
+ * Function to stop kinect and close out cameras
+ * 
+ */
+async function stopKinect() {
+  // stop kinect - use the await keyword to wait for the promise to resolve
+  await kinect.stopListening();
+  console.log("stopped listening");
+  kinect.destroyTracker();
+  console.log("destroyed tracking");
+  kinect.stopCameras();
+  console.log("stopped cameras");
+}
+
+ipcRenderer.on('stop-kinect', () => {
+  stopKinect();
+})
+
 
 init();
