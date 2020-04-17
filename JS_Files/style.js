@@ -3,13 +3,28 @@
 // All of the Node.js APIs are available in this process.
 const remote = require('electron').remote;
 
-
 const viewerWindow = document.getElementById('content-selection');
 const btnHome = document.getElementById('homePage');
 const btnWebcam = document.getElementById('webcamPage');
 const btnKinect = document.getElementById('kinectPage');
 const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
+
+const HOME_PAGE_NUM = 0;
+const WEBCAM_PAGE_NUM = 1;
+const KINECT_PAGE_NUM = 2;
+const KINECT_BODY_PAGE_NUM = 3;
+const ABOUT_PAGE_NUM = 4;
+
+//Holds a value for which page is open for the device so it knows which 
+//functions to call from which page.
+//Legend:
+// 0 - Home
+// 1 - Webcam
+// 2 - Kinect
+// 3 - Kinect Body Tracking
+// 4 - About
+let currentlyOpenPage = 0;
 
 
 // When document has loaded, initialise
@@ -63,27 +78,71 @@ function handleWindowControls() {
     */
     btnHome.addEventListener("click", event => {
         console.log("YOU ARE HOME");
+        checkClosingWindow(HOME_PAGE_NUM);
+        currentlyOpenPage = HOME_PAGE_NUM;
         //Add HTML for Home page as source for the web viewer
     });
 
     btnWebcam.addEventListener("click", event => {
         console.log("YOU ARE WEBCAM");
+        checkClosingWindow(WEBCAM_PAGE_NUM);
+        currentlyOpenPage = WEBCAM_PAGE_NUM;
         viewerWindow.src = "../HTML_Files/webcam.html";
     });
 
     btnKinect.addEventListener("click", event => {
         console.log("YOU ARE KINECT CAM");
+        checkClosingWindow(KINECT_PAGE_NUM);
+        currentlyOpenPage = KINECT_PAGE_NUM;
         viewerWindow.src = "../HTML_Files/kinect.html";
     });
 
     btnKinectBodyTracking.addEventListener("click", event => {
         console.log("YOU ARE BODY TRACKING");
+        checkClosingWindow(KINECT_BODY_PAGE_NUM);
+        currentlyOpenPage = KINECT_BODY_PAGE_NUM;
         viewerWindow.src = "../HTML_Files/kinect_body.html";
     });
 
     btnAbout.addEventListener("click", event => {
         console.log("YOU ARE ABOUT");
+        checkClosingWindow(ABOUT_PAGE_NUM);
+        currentlyOpenPage = ABOUT_PAGE_NUM;
         //Add HTML for an about page to the src of webviewer
     });
 
 } //End of handleWindowControls()
+
+/**
+ * Function that checks which windows are being closed out in order to call
+ * the correct functions from their respective js files to close out running
+ * device functionality before switching.
+ * 
+ */
+function checkClosingWindow(newPageNum) {
+    //Check which window is closing; if changing to same as before, don't 
+    //refresh
+    if(currentlyOpenPage == newPageNum) {
+        return;
+    }
+
+    switch (currentlyOpenPage) {
+        case HOME_PAGE_NUM:
+            break;
+
+        case WEBCAM_PAGE_NUM:
+            break;
+
+        case KINECT_PAGE_NUM:
+            break;
+
+        case KINECT_BODY_PAGE_NUM:
+            break;
+
+        case ABOUT_PAGE_NUM:
+            break;
+
+    }  //End of switch 
+
+
+}

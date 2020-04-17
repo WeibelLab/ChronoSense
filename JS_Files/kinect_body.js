@@ -1,35 +1,36 @@
-console.log("Before require")
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();  
+
+
 
 const outputCanvas = document.getElementById('kinect_feed');
 const outputCtx = outputCanvas.getContext('2d');
 let outputImageData, depthModeRange;
 
 const init = () => {
-    console.log("init called");
     startKinect();
-    console.log('AFTER START');
-    //stopKinect();
 };
 
 const startKinect = () => {
   if(kinect.open()) {
 
     kinect.startCameras({
-      depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED
+      depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
+      color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+      color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
+      camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
     });
     depthModeRange = kinect.getDepthModeRange(KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED);
     kinect.createTracker();
 
     kinect.startListening((data) => {
-      if (!outputImageData && data.depthImageFrame.width > 0) {
-        outputCanvas.width = data.depthImageFrame.width;
-        outputCanvas.height = data.depthImageFrame.height;
+      if (!outputImageData && data.colorImageFrame.width > 0) {
+        outputCanvas.width = data.colorImageFrame.width;
+        outputCanvas.height = data.colorImageFrame.height;
         outputImageData = outputCtx.createImageData(outputCanvas.width, outputCanvas.height);
       }
       if (outputImageData) {
-        renderDepthFrameAsGreyScale(outputCtx, outputImageData, data.depthImageFrame);
+        renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
       }
       if (data.bodyFrame.bodies) {
         // render the skeleton joints on top of the color feed
@@ -47,7 +48,6 @@ const startKinect = () => {
 };
 
 const renderDepthFrameAsGreyScale = (ctx, canvasImageData, imageFrame) => {
-  console.log("RENDERING"); //Doesnt Reach Here
   const newPixelData = Buffer.from(imageFrame.imageData);
   const pixelArray = canvasImageData.data;
   let depthPixelIndex = 0;
@@ -67,5 +67,17 @@ const map = (value, inputMin, inputMax, outputMin, outputMax) => {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
 };
 
-window.kinect = kinect;
+const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
+  //console.log("Start of renderBGRA32ColorFrame() reached");
+  const newPixelData = Buffer.from(imageFrame.imageData);
+  const pixelArray = canvasImageData.data;
+  for (let i = 0; i < canvasImageData.data.length; i+=4) {
+      pixelArray[i] = newPixelData[i+2];
+      pixelArray[i+1] = newPixelData[i+1];
+      pixelArray[i+2] = newPixelData[i];
+      pixelArray[i+3] = 0xff;
+  }
+  ctx.putImageData(canvasImageData, 0, 0);
+};
+
 init();
