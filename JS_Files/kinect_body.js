@@ -1,27 +1,10 @@
-const KinectAzure = require('kinect-azure');
-const kinect = new KinectAzure();  
-const { ipcRenderer } = require('electron')
+/*
+ * Description: File is used to display the joint and body data from the 
+ *              Azure Kinect. 
+ *
+ */
 
-
-const outputCanvas = document.getElementById('kinect_feed');
-const outputCtx = outputCanvas.getContext('2d');
-let outputImageData, depthModeRange;
-
-const init = () => {
-  startKinect();
-};
-
-const startKinect = () => {
-  if(kinect.open()) {
-
-    kinect.startCameras({
-      depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
-      color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
-      color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
-      camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
-    });
-    depthModeRange = kinect.getDepthModeRange(KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED);
-    kinect.createTracker();
+function kinectBodyTrackingFeed() {
 
     kinect.startListening((data) => {
       if (!outputImageData && data.colorImageFrame.width > 0) {
@@ -44,10 +27,9 @@ const startKinect = () => {
         outputCtx.restore();
       }
     });
-  }
-};
+}
 
-const renderDepthFrameAsGreyScale = (ctx, canvasImageData, imageFrame) => {
+function renderDepthFrameAsGreyScale(ctx, canvasImageData, imageFrame) {
   const newPixelData = Buffer.from(imageFrame.imageData);
   const pixelArray = canvasImageData.data;
   let depthPixelIndex = 0;
@@ -61,13 +43,13 @@ const renderDepthFrameAsGreyScale = (ctx, canvasImageData, imageFrame) => {
     depthPixelIndex += 2;
   }
   ctx.putImageData(canvasImageData, 0, 0);
-};
+}
 
-const map = (value, inputMin, inputMax, outputMin, outputMax) => {
+function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
-};
+}
 
-const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
+function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
   //console.log("Start of renderBGRA32ColorFrame() reached");
   const newPixelData = Buffer.from(imageFrame.imageData);
   const pixelArray = canvasImageData.data;
@@ -78,25 +60,4 @@ const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
       pixelArray[i+3] = 0xff;
   }
   ctx.putImageData(canvasImageData, 0, 0);
-};
-
-/**
- * Function to stop kinect and close out cameras
- * 
- */
-async function stopKinect() {
-  // stop kinect - use the await keyword to wait for the promise to resolve
-  await kinect.stopListening();
-  console.log("stopped listening");
-  kinect.destroyTracker();
-  console.log("destroyed tracking");
-  kinect.stopCameras();
-  console.log("stopped cameras");
 }
-
-ipcRenderer.on('stop-kinect', () => {
-  stopKinect();
-})
-
-
-init();

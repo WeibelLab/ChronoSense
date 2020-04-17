@@ -1,3 +1,4 @@
+/*
 const { ipcRenderer } = require('electron');
 ipcRenderer.on('close-kinect', (event, message) => {
   if (window.kinect) {
@@ -17,3 +18,4 @@ ipcRenderer.on('close-kinect', (event, message) => {
     event.sender.send('kinect closed');
   }
 });
+*/

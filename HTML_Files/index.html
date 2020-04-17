@@ -1,6 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="../CSS_Files/style.css" />
+
   </head>
   <body>
 
@@ -42,11 +43,24 @@
     <!-- Central Window Attributes and Embeded HTML -->
     <div id="main">
       <p>
-        <webview id='content-selection' style="width:100%; height:95%" nodeintegration></webview>
-        <script src="../JS_Files/style.js"></script>
+      <canvas id="video_canvas" style="width: 100%; height: 100%; margin: 0; display: none;" img-fluid></canvas>
       </p>
     </div>
 
+    <script src="../JS_Files/style.js"></script>
+    <script src="../JS_Files/kinect.js"></script>
+    <script src="../JS_Files/kinect_body.js"></script>
+
+    <script>
+      /* important! for alignment, you should make things
+      * relative to the canvas' current width/height.
+      */
+      function draw() {
+        var ctx = (document.getElementById('video_canvas'));
+        ctx.canvas.width  = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+      }
+    </script>
     
 
   </body>

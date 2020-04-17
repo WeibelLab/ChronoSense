@@ -2,6 +2,9 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require('electron').remote;
+const KinectAzure = require('kinect-azure');
+const kinect = new KinectAzure();  
+
 
 const viewerWindow = document.getElementById('content-selection');
 const btnHome = document.getElementById('homePage');
@@ -10,11 +13,18 @@ const btnKinect = document.getElementById('kinectPage');
 const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
 
+//Used in Kinect JS files for displaying content
+const displayCanvas = document.getElementById('video_canvas');
+const outputCtx = displayCanvas.getContext('2d');
+let outputImageData, depthModeRange;
+
 const HOME_PAGE_NUM = 0;
 const WEBCAM_PAGE_NUM = 1;
 const KINECT_PAGE_NUM = 2;
 const KINECT_BODY_PAGE_NUM = 3;
 const ABOUT_PAGE_NUM = 4;
+
+var isKinectOn = 0;
 
 //Holds a value for which page is open for the device so it knows which 
 //functions to call from which page.
@@ -24,7 +34,7 @@ const ABOUT_PAGE_NUM = 4;
 // 2 - Kinect
 // 3 - Kinect Body Tracking
 // 4 - About
-let currentlyOpenPage = 0;
+let currentlyOpenPage = false;
 
 
 // When document has loaded, initialise
@@ -111,7 +121,7 @@ function handleWindowControls() {
  * Also serves as the function that manipulates the webviewer!
  * 
  */
-async function checkClosingWindowAndChangeContent(newPageNum) {
+function checkClosingWindowAndChangeContent(newPageNum) {
     //Check which window is closing; if changing to same as before, don't 
     //refresh
     if(currentlyOpenPage == newPageNum) {
@@ -130,8 +140,6 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             break;
 
         case KINECT_BODY_PAGE_NUM:
-            //TODO: Set up a 'promise' system so it has enough time to reset!!
-            viewerWindow.send('stop-kinect');
             break;
 
         case ABOUT_PAGE_NUM:
@@ -143,28 +151,78 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
     switch (newPageNum) {
         case HOME_PAGE_NUM:
             currentlyOpenPage = HOME_PAGE_NUM;
+            displayCanvas.style.display = "none";
             break;
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            viewerWindow.src = "../HTML_Files/webcam.html";
+            displayCanvas.style.display = "block";  //Reveal video canvas feed.
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            viewerWindow.src = "../HTML_Files/kinect.html";
+            displayCanvas.style.display = "block";  //Reveal video canvas feed.
+            if(isKinectOn) {
+                kinectColorVideoFeed();                
+            } else {
+                startKinect();
+                kinectColorVideoFeed(); 
+                isKinectOn = true;
+            }
             break;
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            viewerWindow.src = "../HTML_Files/kinect_body.html";
+            displayCanvas.style.display = "block";  //Reveal video canvas feed.
+            if(isKinectOn) {
+                kinectBodyTrackingFeed();                
+            } else {
+                startKinect();
+                kinectBodyTrackingFeed(); 
+                isKinectOn = true;
+            }
             break;
 
         case ABOUT_PAGE_NUM:
             currentlyOpenPage = ABOUT_PAGE_NUM;
+            displayCanvas.style.display = "none";
             break;
 
     }  //End of NEW page switch
 
 
 }
+
+//////////////////////////////////////////////
+////  Start of Kinect specific functions  ////
+////                                      ////
+////                                      ////
+//////////////////////////////////////////////
+
+/**
+ * Function starts the connect cameras with the set parameters. By default it
+ * uses the parameters below; they can be changed later through UI options in 
+ * the application.
+ * 
+ */
+function startKinect() {
+    if(kinect.open()) {
+
+        kinect.startCameras({
+            depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
+            color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
+            color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
+            camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
+        });
+        
+        depthModeRange = kinect.getDepthModeRange(KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED);
+        kinect.createTracker();
+    } else {
+        //Opening up the kinect has failed, adjust for that error...
+
+    }    
+
+
+
+
+} //End of startKinect()
