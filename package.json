@@ -4,11 +4,13 @@
   "description": "Chronosense Electron Application",
   "main": "main.js",
   "scripts": {
-    "start": "electron --no-sandbox --use-gl=swiftshader ."
+    "start": "electron --no-sandbox --use-gl=swiftshader .",
+    "postinstall": "node ./node_modules/kinect-azure/scripts/install.js"
   },
   "author": "Alexander Schonken",
   "license": "ISC",
   "dependencies": {
-    "electron": "^8.0.2"
+    "electron": "^8.0.3",
+    "kinect-azure": "0.0.12"
   }
 }

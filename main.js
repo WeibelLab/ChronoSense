@@ -15,14 +15,19 @@ function createWindow() {
         width: width, 
         height: height, 
         frame: false,
-        webPreferences: { nodeIntegration: true},
+        webPreferences: {
+          nodeIntegration: true,
+          webviewTag: true
+        },
         show: false
      });
     mainWindow.once('ready-to-show', () => {
         mainWindow.show()
       })
     // Load html into window
-    mainWindow.loadFile('HTML_Files/index.html');
+    mainWindow.loadFile('HTML_Files/index.html');   //Change back to index.html before ready
+    //For debugging
+    mainWindow.webContents.openDevTools();
     //Close window when closed
     mainWindow.on('closed', function() {
         mainWindow = null;

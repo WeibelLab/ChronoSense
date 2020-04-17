@@ -48,12 +48,24 @@ h1 {
   display: block;
   color: white;
   text-align: center;
-  padding: 5px 16px;
+  padding: 5px 16px; 
+  padding-bottom: 15px;
+  margin: 0px;
   text-decoration: none;
 }
 
 #navigation-bar li a:hover {
   background-color: var(--secondaryDarkConstrastColor);
+
+}
+
+.nav-bar-item {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;  
 
 }
 

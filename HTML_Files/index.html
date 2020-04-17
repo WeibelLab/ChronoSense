@@ -1,28 +1,16 @@
 <html>
   <head>
     <link rel="stylesheet" href="../CSS_Files/style.css" />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js"
-      type="text/javascript"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js"
-      type="text/javascript"
-    ></script>
-    <script
-      src="../../../../client/dist/kinectron-client.js"
-      type="text/javascript"
-    ></script>
-    <script src="../JS_Files/sketch.js" type="text/javascript"></script>
   </head>
   <body>
 
     <!-- Window Properties: Close, expand, etc. -->
     <ul id="navigation-bar">
-      <li id="nav-bar-item"><a href="#home">Home</a></li>
-      <li id="nav-bar-item"><a href="#webcamPage">Webcam</a></li>
-      <li id="nav-bar-item"><a href="#kinectPage">Kinect</a></li>
-      <li id="nav-bar-item"><a href="#AboutPage">About</a></li>
+      <li class="nav-bar-item"><a id="homePage">Home</a></li>
+      <li class="nav-bar-item"><a id="webcamPage">Webcam</a></li>
+      <li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
+      <li class="nav-bar-item"><a id="kinectBodyPage">Kinect Body Tracking</a></li>
+      <li class="nav-bar-item"><a id="aboutPage">About</a></li>
     </ul>
 
       <header id="titlebar">
@@ -50,14 +38,12 @@
           </div>
         </div>
       </header>
-    <script src="../JS_Files/style.js"></script>
-
-
 
     <!-- Central Window Attributes and Embeded HTML -->
     <div id="main">
       <p>
-        <embed width="100%" height="95%" src="../HTML_Files/webcam.html">
+        <webview id='content-selection' style="width:100%; height:95%" nodeintegration></webview>
+        <script src="../JS_Files/style.js"></script>
       </p>
     </div>
 
