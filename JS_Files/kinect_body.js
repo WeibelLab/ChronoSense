@@ -5,8 +5,14 @@
  */
 
 function kinectBodyTrackingFeed() {
+    //For debugging
+    console.log("I have reached the start of kinectBodyTrackingFeed()");
+    //Program does reach the above after waiting for sensor to stop listening 
+    //but then freezes at some point below
 
     kinect.startListening((data) => {
+      //Debugging: Currently does not 
+      console.log("Started listening to data again");
       if (!outputImageData && data.colorImageFrame.width > 0) {
         displayCanvas.width = data.colorImageFrame.width;
         displayCanvas.height = data.colorImageFrame.height;

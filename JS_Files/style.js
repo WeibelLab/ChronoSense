@@ -134,6 +134,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
     }
 
     //Manipulate last page due to change
+    /*
     switch (currentlyOpenPage) {
         case HOME_PAGE_NUM:
             break;
@@ -151,6 +152,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
             break;
 
     }  //End of OLD page switch
+    */
 
     //Manipulate webviewer to change for NEW window parameters.
     switch (newPageNum) {
@@ -194,12 +196,8 @@ function checkClosingWindowAndChangeContent(newPageNum) {
             camVideo.style.display = "none";
             dropdown.style.display = "none";
             if(isKinectOn) {
-                let promise = new Promise(function(resolve, reject) {    
-                    stopKinectListener();
-                    setTimeout(() => resolve("DONE"), 10000);
-                });
                 //promise.finally(kinectBodyTrackingFeed());  
-                promise.then(kinectBodyTrackingFeed());  
+                kinect.stopListening().then(kinectBodyTrackingFeed());  
                             
             } else {
                 startKinect();
@@ -230,7 +228,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 /**
  * Function starts the connect cameras with the set parameters. By default it
  * uses the parameters below; they can be changed later through UI options in 
- * the application.
+ * the application [in progress].
  * 
  */
 function startKinect() {
