@@ -8,9 +8,9 @@ function kinectBodyTrackingFeed() {
 
     kinect.startListening((data) => {
       if (!outputImageData && data.colorImageFrame.width > 0) {
-        outputCanvas.width = data.colorImageFrame.width;
-        outputCanvas.height = data.colorImageFrame.height;
-        outputImageData = outputCtx.createImageData(outputCanvas.width, outputCanvas.height);
+        displayCanvas.width = data.colorImageFrame.width;
+        displayCanvas.height = data.colorImageFrame.height;
+        outputImageData = outputCtx.createImageData(displayCanvas.width, displayCanvas.height);
       }
       if (outputImageData) {
         renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);

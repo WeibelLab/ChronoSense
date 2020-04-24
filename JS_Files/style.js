@@ -18,13 +18,18 @@ const displayCanvas = document.getElementById('video_canvas');
 const outputCtx = displayCanvas.getContext('2d');
 let outputImageData, depthModeRange;
 
+//Used in webcam methods
+const recordingButton = document.getElementById('record');
+const camVideo = document.getElementById('webcam');
+const dropdown = document.getElementById('dropdown');
+
 const HOME_PAGE_NUM = 0;
 const WEBCAM_PAGE_NUM = 1;
 const KINECT_PAGE_NUM = 2;
 const KINECT_BODY_PAGE_NUM = 3;
 const ABOUT_PAGE_NUM = 4;
 
-var isKinectOn = 0;
+var isKinectOn = false;
 
 //Holds a value for which page is open for the device so it knows which 
 //functions to call from which page.
@@ -152,17 +157,28 @@ function checkClosingWindowAndChangeContent(newPageNum) {
         case HOME_PAGE_NUM:
             currentlyOpenPage = HOME_PAGE_NUM;
             displayCanvas.style.display = "none";
+            recordingButton.style.display = "none"; 
+            camVideo.style.display = "none";
+            dropdown.style.display = "none";
             break;
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            displayCanvas.style.display = "block";  //Reveal video canvas feed.
+            displayCanvas.style.display = "none";  //Reveal video canvas feed.
+            recordingButton.style.display = "block"; //Reveal Record button
+            camVideo.style.display = "inline-block"; //Reveal Webcam video object
+            dropdown.style.display = "block"; //Reveal Drop down menu
+            webcamStart();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
             displayCanvas.style.display = "block";  //Reveal video canvas feed.
+            recordingButton.style.display = "none"; 
+            camVideo.style.display = "none";
+            dropdown.style.display = "none";
             if(isKinectOn) {
+                stopKinectListener();
                 kinectColorVideoFeed();                
             } else {
                 startKinect();
@@ -174,8 +190,17 @@ function checkClosingWindowAndChangeContent(newPageNum) {
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
             displayCanvas.style.display = "block";  //Reveal video canvas feed.
+            recordingButton.style.display = "none"; 
+            camVideo.style.display = "none";
+            dropdown.style.display = "none";
             if(isKinectOn) {
-                kinectBodyTrackingFeed();                
+                let promise = new Promise(function(resolve, reject) {    
+                    stopKinectListener();
+                    setTimeout(() => resolve("DONE"), 10000);
+                });
+                //promise.finally(kinectBodyTrackingFeed());  
+                promise.then(kinectBodyTrackingFeed());  
+                            
             } else {
                 startKinect();
                 kinectBodyTrackingFeed(); 
@@ -186,6 +211,9 @@ function checkClosingWindowAndChangeContent(newPageNum) {
         case ABOUT_PAGE_NUM:
             currentlyOpenPage = ABOUT_PAGE_NUM;
             displayCanvas.style.display = "none";
+            recordingButton.style.display = "none"; 
+            camVideo.style.display = "none";
+            dropdown.style.display = "none";
             break;
 
     }  //End of NEW page switch
@@ -222,7 +250,9 @@ function startKinect() {
 
     }    
 
-
-
-
 } //End of startKinect()
+
+function stopKinectListener() {
+    kinect.stopListening();
+
+}
