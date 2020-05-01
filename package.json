@@ -11,6 +11,6 @@
   "license": "ISC",
   "dependencies": {
     "electron": "^8.0.3",
-    "kinect-azure": "0.0.12"
+    "kinect-azure": "0.0.19"
   }
 }

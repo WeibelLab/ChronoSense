@@ -5,6 +5,7 @@
  */
 
 function kinectColorVideoFeed() {
+    console.log("Inside kinectColorVideoFeed"); //I reach here on second start
   
     kinect.startListening((data) => {
         if (!outputImageData && data.colorImageFrame.width > 0) {

@@ -12,6 +12,8 @@ const btnWebcam = document.getElementById('webcamPage');
 const btnKinect = document.getElementById('kinectPage');
 const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
+const btnKinectOn = document.getElementById('kinect_on');
+const btnKinectOff = document.getElementById('kinect_off');
 
 //Used in Kinect JS files for displaying content
 const displayCanvas = document.getElementById('video_canvas');
@@ -116,6 +118,23 @@ function handleWindowControls() {
         checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
     });
 
+    /*
+    * Add events below to buttons and items within "pages."
+    */
+    btnKinectOn.addEventListener("click", event => {
+        startKinect();
+        if(currentlyOpenPage == KINECT_PAGE_NUM) {
+            kinectColorVideoFeed();
+        } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
+            kinectBodyTrackingFeed();
+
+        }
+    });
+
+    btnKinectOff.addEventListener("click", event => {
+        shutOffKinect();
+    });
+
 } //End of handleWindowControls()
 
 /**
@@ -133,85 +152,52 @@ function checkClosingWindowAndChangeContent(newPageNum) {
         return;
     }
 
-    //Manipulate last page due to change
-    /*
-    switch (currentlyOpenPage) {
-        case HOME_PAGE_NUM:
-            break;
-
-        case WEBCAM_PAGE_NUM:
-            break;
-
-        case KINECT_PAGE_NUM:
-            break;
-
-        case KINECT_BODY_PAGE_NUM:
-            break;
-
-        case ABOUT_PAGE_NUM:
-            break;
-
-    }  //End of OLD page switch
-    */
-
     //Manipulate webviewer to change for NEW window parameters.
     switch (newPageNum) {
         case HOME_PAGE_NUM:
             currentlyOpenPage = HOME_PAGE_NUM;
-            displayCanvas.style.display = "none";
-            recordingButton.style.display = "none"; 
-            camVideo.style.display = "none";
-            dropdown.style.display = "none";
+            changeWindowFeatures();
             break;
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            displayCanvas.style.display = "none";  //Reveal video canvas feed.
-            recordingButton.style.display = "block"; //Reveal Record button
-            camVideo.style.display = "inline-block"; //Reveal Webcam video object
-            dropdown.style.display = "block"; //Reveal Drop down menu
+            changeWindowFeatures("none", "block", "inline-block", "block");
             webcamStart();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            displayCanvas.style.display = "block";  //Reveal video canvas feed.
-            recordingButton.style.display = "none"; 
-            camVideo.style.display = "none";
-            dropdown.style.display = "none";
-            if(isKinectOn) {
-                stopKinectListener();
-                kinectColorVideoFeed();                
+            changeWindowFeatures("block", "none", "none", "none", "inline-block", "inline-block");
+
+            if(isKinectOn) {   
+                shutOffKinect();
+                /*console.log("Successfully Stopped Kinect");
+                startKinect();
+                console.log("Successfully Started Kinect");
+                kinectColorVideoFeed(); */
             } else {
                 startKinect();
                 kinectColorVideoFeed(); 
-                isKinectOn = true;
             }
             break;
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            displayCanvas.style.display = "block";  //Reveal video canvas feed.
-            recordingButton.style.display = "none"; 
-            camVideo.style.display = "none";
-            dropdown.style.display = "none";
+            changeWindowFeatures("block", "none", "none", "none", "inline-block", "inline-block");
             if(isKinectOn) {
                 //promise.finally(kinectBodyTrackingFeed());  
-                kinect.stopListening().then(kinectBodyTrackingFeed());  
-                            
+                //kinect.stopListening().then(kinectBodyTrackingFeed());  
+                shutOffKinect();
+                
             } else {
                 startKinect();
                 kinectBodyTrackingFeed(); 
-                isKinectOn = true;
             }
             break;
 
         case ABOUT_PAGE_NUM:
             currentlyOpenPage = ABOUT_PAGE_NUM;
-            displayCanvas.style.display = "none";
-            recordingButton.style.display = "none"; 
-            camVideo.style.display = "none";
-            dropdown.style.display = "none";
+            changeWindowFeatures(); 
             break;
 
     }  //End of NEW page switch
@@ -248,9 +234,63 @@ function startKinect() {
 
     }    
 
+    isKinectOn = true;
 } //End of startKinect()
 
+/**
+ * CURRENTLY NOT WORKING!
+ * 
+ * Function will be used to transition between capturing different data streams
+ * from the kinect (e.g. RGB -> body tracking) without to completely shut off
+ * the Kinect; saving time and resources.
+ * 
+ */
 function stopKinectListener() {
     kinect.stopListening();
 
+}
+
+/**
+ * Turns off the Kinect fully if it is currently on. This is a much easier way
+ * to change the type of data you are collecting BUT it sacrifices time and 
+ * efficiency for ease of use. 
+ * 
+ * NOTE: Look into creating additional function to stop listening and allow 
+ *       quick setting change or transition to capture a different data stream.
+ */
+function shutOffKinect() {
+    //First check if the Kinect is on before allowing it to be shut off.
+    kinect.stopListening();
+    kinect.stopCameras();
+    kinect.close();
+    isKinectOn = false;
+
+}
+
+
+/**
+ * Changes certain aspects of the application based on the current "page" that 
+ * the application is showing. 
+ * 
+ * Parameters:
+ *      displayCanvasDisplay    - video_canvas CSS display property 
+ *      recordingButtonDisplay  - record CSS display property 
+ *      camVideoDisplay         - webcam CSS display property 
+ *      dropdownDisplay         - dropdown CSS display property 
+ *      kinectButtonOnDisplay   - kinect on button CSS display property
+ *      kinectButtonOffDisplay   - kinect off button CSS display property
+ */
+
+function changeWindowFeatures(displayCanvasDisplay = "none", 
+                              recordingButtonDisplay = "none",
+                              camVideoDisplay = "none",
+                              dropdownDisplay = "none",
+                              kinectButtonOnDisplay = "none",
+                              kinectButtonOffDisplay = "none") {
+    displayCanvas.style.display = displayCanvasDisplay;     //Video Canvas Feed
+    recordingButton.style.display = recordingButtonDisplay; //Record Button 
+    camVideo.style.display = camVideoDisplay;               //Webcam Video Feed
+    dropdown.style.display = dropdownDisplay;               //DropDown Menu
+    btnKinectOn.style.display = kinectButtonOnDisplay;      //On button kinect
+    btnKinectOff.style.display = kinectButtonOffDisplay;    //Off button kinect
 }
