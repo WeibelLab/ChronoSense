@@ -5,7 +5,7 @@ const remote = require('electron').remote;
 const KinectAzure = require('kinect-azure');
 const kinect = new KinectAzure();  
 
-
+//Variables of HTML elements for later manipulation 
 const viewerWindow = document.getElementById('content-selection');
 const btnHome = document.getElementById('homePage');
 const btnWebcam = document.getElementById('webcamPage');
@@ -25,12 +25,14 @@ const recordingButton = document.getElementById('record');
 const camVideo = document.getElementById('webcam');
 const dropdown = document.getElementById('dropdown');
 
+//Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
 const WEBCAM_PAGE_NUM = 1;
 const KINECT_PAGE_NUM = 2;
 const KINECT_BODY_PAGE_NUM = 3;
 const ABOUT_PAGE_NUM = 4;
 
+//Global variable to tell if Kinect is on or not.
 var isKinectOn = false;
 
 //List of all changeable parameters for Kinect sensor feed:
@@ -60,10 +62,15 @@ document.onreadystatechange = () => {
     }
 };
 
-
+/**
+ * Handles all window controls from app specific minimization to page
+ * navigation. Called above when the page is ready to be displayed.
+ * 
+ */
 function handleWindowControls() {
 
     let win = remote.getCurrentWindow();
+
     // Make minimise/maximise/restore/close buttons work when they are clicked
     document.getElementById('min-button').addEventListener("click", event => {
         win.minimize();
@@ -168,6 +175,9 @@ function handleWindowControls() {
  * 
  * Also serves as the function that manipulates the webviewer!
  * 
+ * Parameters:
+ *      newPageNum -    Holds one of the global constant page values to 
+ *                      determine what should be displayed or hidden.
  */
 function checkClosingWindowAndChangeContent(newPageNum) {
     //Check which window is closing; if changing to same as before, don't 
@@ -305,12 +315,12 @@ function shutOffKinect() {
  * the application is showing. 
  * 
  * Parameters:
- *      displayCanvasDisplay    - video_canvas CSS display property 
- *      recordingButtonDisplay  - record CSS display property 
- *      camVideoDisplay         - webcam CSS display property 
- *      dropdownDisplay         - dropdown CSS display property 
- *      kinectButtonOnDisplay   - kinect on button CSS display property
- *      kinectButtonOffDisplay   - kinect off button CSS display property
+ *      displayCanvasDisplay    -   video_canvas CSS display property 
+ *      recordingButtonDisplay  -   record CSS display property 
+ *      camVideoDisplay         -   webcam CSS display property 
+ *      dropdownDisplay         -   dropdown CSS display property 
+ *      kinectButtonOnDisplay   -   kinect on button CSS display property
+ *      kinectButtonOffDisplay  -   kinect off button CSS display property
  */
 
 function changeWindowFeatures(displayCanvasDisplay = "none", 
@@ -329,6 +339,10 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
 
 /**
  * Function that allows the user to set the CAMERA FPS of the Kinect.
+ * 
+ * Paramters:
+ *      a - string variable that dictates case to select and change kinect param
+ *          {"fps5", "fps15", "fps30"}
  * 
  */
 function setCameraFPS(a) {
@@ -357,6 +371,10 @@ function setCameraFPS(a) {
 
 /**
  * Function that allows the user to set the COLOR FORMAT of the Kinect.
+ * 
+ * Parameters:
+ *      b - string variable that dictates case to select and change kinect param
+ *          {"mjpg", "nv12", "yuy2", "BGRA32"}
  * 
  */
 function setColorFormat(b) {
@@ -387,6 +405,11 @@ function setColorFormat(b) {
 
 /**
  * Function that allows the user to set the COLOR RESOLUTION of the Kinect.
+ * 
+ * Parameters:
+ *      c - string variable that dictates case to select and change kinect param
+ *          {"off", "res720", "res1080", "res1440", "res1536", "res2160",
+ *           "res3072"}
  * 
  */
 function setColorResolution(c) {
@@ -431,6 +454,11 @@ function setColorResolution(c) {
 /**
  * Function that allows the user to set the DEPTH mode of the Kinect.
  * 
+ * Parameters:
+ *      d - string variable that dictates case to select and change kinect param
+ *          {"off", "nfov2x2binned", "nfovunbinned", "wfov2x2binned", 
+ *           "wfovunbinned", "passive"}
+ * 
  */
 function setDepthMode(d) {
     switch (d){
@@ -446,7 +474,7 @@ function setDepthMode(d) {
             DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED;
             break;
 
-        case "wfov2v2binned":
+        case "wfov2x2binned":
             DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_2X2BINNED;
             break;
         
@@ -470,6 +498,9 @@ function setDepthMode(d) {
 /**
  * Function that allows the user to only allow SYNCHRONIZED IMAGES only.
  * 
+ * Parameters:
+ *      e - string variable that dictates case to select and change kinect param
+ *          {"sync", "nosync"}
  */
 function setSyncMode(e) {
     switch (e){
@@ -493,16 +524,21 @@ function setSyncMode(e) {
  * Condensed function that allows the above functions to be set in a single call
  * 
  * Parameters:
- *      a - Camera FPS string
- *      b - Color Format string
- *      c - Color Resolution string
- *      d - Depth Mode string
- *      e - Sync Mode string
+ *      fps     -   Camera FPS string [see setCameraFPS for details on passable 
+ *                  strings]
+ *      format  -   Color Format string [see setColorFormat for details on 
+ *                  passable strings]
+ *      res     -   Color Resolution string [see setColorResolution for details  
+ *                  on passable strings]
+ *      depth   -   Depth Mode string [see setDepthMode for details on passable 
+ *                  strings]
+ *      sync    -   Sync Mode string [see setSyncMode for details on passable 
+ *                  strings]
  */
-function changeKinectParameters(a, b, c, d, e){
-    setCameraFPS(a);
-    setColorFormat(b);
-    setColorResolution(c);
-    setDepthMode(d);
-    setSyncMode(e);
+function changeKinectParameters(fps, format, res, depth, sync){
+    setCameraFPS(fps);
+    setColorFormat(format);
+    setColorResolution(res);
+    setDepthMode(depth);
+    setSyncMode(sync);
 }
