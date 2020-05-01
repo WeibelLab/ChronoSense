@@ -61,7 +61,7 @@ function getWebcams() {
                 return device.kind === "videoinput"
             });
 
-            resolve(filtered);s
+            resolve(filtered);
         })
 
     });
