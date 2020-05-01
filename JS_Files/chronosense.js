@@ -33,6 +33,15 @@ const ABOUT_PAGE_NUM = 4;
 
 var isKinectOn = false;
 
+//List of all changeable parameters for Kinect sensor feed:
+//Set in global scope for setting and retrieving and set to default 
+CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
+ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
+ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
+SyncMode = false;
+
+
 //Holds a value for which page is open for the device so it knows which 
 //functions to call from which page.
 //Legend:
@@ -122,17 +131,32 @@ function handleWindowControls() {
     * Add events below to buttons and items within "pages."
     */
     btnKinectOn.addEventListener("click", event => {
-        startKinect();
-        if(currentlyOpenPage == KINECT_PAGE_NUM) {
-            kinectColorVideoFeed();
-        } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-            kinectBodyTrackingFeed();
+        if(!isKinectOn) {
+            startKinect();
+            if(currentlyOpenPage == KINECT_PAGE_NUM) {
 
+                kinectColorVideoFeed();
+            } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
+                kinectBodyTrackingFeed();
+
+            }
+            isKinectOn = true;
+        } else {
+            //For debugging:
+            //console.log('In function[btnKinectOn.addEventListener] the kinect is already on.');
         }
+        
     });
 
     btnKinectOff.addEventListener("click", event => {
-        shutOffKinect();
+        if(isKinectOn) {
+            shutOffKinect();
+            isKinectOn = false;
+        } else {
+            //For debugging:
+            //console.log('In function[btnKinectOff.addEventListener] the kinect is already off.');
+        }
+        
     });
 
 } //End of handleWindowControls()
@@ -176,6 +200,8 @@ function checkClosingWindowAndChangeContent(newPageNum) {
                 console.log("Successfully Started Kinect");
                 kinectColorVideoFeed(); */
             } else {
+                //Keep set parameters function here for testing (temp):
+                changeKinectParameters("fps30", "BGRA32", "res1080", "nfovunbinned", "nosync");
                 startKinect();
                 kinectColorVideoFeed(); 
             }
@@ -219,20 +245,26 @@ function checkClosingWindowAndChangeContent(newPageNum) {
  */
 function startKinect() {
     if(kinect.open()) {
-
         kinect.startCameras({
-            depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
-            color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
-            color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
-            camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
+            depth_mode: DepthMode,
+            color_format: ColorFormat,
+            color_resolution: ColorResolution,
+            camera_fps: CameraFPS,
+            synchronized_images_only: SyncMode
         });
         
-        depthModeRange = kinect.getDepthModeRange(KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED);
+        depthModeRange = kinect.getDepthModeRange(DepthMode);
         kinect.createTracker();
     } else {
         //Opening up the kinect has failed, adjust for that error...
 
     }    
+    //Debugging logs to the console:
+    console.log("Camera FPS: " + CameraFPS); 
+    console.log("Color Resolution: " + ColorResolution);
+    console.log("Color Format: " + ColorFormat);  
+    console.log("Depth Mode: " + DepthMode); 
+    console.log("Sync Mode: " + SyncMode);
 
     isKinectOn = true;
 } //End of startKinect()
@@ -293,4 +325,184 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
     dropdown.style.display = dropdownDisplay;               //DropDown Menu
     btnKinectOn.style.display = kinectButtonOnDisplay;      //On button kinect
     btnKinectOff.style.display = kinectButtonOffDisplay;    //Off button kinect
+}
+
+/**
+ * Function that allows the user to set the CAMERA FPS of the Kinect.
+ * 
+ */
+function setCameraFPS(a) {
+    switch (a){
+        case "fps5":
+            CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_5;
+            break;
+
+        case "fps15":
+            CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
+            break;
+
+        case "fps30":
+            CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
+            break;
+
+        default:
+            //Set default to 15 FPS
+
+    }
+
+
+
+
+}
+
+/**
+ * Function that allows the user to set the COLOR FORMAT of the Kinect.
+ * 
+ */
+function setColorFormat(b) {
+    switch (b){
+        case "mjpg":
+            ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+            break;
+
+        case "nv12":
+            ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_NV12;
+            break;
+
+        case "yuy2":
+            ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_YUY2;
+            break;
+
+        case "BGRA32":
+            ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32;
+            break;
+
+        default:
+            ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+
+    }
+    
+    
+}
+
+/**
+ * Function that allows the user to set the COLOR RESOLUTION of the Kinect.
+ * 
+ */
+function setColorResolution(c) {
+    switch (c){
+        case "off":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
+            break;
+
+        case "res720":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_720P;
+            break;
+
+        case "res1080":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+            break;
+
+        case "res1440":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1440P;
+            break;
+        
+        case "res1536":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1536P;
+            break;
+
+        case "res2160":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_2160P;
+            break;
+
+        case "res3072":
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_3072P;
+            break;
+
+        default:
+            //Set default to 1080P
+            ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+
+    }
+
+    
+}
+
+/**
+ * Function that allows the user to set the DEPTH mode of the Kinect.
+ * 
+ */
+function setDepthMode(d) {
+    switch (d){
+        case "off":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
+            break;
+
+        case "nfov2x2binned":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_2X2BINNED
+            break;
+
+        case "nfovunbinned":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED;
+            break;
+
+        case "wfov2v2binned":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_2X2BINNED;
+            break;
+        
+        case "wfovunbinned":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_UNBINNED;
+            break;
+
+        case "passive":
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
+            break;
+
+        default:
+            //Set default to passive IR at 1024x1024
+            DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
+
+    }
+
+    
+}
+
+/**
+ * Function that allows the user to only allow SYNCHRONIZED IMAGES only.
+ * 
+ */
+function setSyncMode(e) {
+    switch (e){
+        case "sync":
+            SyncMode = true;
+            break;
+
+        case "nosync":
+            SyncMode = false;
+            break;
+
+        default:
+            //Set default to no synchronization
+            SyncMode = false;
+    }
+    
+
+}
+
+/**
+ * Condensed function that allows the above functions to be set in a single call
+ * 
+ * Parameters:
+ *      a - Camera FPS string
+ *      b - Color Format string
+ *      c - Color Resolution string
+ *      d - Depth Mode string
+ *      e - Sync Mode string
+ */
+function changeKinectParameters(a, b, c, d, e){
+    setCameraFPS(a);
+    setColorFormat(b);
+    setColorResolution(c);
+    setDepthMode(d);
+    setSyncMode(e);
 }
