@@ -211,7 +211,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
                 kinectColorVideoFeed(); */
             } else {
                 //Keep set parameters function here for testing (temp):
-                changeKinectParameters("fps30", "BGRA32", "res1080", "nfovunbinned", "nosync");
+                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
                 kinectColorVideoFeed(); 
             }
@@ -541,4 +541,20 @@ function changeKinectParameters(fps, format, res, depth, sync){
     setColorResolution(res);
     setDepthMode(depth);
     setSyncMode(sync);
+}
+
+/**
+ * Function that is called to make sure all devices are properly shut down 
+ * before the application shuts down. 
+ * Acts as an EventHandler for Node.
+ */
+global.onbeforeunload = () => {
+    if(isKinectOn) {
+        shutOffKinect();
+        isKinectOn = false;
+    } else {
+        //The Kinect is already off and we can safely shut down the application.
+        //For debugging:
+        //console.log('In function[global.onbeforeunload] the kinect is already off.');
+    }
 }
