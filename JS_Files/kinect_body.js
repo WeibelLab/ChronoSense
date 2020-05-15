@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 /*
  * Description: File is used to display the joint and body data from the 
  *              Azure Kinect. 
@@ -66,4 +68,19 @@ function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
       pixelArray[i+3] = 0xff;
   }
   ctx.putImageData(canvasImageData, 0, 0);
+}
+
+/**
+ * Def: Function that scans for body updates periodically or whenever an update
+ *      occurs and adds that to a file.
+ * Parameters:
+ *  skeleton - JSFrame.JSBodyFrame.JSBody[].JSSkeleton
+ * 
+ */
+function readAndWriteJointData(skeleton) {
+  //JSSkeleton has an array of joints stored in skeleton.joints[]
+  //I'm going to first try writing to a JSON file with every joint separate 
+  //and write them all at the same time as they come in.
+
+
 }
