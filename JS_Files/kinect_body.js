@@ -12,25 +12,35 @@ function kinectBodyTrackingFeed() {
 
     kinect.startListening((data) => {
       //Debugging: Currently does not 
-      console.log("Started listening to data again");
-      if (!outputImageData && data.colorImageFrame.width > 0) {
+      //console.log("Started listening to data again");
+      if (!outputImageData && data.colorImageFrame.width > 0 && data.depthImageFrame.width > 0) {
         displayCanvas.width = data.colorImageFrame.width;
         displayCanvas.height = data.colorImageFrame.height;
+        displayCanvas2.width = data.depthImageFrame.width;
+        displayCanvas2.height = data.depthImageFrame.height;
         outputImageData = outputCtx.createImageData(displayCanvas.width, displayCanvas.height);
+        outputImageData2 = outputCtx2.createImageData(displayCanvas2.width, displayCanvas2.height);
       }
       if (outputImageData) {
         renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
       }
+      if (outputImageData2) {
+        renderDepthFrameAsGreyScale(outputCtx2, outputImageData2, data.depthImageFrame);
+      }
       if (data.bodyFrame.bodies) {
         // render the skeleton joints on top of the color feed
         outputCtx.save();
+        outputCtx2.save();
         outputCtx.fillStyle = 'red';
+        outputCtx2.fillStyle = 'red';
         data.bodyFrame.bodies.forEach(body => {
           body.skeleton.joints.forEach(joint => {
             outputCtx.fillRect(joint.colorX, joint.colorY, 10, 10);
+            outputCtx2.fillRect(joint.depthX, joint.depthY, 4, 4);
           });
         });
         outputCtx.restore();
+        outputCtx2.restore();
       }
     });
 }

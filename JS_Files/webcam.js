@@ -68,6 +68,11 @@ function getWebcams() {
 
 }
 
+
+function emptyDropdown(dropdown_el){
+  for (a in dropdown_el.options) { dropdown_el.options.remove(0); }
+}
+
 /*
  * Uses the list of discovered user video devices to populate a selectable 
  * drop-down menu.
@@ -76,6 +81,7 @@ function getWebcams() {
 function populateDropDownMenu(webcams) {
  
   //let dropdown = document.getElementById("dropdown"); put in style file
+  emptyDropdown(dropdown);
  
   webcams.forEach((cam) => {
     let option = document.createElement("option");
