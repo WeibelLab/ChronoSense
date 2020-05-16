@@ -8,6 +8,7 @@ function kinectColorVideoFeed() {
     console.log("Inside kinectColorVideoFeed"); //I reach here on second start
   
     kinect.startListening((data) => {
+        outputImageData = null;
         if (!outputImageData && data.colorImageFrame.width > 0) {
             console.log("START RENDER REACHED")
             displayCanvas.width = data.colorImageFrame.width;

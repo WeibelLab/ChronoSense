@@ -18,8 +18,10 @@ const btnKinectOff = document.getElementById('kinect_off');
 //Used in Kinect JS files for displaying content
 const displayCanvas = document.getElementById('video_canvas');
 const displayCanvas2 = document.getElementById('video_canvas2');
+const displayCanvas3 = document.getElementById('video_canvas3');
 const outputCtx = displayCanvas.getContext('2d');
 const outputCtx2 = displayCanvas2.getContext('2d');
+const outputCtx3 = displayCanvas3.getContext('2d');
 let outputImageData, depthModeRange;
 
 //Used in webcam methods
@@ -69,7 +71,7 @@ document.onreadystatechange = () => {
  * navigation. Called above when the page is ready to be displayed.
  * 
  */
-function handleWindowControls() {
+async function handleWindowControls() {
 
     let win = remote.getCurrentWindow();
 
@@ -195,21 +197,23 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            changeWindowFeatures("none", "none", "none", "block", "inline-block", "none", "none");
+            changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
+            if(isKinectOn) {   
+                await shutOffKinect();
+            }
             webcamStart();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "none", "inline-block", "inline-block");
-
+            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block");
             if(isKinectOn) {   
                 await shutOffKinect();
-                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
+                changeKinectParameters("fps30", "BGRA32", "res1080", "off", "nosync");
                 startKinect();
                 kinectColorVideoFeed(); 
             } else {
-                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
+                changeKinectParameters("fps30", "BGRA32", "res1080", "off", "nosync");
                 startKinect();
                 kinectColorVideoFeed(); 
             }
@@ -217,13 +221,12 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            changeWindowFeatures("block", "block", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
             if(isKinectOn) { 
                 await shutOffKinect();
                 changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
                 kinectBodyTrackingFeed(); 
-                
             } else {
                 changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
@@ -253,7 +256,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
  * the application [in progress].
  * 
  */
-function startKinect() {
+async function startKinect() {
+    console.log(DepthMode);
     if(kinect.open()) {
         kinect.startCameras({
             depth_mode: DepthMode,
@@ -263,8 +267,10 @@ function startKinect() {
             synchronized_images_only: SyncMode
         });
         
-        depthModeRange = kinect.getDepthModeRange(DepthMode);
-        kinect.createTracker();
+        if(DepthMode != 0){ // if depthMode is not "off"
+            depthModeRange = kinect.getDepthModeRange(DepthMode);
+            kinect.createTracker();
+        }
     } else {
         //Opening up the kinect has failed, adjust for that error...
 
@@ -287,9 +293,9 @@ function startKinect() {
  * the Kinect; saving time and resources.
  * 
  */
-function stopKinectListener() {
-    kinect.stopListening();
-
+async function stopKinectListener() {
+    let kinectStoppedlistening = await kinect.stopListening();
+    return kinectStoppedlistening;
 }
 
 /**
@@ -302,11 +308,11 @@ function stopKinectListener() {
  */
 async function shutOffKinect() {
     //First check if the Kinect is on before allowing it to be shut off.
-    await kinect.stopListening();
+    let kinectShutOff = await kinect.stopListening();
     kinect.stopCameras();
     kinect.close();
     isKinectOn = false;
-
+    return kinectShutOff;
 }
 
 
@@ -324,14 +330,16 @@ async function shutOffKinect() {
  */
 
 function changeWindowFeatures(displayCanvasDisplay = "none",
-                              displayCanvas2Display = "none",  
+                              displayCanvas2Display = "none",
+                              displayCanvas3Display = "none",   
                               recordingButtonDisplay = "none",
                               camVideoDisplay = "none",
                               dropdownDisplay = "none",
                               kinectButtonOnDisplay = "none",
                               kinectButtonOffDisplay = "none") {
-    displayCanvas.style.display = displayCanvasDisplay;     //Video Canvas Feed
-    displayCanvas2.style.display = displayCanvas2Display;     //Video Canvas Feed
+    displayCanvas.style.display = displayCanvasDisplay;     //Kinect Color Canvas Feed
+    displayCanvas2.style.display = displayCanvas2Display;     //Kinect Body Color Canvas Feed
+    displayCanvas3.style.display = displayCanvas3Display;     //Kinect Body Depth Canvas Feed
     recordingButton.style.display = recordingButtonDisplay; //Record Button 
     camVideo.style.display = camVideoDisplay;               //Webcam Video Feed
     dropdown.style.display = dropdownDisplay;               //DropDown Menu

@@ -1,5 +1,3 @@
-const fs = require('fs');
-
 /*
  * Description: File is used to display the joint and body data from the 
  *              Azure Kinect. 
@@ -15,34 +13,40 @@ function kinectBodyTrackingFeed() {
     kinect.startListening((data) => {
       //Debugging: Currently does not 
       //console.log("Started listening to data again");
-      if (!outputImageData && data.colorImageFrame.width > 0 && data.depthImageFrame.width > 0) {
-        displayCanvas.width = data.colorImageFrame.width;
-        displayCanvas.height = data.colorImageFrame.height;
-        displayCanvas2.width = data.depthImageFrame.width;
-        displayCanvas2.height = data.depthImageFrame.height;
-        outputImageData = outputCtx.createImageData(displayCanvas.width, displayCanvas.height);
+      outputImageData2 = null;
+      outputImageData3 = null;
+      if (!outputImageData2 && data.colorImageFrame.width > 0) {
+        displayCanvas2.width = data.colorImageFrame.width;
+        displayCanvas2.height = data.colorImageFrame.height;
         outputImageData2 = outputCtx2.createImageData(displayCanvas2.width, displayCanvas2.height);
       }
-      if (outputImageData) {
-        renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
+
+      if (!outputImageData3 && data.depthImageFrame.width > 0) {
+        displayCanvas3.width = data.depthImageFrame.width;
+        displayCanvas3.height = data.depthImageFrame.height;
+        outputImageData3 = outputCtx3.createImageData(displayCanvas3.width, displayCanvas3.height);
       }
+
       if (outputImageData2) {
-        renderDepthFrameAsGreyScale(outputCtx2, outputImageData2, data.depthImageFrame);
+        renderBGRA32ColorFrame(outputCtx2, outputImageData2, data.colorImageFrame);
+      }
+      if (outputImageData3) {
+        renderDepthFrameAsGreyScale(outputCtx3, outputImageData3, data.depthImageFrame);
       }
       if (data.bodyFrame.bodies) {
         // render the skeleton joints on top of the color feed
-        outputCtx.save();
         outputCtx2.save();
-        outputCtx.fillStyle = 'red';
+        outputCtx3.save();
         outputCtx2.fillStyle = 'red';
+        outputCtx3.fillStyle = 'red';
         data.bodyFrame.bodies.forEach(body => {
           body.skeleton.joints.forEach(joint => {
-            outputCtx.fillRect(joint.colorX, joint.colorY, 10, 10);
-            outputCtx2.fillRect(joint.depthX, joint.depthY, 4, 4);
+            outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
+            outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
           });
         });
-        outputCtx.restore();
         outputCtx2.restore();
+        outputCtx3.restore();
       }
     });
 }
