@@ -99,9 +99,10 @@
           </div>
           
         </div> -->
-
+        <p><input type="checkbox" name="kinectPower" id="kinectPower" style="display: none;"></input></p>
         <p><select name="dropdown" id="dropdown" style="display: none;"></select></p>
         <canvas id="video_canvas" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
+        <canvas id="video_canvas2" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
         
         <div id="kinect_button_container">
           <button id="kinect_on">ON</button>
@@ -126,6 +127,9 @@
         var ctx = (document.getElementById('video_canvas'));
         ctx.canvas.width  = window.innerWidth;
         ctx.canvas.height = window.innerHeight;
+        var ctx2 = (document.getElementById('video_canvas2'));
+        ctx2.canvas.width  = window.innerWidth;
+        ctx2.canvas.height = window.innerHeight;
       }
     </script>
     

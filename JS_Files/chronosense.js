@@ -17,7 +17,9 @@ const btnKinectOff = document.getElementById('kinect_off');
 
 //Used in Kinect JS files for displaying content
 const displayCanvas = document.getElementById('video_canvas');
+const displayCanvas2 = document.getElementById('video_canvas2');
 const outputCtx = displayCanvas.getContext('2d');
+const outputCtx2 = displayCanvas2.getContext('2d');
 let outputImageData, depthModeRange;
 
 //Used in webcam methods
@@ -141,11 +143,9 @@ function handleWindowControls() {
         if(!isKinectOn) {
             startKinect();
             if(currentlyOpenPage == KINECT_PAGE_NUM) {
-
                 kinectColorVideoFeed();
             } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
                 kinectBodyTrackingFeed();
-
             }
             isKinectOn = true;
         } else {
@@ -179,7 +179,7 @@ function handleWindowControls() {
  *      newPageNum -    Holds one of the global constant page values to 
  *                      determine what should be displayed or hidden.
  */
-function checkClosingWindowAndChangeContent(newPageNum) {
+async function checkClosingWindowAndChangeContent(newPageNum) {
     //Check which window is closing; if changing to same as before, don't 
     //refresh
     if(currentlyOpenPage == newPageNum) {
@@ -195,22 +195,20 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            changeWindowFeatures("none", "block", "inline-block", "block");
+            changeWindowFeatures("none", "none", "none", "block", "inline-block", "none", "none");
             webcamStart();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("block", "none", "none", "none", "none", "inline-block", "inline-block");
 
             if(isKinectOn) {   
-                shutOffKinect();
-                /*console.log("Successfully Stopped Kinect");
+                await shutOffKinect();
+                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
-                console.log("Successfully Started Kinect");
-                kinectColorVideoFeed(); */
+                kinectColorVideoFeed(); 
             } else {
-                //Keep set parameters function here for testing (temp):
                 changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
                 kinectColorVideoFeed(); 
@@ -219,13 +217,15 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "inline-block", "inline-block");
-            if(isKinectOn) {
-                //promise.finally(kinectBodyTrackingFeed());  
-                //kinect.stopListening().then(kinectBodyTrackingFeed());  
-                shutOffKinect();
+            changeWindowFeatures("block", "block", "none", "none", "none", "inline-block", "inline-block");
+            if(isKinectOn) { 
+                await shutOffKinect();
+                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
+                startKinect();
+                kinectBodyTrackingFeed(); 
                 
             } else {
+                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
                 startKinect();
                 kinectBodyTrackingFeed(); 
             }
@@ -300,9 +300,9 @@ function stopKinectListener() {
  * NOTE: Look into creating additional function to stop listening and allow 
  *       quick setting change or transition to capture a different data stream.
  */
-function shutOffKinect() {
+async function shutOffKinect() {
     //First check if the Kinect is on before allowing it to be shut off.
-    kinect.stopListening();
+    await kinect.stopListening();
     kinect.stopCameras();
     kinect.close();
     isKinectOn = false;
@@ -323,13 +323,15 @@ function shutOffKinect() {
  *      kinectButtonOffDisplay  -   kinect off button CSS display property
  */
 
-function changeWindowFeatures(displayCanvasDisplay = "none", 
+function changeWindowFeatures(displayCanvasDisplay = "none",
+                              displayCanvas2Display = "none",  
                               recordingButtonDisplay = "none",
                               camVideoDisplay = "none",
                               dropdownDisplay = "none",
                               kinectButtonOnDisplay = "none",
                               kinectButtonOffDisplay = "none") {
     displayCanvas.style.display = displayCanvasDisplay;     //Video Canvas Feed
+    displayCanvas2.style.display = displayCanvas2Display;     //Video Canvas Feed
     recordingButton.style.display = recordingButtonDisplay; //Record Button 
     camVideo.style.display = camVideoDisplay;               //Webcam Video Feed
     dropdown.style.display = dropdownDisplay;               //DropDown Menu
