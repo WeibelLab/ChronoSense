@@ -10,19 +10,18 @@ var constraints = {
   video: true 
 };
 
-var camVideo = document.querySelector('video#webcam');
-
-var recordingButton = document.querySelector('button#record');
 recordingButton.onclick = toggleRecording;
+
 
 
 //Go through the steps of populating the webcam selections, selecting the 
 //the current webcam to stream from, and making sure it's a secure path.
-triggerAuthorizationPrompt()
-.then(getWebcams)
-.then(populateDropDownMenu)
-.then(onWebcamSelected);
-
+function webcamStart() {
+  triggerAuthorizationPrompt()
+  .then(getWebcams)
+  .then(populateDropDownMenu)
+  .then(onWebcamSelected);
+}
 
 
 
@@ -62,11 +61,16 @@ function getWebcams() {
                 return device.kind === "videoinput"
             });
 
-            resolve(filtered);s
+            resolve(filtered);
         })
 
     });
 
+}
+
+
+function emptyDropdown(dropdown_el){
+  for (a in dropdown_el.options) { dropdown_el.options.remove(0); }
 }
 
 /*
@@ -76,7 +80,8 @@ function getWebcams() {
  */
 function populateDropDownMenu(webcams) {
  
-  let dropdown = document.getElementById("dropdown");
+  //let dropdown = document.getElementById("dropdown"); put in style file
+  emptyDropdown(dropdown);
  
   webcams.forEach((cam) => {
     let option = document.createElement("option");

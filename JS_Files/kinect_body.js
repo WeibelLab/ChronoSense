@@ -1,53 +1,57 @@
-const KinectAzure = require('kinect-azure');
-const kinect = new KinectAzure();  
-const { ipcRenderer } = require('electron')
+/*
+ * Description: File is used to display the joint and body data from the 
+ *              Azure Kinect. 
+ *
+ */
 
-
-const outputCanvas = document.getElementById('kinect_feed');
-const outputCtx = outputCanvas.getContext('2d');
-let outputImageData, depthModeRange;
-
-const init = () => {
-  startKinect();
-};
-
-const startKinect = () => {
-  if(kinect.open()) {
-
-    kinect.startCameras({
-      depth_mode: KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED,
-      color_format: KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32,
-      color_resolution: KinectAzure.K4A_COLOR_RESOLUTION_1080P,
-      camera_fps: KinectAzure.K4A_FRAMES_PER_SECOND_30
-    });
-    depthModeRange = kinect.getDepthModeRange(KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED);
-    kinect.createTracker();
+function kinectBodyTrackingFeed() {
+    //For debugging
+    console.log("I have reached the start of kinectBodyTrackingFeed()");
+    //Program does reach the above after waiting for sensor to stop listening 
+    //but then freezes at some point below
 
     kinect.startListening((data) => {
-      if (!outputImageData && data.colorImageFrame.width > 0) {
-        outputCanvas.width = data.colorImageFrame.width;
-        outputCanvas.height = data.colorImageFrame.height;
-        outputImageData = outputCtx.createImageData(outputCanvas.width, outputCanvas.height);
+      //Debugging: Currently does not 
+      //console.log("Started listening to data again");
+      outputImageData2 = null;
+      outputImageData3 = null;
+      if (!outputImageData2 && data.colorImageFrame.width > 0) {
+        displayCanvas2.width = data.colorImageFrame.width;
+        displayCanvas2.height = data.colorImageFrame.height;
+        outputImageData2 = outputCtx2.createImageData(displayCanvas2.width, displayCanvas2.height);
       }
-      if (outputImageData) {
-        renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
+
+      if (!outputImageData3 && data.depthImageFrame.width > 0) {
+        displayCanvas3.width = data.depthImageFrame.width;
+        displayCanvas3.height = data.depthImageFrame.height;
+        outputImageData3 = outputCtx3.createImageData(displayCanvas3.width, displayCanvas3.height);
+      }
+
+      if (outputImageData2) {
+        renderBGRA32ColorFrame(outputCtx2, outputImageData2, data.colorImageFrame);
+      }
+      if (outputImageData3) {
+        renderDepthFrameAsGreyScale(outputCtx3, outputImageData3, data.depthImageFrame);
       }
       if (data.bodyFrame.bodies) {
         // render the skeleton joints on top of the color feed
-        outputCtx.save();
-        outputCtx.fillStyle = 'red';
+        outputCtx2.save();
+        outputCtx3.save();
+        outputCtx2.fillStyle = 'red';
+        outputCtx3.fillStyle = 'red';
         data.bodyFrame.bodies.forEach(body => {
           body.skeleton.joints.forEach(joint => {
-            outputCtx.fillRect(joint.colorX, joint.colorY, 10, 10);
+            outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
+            outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
           });
         });
-        outputCtx.restore();
+        outputCtx2.restore();
+        outputCtx3.restore();
       }
     });
-  }
-};
+}
 
-const renderDepthFrameAsGreyScale = (ctx, canvasImageData, imageFrame) => {
+function renderDepthFrameAsGreyScale(ctx, canvasImageData, imageFrame) {
   const newPixelData = Buffer.from(imageFrame.imageData);
   const pixelArray = canvasImageData.data;
   let depthPixelIndex = 0;
@@ -61,13 +65,13 @@ const renderDepthFrameAsGreyScale = (ctx, canvasImageData, imageFrame) => {
     depthPixelIndex += 2;
   }
   ctx.putImageData(canvasImageData, 0, 0);
-};
+}
 
-const map = (value, inputMin, inputMax, outputMin, outputMax) => {
+function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
-};
+}
 
-const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
+function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
   //console.log("Start of renderBGRA32ColorFrame() reached");
   const newPixelData = Buffer.from(imageFrame.imageData);
   const pixelArray = canvasImageData.data;
@@ -78,25 +82,19 @@ const renderBGRA32ColorFrame = (ctx, canvasImageData, imageFrame) => {
       pixelArray[i+3] = 0xff;
   }
   ctx.putImageData(canvasImageData, 0, 0);
-};
-
-/**
- * Function to stop kinect and close out cameras
- * 
- */
-async function stopKinect() {
-  // stop kinect - use the await keyword to wait for the promise to resolve
-  await kinect.stopListening();
-  console.log("stopped listening");
-  kinect.destroyTracker();
-  console.log("destroyed tracking");
-  kinect.stopCameras();
-  console.log("stopped cameras");
 }
 
-ipcRenderer.on('stop-kinect', () => {
-  stopKinect();
-})
+/**
+ * Def: Function that scans for body updates periodically or whenever an update
+ *      occurs and adds that to a file.
+ * Parameters:
+ *  skeleton - JSFrame.JSBodyFrame.JSBody[].JSSkeleton
+ * 
+ */
+function readAndWriteJointData(skeleton) {
+  //JSSkeleton has an array of joints stored in skeleton.joints[]
+  //I'm going to first try writing to a JSON file with every joint separate 
+  //and write them all at the same time as they come in.
 
 
-init();
+}

@@ -1,7 +1,9 @@
 <html>
   <head>
     <link rel="stylesheet" href="../CSS_Files/style.css" />
+
   </head>
+  
   <body>
 
     <!-- Window Properties: Close, expand, etc. -->
@@ -13,40 +15,126 @@
       <li class="nav-bar-item"><a id="aboutPage">About</a></li>
     </ul>
 
-      <header id="titlebar">
-        <div id="drag-region">
+    <header id="titlebar">
+      <div id="drag-region">
   
-          <div id="window-title">
-            <span>ChronoSense</span>
-          </div>
+        <div id="window-title">
+          <span>ChronoSense</span>
+        </div>
           
   
-          <div id="window-controls">
-            <div class="button" id="min-button">
-              <span>&#xE921;</span>
-            </div>
-            <div class="button" id="max-button">
-              <span>&#xE922;</span>
-            </div>
-            <div class="button" id="restore-button">
-              <span>&#xE923;</span>
-            </div>
-            <div class="button" id="close-button">
-              <span>&#xE8BB;</span>
-            </div>
-  
+        <div id="window-controls">
+          <div class="button" id="min-button">
+            <span>&#xE921;</span>
+          </div>
+          <div class="button" id="max-button">
+            <span>&#xE922;</span>
+          </div>
+          <div class="button" id="restore-button">
+            <span>&#xE923;</span>
+          </div>
+          <div class="button" id="close-button">
+            <span>&#xE8BB;</span>
           </div>
         </div>
-      </header>
+        
+      </div>
+    </header>
 
-    <!-- Central Window Attributes and Embeded HTML -->
+    <!-- Central Window Attributes  -->
     <div id="main">
       <p>
-        <webview id='content-selection' style="width:100%; height:95%" nodeintegration></webview>
-        <script src="../JS_Files/style.js"></script>
+        <!--
+        <div class="kinect_parameter_options_container">
+          <div class="camera_fps">
+            <button class="camera_fps_btn">Camera FPS</button>
+            <div class="camera_fps_content">
+              <a id="5fps_value">5 Frames Per Second</a>
+              <a id="15_fps_value">15 Frames Per Second</a>
+              <a id="30_fps_value">30 Frames Per Second</a>
+            </div>
+          </div>
+          
+          <div class="color_resolution">
+            <button class="color_resolution_btn">Color Resolution</button>
+            <div class="color_resolution_content">
+              <a id="color_off_value">Color Camera Off</a>
+              <a id="720_value">1280x720</a>
+              <a id="1080_value">1920x1080</a>
+              <a id="1440_value">2560x1440</a>
+             <a id="1536_value">2048x1536</a>
+              <a id="2160_value">3840x2160</a>
+              <a id="3072_value">4096x3072</a>
+            </div>
+          </div>
+          
+          <div class="color_format">
+            <button class="color_format_btn">Color Format</button>
+            <div class="color_format_content">
+              <a id="mjpg_value">MJPG</a>
+              <a id="nv12_value">NV12</a>
+              <a id="yuy2_value">YUY2</a>
+              <a id="bgra32_value">BGRA32</a>
+            </div>
+          </div>
+          
+          <div class="depth_mode">
+            <button class="depth_mode_btn">Depth Mode</button>
+            <div class="depth_mode_content">
+              <a id="depth_off_value">Depth Sensor Off</a>
+              <a id="nfov2x2binned_value">NFOV 2x2 Binned</a>
+              <a id="nfovunbinned_value">NFOV Unbinned</a>
+              <a id="wfov2x2binned_value">WFOV 2x2 Binned</a>
+              <a id="wfovunbinned_value">WFOV Unbinned</a>
+              <a id="passive_ir_value">Passive IR</a>
+            </div>
+          </div>
+          
+          <div class="sync_mode">
+            <button class="sync_mode_btn">Sync Mode</button>
+           <div class="sync_mode_content">
+             <a id="sync_value">Frame Sycnhronization</a>
+             <a id="no_sync_value">No Frame Sycnhronization</a>
+           </div>
+          </div>
+          
+        </div> -->
+        <p><select name="dropdown" id="dropdown" style="display: none;"></select></p>
+        <canvas id="video_canvas" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
+        <canvas id="video_canvas2" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
+        <canvas id="video_canvas3" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
+        
+        <div id="kinect_button_container">
+          <button id="kinect_on">ON</button>
+          <button id="kinect_off">OFF</button>
+        </div>
+        
+        <video id="webcam" autoplay style="display: none; border: solid 1px black; width:  100%; height: 80%; transform: scaleX(-1);"></video>
+        <button id="record" style="display: none;">Start Recording</button>
       </p>
     </div>
 
+    <script src="../JS_Files/chronosense.js"></script>
+    <script src="../JS_Files/kinect.js"></script>
+    <script src="../JS_Files/kinect_body.js"></script>
+    <script src="../JS_Files/webcam.js"></script>
+
+    <script>
+      /* important! for alignment, you should make things
+      * relative to the canvas' current width/height.
+      */
+      function draw() {
+        var ctx = (document.getElementById('video_canvas'));
+        ctx.canvas.width  = window.innerWidth;
+        ctx.canvas.height = window.innerHeight;
+        var ctx2 = (document.getElementById('video_canvas2'));
+        ctx2.canvas.width  = window.innerWidth;
+        ctx2.canvas.height = window.innerHeight;
+        var ctx3 = (document.getElementById('video_canvas3'));
+        ctx3.canvas.width  = window.innerWidth;
+        ctx3.canvas.height = window.innerHeight;
+      }
+    </script>
     
 
   </body>
