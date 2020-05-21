@@ -13,8 +13,8 @@ function kinectBodyTrackingFeed() {
     kinect.startListening((data) => {
       //Debugging: Currently does not 
       //console.log("Started listening to data again");
-      outputImageData2 = null;
-      outputImageData3 = null;
+      var outputImageData2 = null;
+      var outputImageData3 = null;
       if (!outputImageData2 && data.colorImageFrame.width > 0) {
         displayCanvas2.width = data.colorImageFrame.width;
         displayCanvas2.height = data.colorImageFrame.height;
@@ -41,6 +41,9 @@ function kinectBodyTrackingFeed() {
         outputCtx3.fillStyle = 'red';
         data.bodyFrame.bodies.forEach(body => {
           body.skeleton.joints.forEach(joint => {
+            //console.log('Joint ' + joint.index + ': X = ' + joint.colorX + ' Y = ' + joint.colorY);
+            //Add joint to the JSON file:
+            readAndWriteJointData(joint, joint.index);
             outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
             outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
           });
@@ -91,10 +94,17 @@ function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
  *  skeleton - JSFrame.JSBodyFrame.JSBody[].JSSkeleton
  * 
  */
-function readAndWriteJointData(skeleton) {
+function readAndWriteJointData(joint, index) {
   //JSSkeleton has an array of joints stored in skeleton.joints[]
   //I'm going to first try writing to a JSON file with every joint separate 
   //and write them all at the same time as they come in.
+  //First try: No memory management, keep holding and then write to file (test)
+  console.log('Reached joint write');
+  jArrX.append(joint.colorX);
+  for(let i=0; i < jArrX.length; i++) {
+    console.log(jArrX[i] + ', ');
+  }
+  console.log('\n');
 
 
 }
