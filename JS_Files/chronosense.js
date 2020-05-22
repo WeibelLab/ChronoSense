@@ -2,6 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require('electron').remote;
+import {Kinect} from './kinect.js';
 
 //Variables of HTML elements for later manipulation 
 const viewerWindow = document.getElementById('content-selection');
@@ -46,7 +47,7 @@ const ABOUT_PAGE_NUM = 4;
 let currentlyOpenPage = false;
 
 //Variable for the open KinectDevice
-//TODO
+var kinect = new Kinect(displayCanvas);  //Later have dedicated button
 
 
 // When document has loaded, initialise
@@ -132,30 +133,20 @@ async function handleWindowControls() {
     * Add events below to buttons and items within "pages."
     */
     btnKinectOn.addEventListener("click", event => {
-        if(!isKinectOn) {
-            startKinect();
-            if(currentlyOpenPage == KINECT_PAGE_NUM) {
-                kinectColorVideoFeed();
-            } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-                kinectBodyTrackingFeed();
-            }
-            isKinectOn = true;
-        } else {
-            //For debugging:
-            //console.log('In function[btnKinectOn.addEventListener] the kinect is already on.');
+        if(kinect == null) {
+            kinect = new Kinect(displayCanvas);
+
         }
-        
+        kinect.start();  //Start the Kinect 
+        if(currentlyOpenPage == KINECT_PAGE_NUM) {
+            kinect.ColorVideoFeed();
+        } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
+            //kinect.BodyTrackingFeed();
+        }
     });
 
     btnKinectOff.addEventListener("click", event => {
-        if(isKinectOn) {
-            shutOffKinect();
-            isKinectOn = false;
-        } else {
-            //For debugging:
-            //console.log('In function[btnKinectOff.addEventListener] the kinect is already off.');
-        }
-        
+        kinect.shutOff();
     });
 
 } //End of handleWindowControls()
@@ -188,40 +179,30 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
             changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
-            if(isKinectOn) {   
-                await shutOffKinect();
-            }
+            await shutOffKinect();
             webcamStart();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
             changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block");
-            if(isKinectOn) {   
-                await shutOffKinect();
-                changeKinectParameters("fps30", "BGRA32", "res1080", "off", "nosync");
-                startKinect();
-                kinectColorVideoFeed(); 
-            } else {
-                changeKinectParameters("fps30", "BGRA32", "res1080", "off", "nosync");
-                startKinect();
-                kinectColorVideoFeed(); 
-            }
+
+            await kinect.shutOff();
+            kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
+            kinect.start();
+            kinect.ColorVideoFeed(); 
+        
             break;
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
             changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
-            if(isKinectOn) { 
-                await shutOffKinect();
-                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
-                startKinect();
-                kinectBodyTrackingFeed(); 
-            } else {
-                changeKinectParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
-                startKinect();
-                kinectBodyTrackingFeed(); 
-            }
+
+            await kinect.shutOff();
+            kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
+            kinect.start();
+            //kinectBodyTrackingFeed(); 
+
             break;
 
         case ABOUT_PAGE_NUM:
@@ -274,12 +255,6 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
  * Acts as an EventHandler for Node.
  */
 global.onbeforeunload = () => {
-    if(isKinectOn) {
-        shutOffKinect();
-        isKinectOn = false;
-    } else {
-        //The Kinect is already off and we can safely shut down the application.
-        //For debugging:
-        //console.log('In function[global.onbeforeunload] the kinect is already off.');
-    }
+    kinect.shutOff();
+
 }

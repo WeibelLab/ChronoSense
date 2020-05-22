@@ -6,21 +6,22 @@
 const KinectAzure = require('kinect-azure');  
 
 export class Kinect {
-    kinectDevice = new KinectAzure();
-    displayCanvas;
-    outputCtx;
-    isKinectOn = false;
+    #kinectDevice = new KinectAzure();
+    #displayCanvas;
+    #outputCtx;
+    #isKinectOn = false;
+    #depthModeRange;
 
     //List of all changeable parameters for Kinect sensor feed:
-    CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
-    ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
-    ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
-    DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
-    SyncMode = false;
+    #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
+    #ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
+    #ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+    #DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
+    #SyncMode = false;
 
-    constructor(displayCanvas, outputCtx) {
-        this.displayCanvas = displayCanvas;
-        outputCtx = displayCanvas.getContext('2d');
+    constructor(displayCanvas) {
+        this.#displayCanvas = displayCanvas;
+        this.#outputCtx = displayCanvas.getContext('2d');
 
     }
 
@@ -30,33 +31,33 @@ export class Kinect {
     * the application [in progress].
     * 
     */
-    async startKinect() {
-        console.log(DepthMode);
-        if(kinect.open()) {
-            kinect.startCameras({
-                depth_mode: DepthMode,
-                color_format: ColorFormat,
-                color_resolution: ColorResolution,
-                camera_fps: CameraFPS,
-                synchronized_images_only: SyncMode
+    async start() {
+        console.log(this.#DepthMode);
+        if(this.#kinectDevice.open()) {
+            this.#kinectDevice.startCameras({
+                depth_mode: this.#DepthMode,
+                color_format: this.#ColorFormat,
+                color_resolution: this.#ColorResolution,
+                camera_fps: this.#CameraFPS,
+                synchronized_images_only: this.#SyncMode
             });
         
-            if(DepthMode != 0){ // if depthMode is not "off"
-                depthModeRange = kinect.getDepthModeRange(DepthMode);
-                kinect.createTracker();
+            if(this.#DepthMode != 0){ // if depthMode is not "off"
+                this.#depthModeRange = this.#kinectDevice.getDepthModeRange(this.#DepthMode);
+                this.#kinectDevice.createTracker();
             }
         } else {
         //Opening up the kinect has failed, adjust for that error...
 
         }    
         //Debugging logs to the console:
-        console.log("Camera FPS: " + CameraFPS); 
-        console.log("Color Resolution: " + ColorResolution);
-        console.log("Color Format: " + ColorFormat);  
-        console.log("Depth Mode: " + DepthMode); 
-        console.log("Sync Mode: " + SyncMode);
+        console.log("Camera FPS: " + this.#CameraFPS); 
+        console.log("Color Resolution: " + this.#ColorResolution);
+        console.log("Color Format: " + this.#ColorFormat);  
+        console.log("Depth Mode: " + this.#DepthMode); 
+        console.log("Sync Mode: " + this.#SyncMode);
 
-        isKinectOn = true;
+        this.#isKinectOn = true;
     } //End of startKinect()
 
     /**
@@ -67,13 +68,15 @@ export class Kinect {
     * NOTE: Look into creating additional function to stop listening and allow 
     *       quick setting change or transition to capture a different data stream.
     */
-    async shutOffKinect() {
+    async shutOff() {
         //First check if the Kinect is on before allowing it to be shut off.
-        let kinectShutOff = await kinect.stopListening();
-        kinect.stopCameras();
-        kinect.close();
-        isKinectOn = false;
-        return kinectShutOff;
+        if(this.#isKinectOn) {
+            let kinectShutOff = await this.#kinectDevice.stopListening();
+            this.#kinectDevice.stopCameras();
+            this.#kinectDevice.close();
+            this.#isKinectOn = false;
+            return kinectShutOff;
+        }
     }
 
     /**
@@ -85,28 +88,36 @@ export class Kinect {
     * 
     */
     async stopKinectListener() {
-        let kinectStoppedlistening = await kinect.stopListening();
+        let kinectStoppedlistening = await this.#kinectDevice.stopListening();
         return kinectStoppedlistening;
     }
 
-    kinectColorVideoFeed() {
-        console.log("Inside kinectColorVideoFeed"); //I reach here on second start
-      
-        kinect.startListening((data) => {
-            outputImageData = null;
-            if (!outputImageData && data.colorImageFrame.width > 0) {
-                console.log("START RENDER REACHED")
-                displayCanvas.width = data.colorImageFrame.width;
-                displayCanvas.height = data.colorImageFrame.height;
-                outputImageData = outputCtx.createImageData(displayCanvas.width, displayCanvas.height);
-            }
-      
-            if (outputImageData) {
-                renderBGRA32ColorFrame(outputCtx, outputImageData, data.colorImageFrame);
-            }
-        });
+
+    /* The color (RGB) video feed of the Azure Kinect is output to a display
+       canvas */
+    ColorVideoFeed() {
+        //console.log("Inside kinectColorVideoFeed");
+        
+        //First check if the Kinect is already running and don't start if it is:
+        if(this.#isKinectOn) {
+            this.#kinectDevice.startListening((data) => {
+                var outputImageData = null;
+                if (!outputImageData && data.colorImageFrame.width > 0) {
+                    //console.log("START RENDER REACHED");
+                    this.#displayCanvas.width = data.colorImageFrame.width;
+                    this.#displayCanvas.height = data.colorImageFrame.height;
+                    outputImageData = this.#outputCtx.createImageData(this.#displayCanvas.width, this.#displayCanvas.height);
+                }
+          
+                if (outputImageData) {
+                    this.renderBGRA32ColorFrame(this.#outputCtx, outputImageData, data.colorImageFrame);
+                }
+            });
+        }
     }
-      
+    
+
+    /* Function used to render data retrieved from Kinect to the canvas */
     renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
         //console.log("Start of renderBGRA32ColorFrame() reached");
         const newPixelData = Buffer.from(imageFrame.imageData);
@@ -125,58 +136,59 @@ export class Kinect {
     * Function that allows the user to set the CAMERA FPS of the Kinect.
     * 
     * Paramters:
-    *      a - string variable that dictates case to select and change kinect param
+    *      a - string variable that dictates selection and change kinect param
     *          {"fps5", "fps15", "fps30"}
     * 
     */
     setCameraFPS(a) {
         switch (a){
             case "fps5":
-                CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_5;
+                this.#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_5;
                 break;
 
             case "fps15":
-                CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
+                this.#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
                 break;
 
             case "fps30":
-                CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
+                this.#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
                 break;
 
             default:
-            //Set default to 15 FPS
+                this.#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
 
         }
     }
+
 
     /**
     * Function that allows the user to set the COLOR FORMAT of the Kinect.
     * 
     * Parameters:
-    *      b - string variable that dictates case to select and change kinect param
+    *      b - string variable that dictates selection and change kinect param
     *          {"mjpg", "nv12", "yuy2", "BGRA32"}
     * 
     */
     setColorFormat(b) {
         switch (b){
             case "mjpg":
-                ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+                this.#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
                 break;
 
             case "nv12":
-                ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_NV12;
+                this.#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_NV12;
                 break;
 
             case "yuy2":
-                ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_YUY2;
+                this.#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_YUY2;
                 break;
 
             case "BGRA32":
-                ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32;
+                this.#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32;
                 break;
 
             default:
-                ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+                this.#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
 
         }
     }
@@ -185,7 +197,7 @@ export class Kinect {
      * Function that allows the user to set the COLOR RESOLUTION of the Kinect.
      * 
      * Parameters:
-     *      c - string variable that dictates case to select and change kinect param
+     *      c - string variable that dictates selection and change kinect param
      *          {"off", "res720", "res1080", "res1440", "res1536", "res2160",
      *           "res3072"}
      * 
@@ -193,36 +205,36 @@ export class Kinect {
     setColorResolution(c) {
         switch (c){
             case "off":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
                 break;
 
             case "res720":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_720P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_720P;
                 break;
 
             case "res1080":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
                 break;
 
             case "res1440":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1440P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1440P;
                 break;
         
             case "res1536":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1536P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1536P;
                 break;
 
             case "res2160":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_2160P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_2160P;
                 break;
 
             case "res3072":
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_3072P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_3072P;
                 break;
 
             default:
                 //Set default to 1080P
-                ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+                this.#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
 
         }
     }
@@ -231,7 +243,7 @@ export class Kinect {
      * Function that allows the user to set the DEPTH mode of the Kinect.
      * 
      * Parameters:
-     *      d - string variable that dictates case to select and change kinect param
+     *      d - string variable that dictates selection and change kinect param
      *          {"off", "nfov2x2binned", "nfovunbinned", "wfov2x2binned", 
      *           "wfovunbinned", "passive"}
      * 
@@ -239,32 +251,32 @@ export class Kinect {
     setDepthMode(d) {
         switch (d){
             case "off":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
                 break;
 
             case "nfov2x2binned":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_2X2BINNED
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_2X2BINNED
                 break;
 
             case "nfovunbinned":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_NFOV_UNBINNED;
                 break;
 
             case "wfov2x2binned":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_2X2BINNED;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_2X2BINNED;
                 break;
         
             case "wfovunbinned":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_UNBINNED;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_WFOV_UNBINNED;
                 break;
 
             case "passive":
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
                 break;
 
             default:
                 //Set default to passive IR at 1024x1024
-                DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
+                this.#DepthMode = KinectAzure.K4A_DEPTH_MODE_PASSIVE_IR;
 
         }
     }
@@ -273,46 +285,46 @@ export class Kinect {
      * Function that allows the user to only allow SYNCHRONIZED IMAGES only.
      * 
      * Parameters:
-     *      e - string variable that dictates case to select and change kinect param
+     *      e - string variable that dictates cselection and change kinect param
      *          {"sync", "nosync"}
      */
     setSyncMode(e) {
         switch (e){
             case "sync":
-                SyncMode = true;
+                this.#SyncMode = true;
                 break;
 
             case "nosync":
-                SyncMode = false;
+                this.#SyncMode = false;
                 break;
 
             default:
                 //Set default to no synchronization
-                SyncMode = false;
+                this.#SyncMode = false;
         }
     }
 
     /**
-     * Condensed function that allows the above functions to be set in a single call
+     * Condensed function that allows the above functions to be set in one call
      * 
      * Parameters:
-     *      fps     -   Camera FPS string [see setCameraFPS for details on passable 
-     *                  strings]
+     *      fps     -   Camera FPS string [see setCameraFPS for details on 
+     *                  passable strings]
      *      format  -   Color Format string [see setColorFormat for details on 
      *                  passable strings]
-     *      res     -   Color Resolution string [see setColorResolution for details  
-     *                  on passable strings]
-     *      depth   -   Depth Mode string [see setDepthMode for details on passable 
-     *                  strings]
-     *      sync    -   Sync Mode string [see setSyncMode for details on passable 
-     *                  strings]
+     *      res     -   Color Resolution string [see setColorResolution for 
+     *                  details on passable strings]
+     *      depth   -   Depth Mode string [see setDepthMode for details on 
+     *                  passable strings]
+     *      sync    -   Sync Mode string [see setSyncMode for details on 
+     *                  passable strings]
      */
-    changeKinectParameters(fps, format, res, depth, sync){
-        setCameraFPS(fps);
-        setColorFormat(format);
-        setColorResolution(res);
-        setDepthMode(depth);
-        setSyncMode(sync);
+    changeParameters(fps, format, res, depth, sync){
+        this.setCameraFPS(fps);
+        this.setColorFormat(format);
+        this.setColorResolution(res);
+        this.setDepthMode(depth);
+        this.setSyncMode(sync);
     }
 
 
