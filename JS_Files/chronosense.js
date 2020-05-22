@@ -3,6 +3,7 @@
 // All of the Node.js APIs are available in this process.
 const remote = require('electron').remote;
 import {Kinect} from './kinect.js';
+import {Webcam} from './webcam.js';
 
 //Variables of HTML elements for later manipulation 
 const viewerWindow = document.getElementById('content-selection');
@@ -14,8 +15,9 @@ const btnAbout = document.getElementById('aboutPage');
 const btnKinectOn = document.getElementById('kinect_on');
 const btnKinectOff = document.getElementById('kinect_off');
 
-//Used in Kinect JS files for displaying content
-const displayCanvas = document.getElementById('video_canvas');  //Use in constructor for Kinect class object
+//Used in Kinect Class for displaying content
+//Send through constructor to Kinect class object
+const displayCanvas = document.getElementById('video_canvas');  
 const displayCanvas2 = document.getElementById('video_canvas2');
 const displayCanvas3 = document.getElementById('video_canvas3');
 
@@ -42,8 +44,9 @@ const ABOUT_PAGE_NUM = 4;
 // 4 - About
 let currentlyOpenPage = false;
 
-//Variable for the open KinectDevice
+//Variable for the open KinectDevice & webcam
 var kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);  //Later have dedicated button
+var webcam = new Webcam(recordingButton, camVideo, dropdown);      //Later have dedicated button
 
 
 // When document has loaded, initialise
@@ -176,8 +179,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
             changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
-            await shutOffKinect();
-            webcamStart();
+            await kinect.shutOff();
+            webcam.start();
             break;
 
         case KINECT_PAGE_NUM:
