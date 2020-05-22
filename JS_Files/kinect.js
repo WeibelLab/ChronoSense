@@ -51,7 +51,8 @@ export class Kinect {
                 });
             
                 if(this.#DepthMode != 0){ // if depthMode is not "off"
-                    this.#depthModeRange = this.#kinectDevice.getDepthModeRange(this.#DepthMode);
+                    this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
+                                                              this.#DepthMode);
                     this.#kinectDevice.createTracker();
                 }
                 this.#isKinectOn = true;
@@ -118,11 +119,15 @@ export class Kinect {
                     //console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
                     this.#displayCanvas.height = data.colorImageFrame.height;
-                    outputImageData = this.#outputCtx.createImageData(this.#displayCanvas.width, this.#displayCanvas.height);
+                    outputImageData = this.#outputCtx.createImageData(
+                                                      this.#displayCanvas.width, 
+                                                      this.#displayCanvas.height);
                 }
           
                 if (outputImageData) {
-                    this.renderBGRA32ColorFrame(this.#outputCtx, outputImageData, data.colorImageFrame);
+                    this.renderBGRA32ColorFrame(this.#outputCtx, 
+                                                outputImageData, 
+                                                data.colorImageFrame);
                 }
             });
         }
@@ -357,20 +362,27 @@ export class Kinect {
               if (!outputImageData2 && data.colorImageFrame.width > 0) {
                 this.#displayCanvas2.width = data.colorImageFrame.width;
                 this.#displayCanvas2.height = data.colorImageFrame.height;
-                outputImageData2 = this.#outputCtx2.createImageData(this.#displayCanvas2.width, this.#displayCanvas2.height);
+                outputImageData2 = this.#outputCtx2.createImageData(
+                                                    this.#displayCanvas2.width, 
+                                                    this.#displayCanvas2.height);
               }
           
               if (!outputImageData3 && data.depthImageFrame.width > 0) {
                 this.#displayCanvas3.width = data.depthImageFrame.width;
                 this.#displayCanvas3.height = data.depthImageFrame.height;
-                outputImageData3 = this.#outputCtx3.createImageData(this.#displayCanvas3.width, this.#displayCanvas3.height);
+                outputImageData3 = this.#outputCtx3.createImageData(
+                                                    this.#displayCanvas3.width, 
+                                                    this.#displayCanvas3.height);
               }
           
               if (outputImageData2) {
-                this.renderBGRA32ColorFrame(this.#outputCtx2, outputImageData2, data.colorImageFrame);
+                this.renderBGRA32ColorFrame(this.#outputCtx2, outputImageData2, 
+                                            data.colorImageFrame);
               }
               if (outputImageData3) {
-                this.renderDepthFrameAsGreyScale(this.#outputCtx3, outputImageData3, data.depthImageFrame);
+                this.renderDepthFrameAsGreyScale(this.#outputCtx3, 
+                                                 outputImageData3, 
+                                                 data.depthImageFrame);
               }
               if (data.bodyFrame.bodies) {
                 // render the skeleton joints on top of the color feed
@@ -380,8 +392,8 @@ export class Kinect {
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
                   body.skeleton.joints.forEach(joint => {
-                    //console.log('Joint ' + joint.index + ': X = ' + joint.colorX + ' Y = ' + joint.colorY);
-                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
+                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
+                                              10, 10);
                     this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
                   });
                 });
@@ -399,8 +411,10 @@ export class Kinect {
       const pixelArray = canvasImageData.data;
       var depthPixelIndex = 0;
       for (var i = 0; i < canvasImageData.data.length; i+=4) {
-        const depthValue = newPixelData[depthPixelIndex+1] << 8 | newPixelData[depthPixelIndex];
-        const normalizedValue = this.map(depthValue, this.#depthModeRange.min, this.#depthModeRange.max, 255, 0);
+        const depthValue = newPixelData[depthPixelIndex+1] << 8 | 
+                                        newPixelData[depthPixelIndex];
+        const normalizedValue = this.map(depthValue, this.#depthModeRange.min, 
+                                         this.#depthModeRange.max, 255, 0);
         pixelArray[i] = normalizedValue;
         pixelArray[i+1] = normalizedValue;
         pixelArray[i+2] = normalizedValue;
@@ -411,7 +425,7 @@ export class Kinect {
     }
     
 
-    /* Change the values on the dep to map within the maximum and minimum dist*/
+    /* Change the values on depth to map within the maximum and minimum dist*/
     map (value, inputMin, inputMax, outputMin, outputMax) {
       return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
     }

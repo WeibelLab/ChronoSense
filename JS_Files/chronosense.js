@@ -45,8 +45,8 @@ const ABOUT_PAGE_NUM = 4;
 let currentlyOpenPage = false;
 
 //Variable for the open KinectDevice & webcam
-var kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);  //Later have dedicated button
-var webcam = new Webcam(recordingButton, camVideo, dropdown);      //Later have dedicated button
+const kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);  //Later have dedicated button
+const webcam = new Webcam(recordingButton, camVideo, dropdown);      //Later have dedicated button
 
 
 // When document has loaded, initialise
@@ -134,7 +134,7 @@ async function handleWindowControls() {
     btnKinectOn.addEventListener("click", event => {
         //If no kinect object, create one
         if(kinect == null) {
-            kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
+            //kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
 
         }
         kinect.start();  //Start the Kinect 
