@@ -7,6 +7,7 @@ export class Webcam {
   #recordingButton;
   #camVideo;
   #dropdown;
+  webcams;
   #timesliceConstraint = 20; //milleseconds until record autosaves to file
   #recordingConstraints = 'video/mp4';
   #constraints = {
@@ -27,11 +28,14 @@ export class Webcam {
 
   //Go through the steps of populating the webcam selections, selecting the 
   //the current webcam to stream from, and making sure it's a secure path.
-  start() {
-    this.triggerAuthorizationPrompt()
-    .then(this.getWebcams)
-    .then(this.populateDropDownMenu)
-    .then(this.onWebcamSelected);
+  async init() {
+    await this.triggerAuthorizationPrompt();
+    this.webcams = await this.getWebcams();
+  }
+
+  ready(){
+    this.populateDropDownMenu();
+    this.onWebcamSelected();
   }
 
 
@@ -78,7 +82,7 @@ export class Webcam {
 
   /* Used to empty the drop down menu before re adding webcam list */
   emptyDropdown(dropdown_el){
-    for (a in dropdown_el.options) { dropdown_el.options.remove(0); }
+    for (let a in dropdown_el.options) { dropdown_el.options.remove(0); }
   }
 
 
@@ -87,12 +91,14 @@ export class Webcam {
    * drop-down menu.
    *
    */
-  populateDropDownMenu(webcams) {
+  populateDropDownMenu() {
   
     //let dropdown = document.getElementById("dropdown"); put in style file
-    this.emptyDropdown(this.#dropdown);
+    if(this.#dropdown){
+      this.emptyDropdown(dropdown);
+    }
   
-    webcams.forEach((cam) => {
+    this.webcams.forEach((cam) => {
       let option = document.createElement("option");
       option.text = cam.label;
       option.value = cam.deviceId;

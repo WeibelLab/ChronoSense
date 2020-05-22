@@ -180,7 +180,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             currentlyOpenPage = WEBCAM_PAGE_NUM;
             changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
             await kinect.shutOff();
-            webcam.start();
+            await webcam.init();
+            webcam.ready();
             break;
 
         case KINECT_PAGE_NUM:
