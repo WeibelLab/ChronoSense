@@ -345,7 +345,7 @@ export class Kinect {
         //First check if the Kinect is already running and don't start if it is:
         if(this.#isKinectOn) {
             this.#kinectDevice.startListening((data) => {
-              //Debugging: Currently does not 
+              //Debugging
               //console.log("Started listening to data again");
               var outputImageData2 = null;
               var outputImageData3 = null;
