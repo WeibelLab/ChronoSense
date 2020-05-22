@@ -38,33 +38,38 @@ export class Kinect {
     * the application [in progress].
     * 
     */
-    async start() {
-        console.log(this.#DepthMode);
-        if(this.#kinectDevice.open()) {
-            this.#kinectDevice.startCameras({
-                depth_mode: this.#DepthMode,
-                color_format: this.#ColorFormat,
-                color_resolution: this.#ColorResolution,
-                camera_fps: this.#CameraFPS,
-                synchronized_images_only: this.#SyncMode
-            });
+    start() {
+        //console.log(this.#DepthMode);
+        if(!this.#isKinectOn) {
+            if(this.#kinectDevice.open()) {
+                this.#kinectDevice.startCameras({
+                    depth_mode: this.#DepthMode,
+                    color_format: this.#ColorFormat,
+                    color_resolution: this.#ColorResolution,
+                    camera_fps: this.#CameraFPS,
+                    synchronized_images_only: this.#SyncMode
+                });
+            
+                if(this.#DepthMode != 0){ // if depthMode is not "off"
+                    this.#depthModeRange = this.#kinectDevice.getDepthModeRange(this.#DepthMode);
+                    this.#kinectDevice.createTracker();
+                }
+                this.#isKinectOn = true;
+            } else {
+            //Opening up the kinect has failed, adjust for that error...
+
+            }    
+            //Debugging logs to the console:
+            console.log("Camera FPS: " + this.#CameraFPS); 
+            console.log("Color Resolution: " + this.#ColorResolution);
+            console.log("Color Format: " + this.#ColorFormat);  
+            console.log("Depth Mode: " + this.#DepthMode); 
+            console.log("Sync Mode: " + this.#SyncMode);
         
-            if(this.#DepthMode != 0){ // if depthMode is not "off"
-                this.#depthModeRange = this.#kinectDevice.getDepthModeRange(this.#DepthMode);
-                this.#kinectDevice.createTracker();
-            }
-        } else {
-        //Opening up the kinect has failed, adjust for that error...
+        }  //End of isKinectOn c
+        
 
-        }    
-        //Debugging logs to the console:
-        console.log("Camera FPS: " + this.#CameraFPS); 
-        console.log("Color Resolution: " + this.#ColorResolution);
-        console.log("Color Format: " + this.#ColorFormat);  
-        console.log("Depth Mode: " + this.#DepthMode); 
-        console.log("Sync Mode: " + this.#SyncMode);
-
-        this.#isKinectOn = true;
+        
     } //End of startKinect()
 
     /**
