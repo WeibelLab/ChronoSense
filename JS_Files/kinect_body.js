@@ -74,19 +74,6 @@ function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
 }
 
-function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
-  //console.log("Start of renderBGRA32ColorFrame() reached");
-  const newPixelData = Buffer.from(imageFrame.imageData);
-  const pixelArray = canvasImageData.data;
-  for (let i = 0; i < canvasImageData.data.length; i+=4) {
-      pixelArray[i] = newPixelData[i+2];
-      pixelArray[i+1] = newPixelData[i+1];
-      pixelArray[i+2] = newPixelData[i];
-      pixelArray[i+3] = 0xff;
-  }
-  ctx.putImageData(canvasImageData, 0, 0);
-}
-
 /**
  * Def: Function that scans for body updates periodically or whenever an update
  *      occurs and adds that to a file.

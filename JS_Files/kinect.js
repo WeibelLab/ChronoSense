@@ -8,7 +8,11 @@ const KinectAzure = require('kinect-azure');
 export class Kinect {
     #kinectDevice = new KinectAzure();
     #displayCanvas;
+    #displayCanvas2;
+    #displayCanvas3;
     #outputCtx;
+    #outputCtx2;
+    #outputCtx3;
     #isKinectOn = false;
     #depthModeRange;
 
@@ -19,10 +23,13 @@ export class Kinect {
     #DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
     #SyncMode = false;
 
-    constructor(displayCanvas) {
+    constructor(displayCanvas, displayCanvas2, displayCanvas3) {
         this.#displayCanvas = displayCanvas;
+        this.#displayCanvas2 = displayCanvas2;
+        this.#displayCanvas3 = displayCanvas3;
         this.#outputCtx = displayCanvas.getContext('2d');
-
+        this.#outputCtx2 = displayCanvas2.getContext('2d');
+        this.#outputCtx3 = displayCanvas3.getContext('2d');
     }
 
     /**
@@ -95,7 +102,7 @@ export class Kinect {
 
     /* The color (RGB) video feed of the Azure Kinect is output to a display
        canvas */
-    ColorVideoFeed() {
+    colorVideoFeed() {
         //console.log("Inside kinectColorVideoFeed");
         
         //First check if the Kinect is already running and don't start if it is:
@@ -193,6 +200,7 @@ export class Kinect {
         }
     }
 
+
     /**
      * Function that allows the user to set the COLOR RESOLUTION of the Kinect.
      * 
@@ -239,6 +247,7 @@ export class Kinect {
         }
     }
 
+
     /**
      * Function that allows the user to set the DEPTH mode of the Kinect.
      * 
@@ -281,6 +290,7 @@ export class Kinect {
         }
     }
 
+
     /**
      * Function that allows the user to only allow SYNCHRONIZED IMAGES only.
      * 
@@ -303,6 +313,7 @@ export class Kinect {
                 this.#SyncMode = false;
         }
     }
+
 
     /**
      * Condensed function that allows the above functions to be set in one call
@@ -327,5 +338,77 @@ export class Kinect {
         this.setSyncMode(sync);
     }
 
+
+    /* Takes in the video and depth data to show image with overlayed joints */
+    bodyTrackingFeed() {
+        //console.log("Reached the start of BodyTrackingFeed()");
+        //First check if the Kinect is already running and don't start if it is:
+        if(this.#isKinectOn) {
+            this.#kinectDevice.startListening((data) => {
+              //Debugging: Currently does not 
+              //console.log("Started listening to data again");
+              var outputImageData2 = null;
+              var outputImageData3 = null;
+              if (!outputImageData2 && data.colorImageFrame.width > 0) {
+                this.#displayCanvas2.width = data.colorImageFrame.width;
+                this.#displayCanvas2.height = data.colorImageFrame.height;
+                outputImageData2 = this.#outputCtx2.createImageData(this.#displayCanvas2.width, this.#displayCanvas2.height);
+              }
+          
+              if (!outputImageData3 && data.depthImageFrame.width > 0) {
+                this.#displayCanvas3.width = data.depthImageFrame.width;
+                this.#displayCanvas3.height = data.depthImageFrame.height;
+                outputImageData3 = this.#outputCtx3.createImageData(this.#displayCanvas3.width, this.#displayCanvas3.height);
+              }
+          
+              if (outputImageData2) {
+                this.renderBGRA32ColorFrame(this.#outputCtx2, outputImageData2, data.colorImageFrame);
+              }
+              if (outputImageData3) {
+                this.renderDepthFrameAsGreyScale(this.#outputCtx3, outputImageData3, data.depthImageFrame);
+              }
+              if (data.bodyFrame.bodies) {
+                // render the skeleton joints on top of the color feed
+                this.#outputCtx2.save();
+                this.#outputCtx3.save();
+                this.#outputCtx2.fillStyle = 'red';
+                this.#outputCtx3.fillStyle = 'red';
+                data.bodyFrame.bodies.forEach(body => {
+                  body.skeleton.joints.forEach(joint => {
+                    //console.log('Joint ' + joint.index + ': X = ' + joint.colorX + ' Y = ' + joint.colorY);
+                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
+                    this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
+                  });
+                });
+                this.#outputCtx2.restore();
+                this.#outputCtx3.restore();
+              }
+            });
+        }
+    }
+    
+
+    /* Render the DepthFrame image as grey scale on canvas */
+    renderDepthFrameAsGreyScale(ctx, canvasImageData, imageFrame) {
+      const newPixelData = Buffer.from(imageFrame.imageData);
+      const pixelArray = canvasImageData.data;
+      var depthPixelIndex = 0;
+      for (var i = 0; i < canvasImageData.data.length; i+=4) {
+        const depthValue = newPixelData[depthPixelIndex+1] << 8 | newPixelData[depthPixelIndex];
+        const normalizedValue = this.map(depthValue, this.#depthModeRange.min, this.#depthModeRange.max, 255, 0);
+        pixelArray[i] = normalizedValue;
+        pixelArray[i+1] = normalizedValue;
+        pixelArray[i+2] = normalizedValue;
+        pixelArray[i+3] = 0xff;
+        depthPixelIndex += 2;
+      }
+      ctx.putImageData(canvasImageData, 0, 0);
+    }
+    
+
+    /* Change the values on the dep to map within the maximum and minimum dist*/
+    map (value, inputMin, inputMax, outputMin, outputMax) {
+      return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
+    }
 
 }  //End of Kinect class

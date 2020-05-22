@@ -18,10 +18,6 @@ const btnKinectOff = document.getElementById('kinect_off');
 const displayCanvas = document.getElementById('video_canvas');  //Use in constructor for Kinect class object
 const displayCanvas2 = document.getElementById('video_canvas2');
 const displayCanvas3 = document.getElementById('video_canvas3');
-const outputCtx = displayCanvas.getContext('2d');  //Delete after instantiating class Kinect
-const outputCtx2 = displayCanvas2.getContext('2d');
-const outputCtx3 = displayCanvas3.getContext('2d');
-let outputImageData, depthModeRange;
 
 //Used in webcam methods
 const recordingButton = document.getElementById('record');
@@ -47,7 +43,7 @@ const ABOUT_PAGE_NUM = 4;
 let currentlyOpenPage = false;
 
 //Variable for the open KinectDevice
-var kinect = new Kinect(displayCanvas);  //Later have dedicated button
+var kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);  //Later have dedicated button
 
 
 // When document has loaded, initialise
@@ -133,15 +129,16 @@ async function handleWindowControls() {
     * Add events below to buttons and items within "pages."
     */
     btnKinectOn.addEventListener("click", event => {
+        //If no kinect object, create one
         if(kinect == null) {
-            kinect = new Kinect(displayCanvas);
+            kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
 
         }
         kinect.start();  //Start the Kinect 
         if(currentlyOpenPage == KINECT_PAGE_NUM) {
-            kinect.ColorVideoFeed();
+            kinect.colorVideoFeed();
         } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-            //kinect.BodyTrackingFeed();
+            kinect.bodyTrackingFeed();
         }
     });
 
@@ -190,7 +187,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             await kinect.shutOff();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
             kinect.start();
-            kinect.ColorVideoFeed(); 
+            kinect.colorVideoFeed(); 
         
             break;
 
@@ -201,7 +198,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             await kinect.shutOff();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
             kinect.start();
-            //kinectBodyTrackingFeed(); 
+            kinect.bodyTrackingFeed(); 
 
             break;
 
@@ -256,5 +253,6 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
  */
 global.onbeforeunload = () => {
     kinect.shutOff();
+
 
 }
