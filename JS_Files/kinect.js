@@ -17,9 +17,9 @@ export class Kinect {
     #depthModeRange;
 
     //List of all changeable parameters for Kinect sensor feed:
-    #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_15;
-    #ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_OFF;
-    #ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_MJPG;
+    #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
+    #ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+    #ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32;
     #DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
     #SyncMode = false;
 
@@ -42,6 +42,7 @@ export class Kinect {
         //console.log(this.#DepthMode);
         if(!this.#isKinectOn) {
             if(this.#kinectDevice.open()) {
+                console.log('Inside KinectDeviceOpen');
                 this.#kinectDevice.startCameras({
                     depth_mode: this.#DepthMode,
                     color_format: this.#ColorFormat,
@@ -49,11 +50,12 @@ export class Kinect {
                     camera_fps: this.#CameraFPS,
                     synchronized_images_only: this.#SyncMode
                 });
-            
+                console.log('Inside KinectDeviceOpen2');
                 if(this.#DepthMode != 0){ // if depthMode is not "off"
                     this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
                                                               this.#DepthMode);
                     this.#kinectDevice.createTracker();
+                    console.log('After createTracker()');
                 }
                 this.#isKinectOn = true;
             } else {
@@ -84,11 +86,12 @@ export class Kinect {
     async shutOff() {
         //First check if the Kinect is on before allowing it to be shut off.
         if(this.#isKinectOn) {
-            let kinectShutOff = await this.#kinectDevice.stopListening();
+            console.log('Inside shutOff beginning');
+            let kinectStoppedlistening = await this.#kinectDevice.stopListening();
             this.#kinectDevice.stopCameras();
             this.#kinectDevice.close();
             this.#isKinectOn = false;
-            return kinectShutOff;
+            return kinectStoppedlistening;
         }
     }
 
@@ -114,9 +117,11 @@ export class Kinect {
         //First check if the Kinect is already running and don't start if it is:
         if(this.#isKinectOn) {
             this.#kinectDevice.startListening((data) => {
+                //Currently doesn't reach here when going between pages... BUG
+                console.log('Color listening for data...');
                 var outputImageData = null;
                 if (!outputImageData && data.colorImageFrame.width > 0) {
-                    //console.log("START RENDER REACHED");
+                    console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
                     this.#displayCanvas.height = data.colorImageFrame.height;
                     outputImageData = this.#outputCtx.createImageData(
