@@ -192,7 +192,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             //     the Kinect is turns on and "listens" but no data comes
             //     through on the display OR within the function (look at 
             //      console statements to see this).
-            webcam.stopVideoStream();
+            
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
             kinect.start();

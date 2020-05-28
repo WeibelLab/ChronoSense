@@ -1,6 +1,6 @@
 export class Webcam {
 
-  #mediaSource = new MediaSource();
+  #mediaSource;
   #mediaRecorder;
   #recordedBlobs;
   #sourceBuffer;
@@ -17,6 +17,7 @@ export class Webcam {
 
 
   constructor(recordingButton, camVideo, dropdown) {
+    this.#mediaSource = new MediaSource();
     this.#mediaSource.addEventListener('sourceopen', this.handleSourceOpen, false);
     recordingButton.onclick = this.toggleRecording;
     this.#recordingButton = recordingButton;
@@ -62,6 +63,7 @@ export class Webcam {
    * not interfere with other application processes.
    */
   stopVideoStream() {
+    /*
     var stream = this.#camVideo.srcObject;
     
     if(stream != null) {
@@ -71,7 +73,7 @@ export class Webcam {
       currentTracks.forEach((item, index) => {
         item.stop();
       })
-    }
+    } */
 
   }
 

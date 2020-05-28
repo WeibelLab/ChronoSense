@@ -94,14 +94,28 @@ export class Kinect {
     */
     async shutOff() {
         //First check if the Kinect is on before allowing it to be shut off.
-        if(this.#isKinectOn) {
-            console.log('Inside shutOff beginning');
-            let kinectStoppedlistening = await this.#kinectDevice.stopListening();
-            this.#kinectDevice.stopCameras();
-            this.#kinectDevice.close();
-            this.#isKinectOn = false;
-            return kinectStoppedlistening;
+        //if(this.#isKinectOn) {
+        console.log('Inside shutOff beginning');
+        if(this.#isKinectListening) {
+            await this.#kinectDevice.stopListening();
+            this.#isKinectListening = false;
+
         }
+
+        if(this.#isKinectCamerasStarted) {
+            await this.#kinectDevice.stopCameras();
+            this.#isKinectCamerasStarted = false;
+        }
+
+        if(this.#isKinectOpen) {
+            await this.#kinectDevice.close();
+            this.#isKinectOpen = false;
+
+
+        }
+            
+            //return kinectStoppedlistening;
+        //}
     }
 
     /**
@@ -138,10 +152,9 @@ export class Kinect {
     /* The color (RGB) video feed of the Azure Kinect is output to a display
        canvas */
     colorVideoFeed() {
-        //console.log("Inside kinectColorVideoFeed");
-        
         //First check if the Kinect is already running and don't start if it is:
         //if(this.#isKinectOn) {
+            console.log('ColorFeed() START');
             this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
                 //Currently doesn't reach here when going between pages... BUG
