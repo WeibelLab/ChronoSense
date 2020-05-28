@@ -57,6 +57,24 @@ export class Webcam {
   
   }
 
+  /*
+   * Stops the feed of connected devices before closing this page in order to 
+   * not interfere with other application processes.
+   */
+  stopVideoStream() {
+    var stream = this.#camVideo.srcObject;
+    
+    if(stream != null) {
+      //Check if leaving page to stop stream 
+      var currentTracks = stream.getTracks();
+      //Go through all tracks stopping them
+      currentTracks.forEach((item, index) => {
+        item.stop();
+      })
+    }
+
+  }
+
 
   /*
    * Goes through all user connected video devices and returns a list of them.

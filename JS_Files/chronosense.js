@@ -146,7 +146,7 @@ async function handleWindowControls() {
     });
 
     btnKinectOff.addEventListener("click", event => {
-        kinect.shutOff();
+        kinect.stopListeningAndCameras();
     });
 
 } //End of handleWindowControls()
@@ -179,7 +179,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
             changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
-            await kinect.shutOff();
+            await kinect.stopListeningAndCameras();
             await webcam.init();
             webcam.ready();
             break;
@@ -188,18 +188,23 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             currentlyOpenPage = KINECT_PAGE_NUM;
             changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block");
 
-            await kinect.shutOff();
+            //BUG: When changing from Webcam feed to Kinect Color feed,
+            //     the Kinect is turns on and "listens" but no data comes
+            //     through on the display OR within the function (look at 
+            //      console statements to see this).
+            webcam.stopVideoStream();
+            await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
             kinect.start();
-            kinect.colorVideoFeed(); 
-        
+            kinect.colorVideoFeed();
             break;
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
             changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
 
-            await kinect.shutOff();
+            //BUG: same as color Kinect above
+            await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
             kinect.start();
             kinect.bodyTrackingFeed(); 

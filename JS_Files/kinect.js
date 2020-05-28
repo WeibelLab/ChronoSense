@@ -6,7 +6,7 @@
 const KinectAzure = require('kinect-azure');  
 
 export class Kinect {
-    #kinectDevice = new KinectAzure();
+    #kinectDevice;
     #displayCanvas;
     #displayCanvas2;
     #displayCanvas3;
@@ -14,6 +14,9 @@ export class Kinect {
     #outputCtx2;
     #outputCtx3;
     #isKinectOn = false;
+    #isKinectOpen = false;
+    #isKinectCamerasStarted = false;
+    #isKinectListening = false;
     #depthModeRange;
 
     //List of all changeable parameters for Kinect sensor feed:
@@ -24,6 +27,7 @@ export class Kinect {
     #SyncMode = false;
 
     constructor(displayCanvas, displayCanvas2, displayCanvas3) {
+        this.#kinectDevice = new KinectAzure();
         this.#displayCanvas = displayCanvas;
         this.#displayCanvas2 = displayCanvas2;
         this.#displayCanvas3 = displayCanvas3;
@@ -39,40 +43,45 @@ export class Kinect {
     * 
     */
     start() {
-        //console.log(this.#DepthMode);
-        if(!this.#isKinectOn) {
-            if(this.#kinectDevice.open()) {
-                console.log('Inside KinectDeviceOpen');
-                this.#kinectDevice.startCameras({
-                    depth_mode: this.#DepthMode,
-                    color_format: this.#ColorFormat,
-                    color_resolution: this.#ColorResolution,
-                    camera_fps: this.#CameraFPS,
-                    synchronized_images_only: this.#SyncMode
-                });
-                console.log('Inside KinectDeviceOpen2');
-                if(this.#DepthMode != 0){ // if depthMode is not "off"
-                    this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
-                                                              this.#DepthMode);
-                    this.#kinectDevice.createTracker();
-                    console.log('After createTracker()');
-                }
-                this.#isKinectOn = true;
-            } else {
-            //Opening up the kinect has failed, adjust for that error...
+        //First check if device is open
+        if(!this.#isKinectOpen) {
+            //Not open, so open
+            this.#kinectDevice.open();
+            this.#isKinectOpen = true;
+            console.log('Opened Kinect');
 
-            }    
-            //Debugging logs to the console:
-            console.log("Camera FPS: " + this.#CameraFPS); 
-            console.log("Color Resolution: " + this.#ColorResolution);
-            console.log("Color Format: " + this.#ColorFormat);  
-            console.log("Depth Mode: " + this.#DepthMode); 
-            console.log("Sync Mode: " + this.#SyncMode);
-        
-        }  //End of isKinectOn c
-        
+        }
 
-        
+
+        //Second check if cameras have been started
+        if(!this.#isKinectCamerasStarted) {
+            this.#kinectDevice.startCameras({
+                camera_fps: this.#CameraFPS,
+                color_format: this.#ColorFormat,
+                color_resolution: this.#ColorResolution,
+                depth_mode: this.#DepthMode,
+                synchronized_images_only: this.#SyncMode
+            });
+
+            this.#isKinectCamerasStarted = true;
+            console.log('Started Cameras on Kinect');
+        }
+
+        //Third check if depthmode != 0 
+        if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+            this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
+                                                            this.#DepthMode);
+            this.#kinectDevice.createTracker();
+
+            console.log('Started Body Tracking');
+
+
+        }
+
+
+
+
+
     } //End of startKinect()
 
     /**
@@ -96,16 +105,33 @@ export class Kinect {
     }
 
     /**
-    * CURRENTLY NOT WORKING!
+    * CURRENTLY WORKING
     * 
     * Function will be used to transition between capturing different data streams
     * from the kinect (e.g. RGB -> body tracking) without to completely shut off
     * the Kinect; saving time and resources.
     * 
     */
-    async stopKinectListener() {
-        let kinectStoppedlistening = await this.#kinectDevice.stopListening();
-        return kinectStoppedlistening;
+    async stopListeningAndCameras() {
+        if(this.#isKinectListening) {
+            let kinectStoppedlistening = await this.#kinectDevice.stopListening();
+            this.#isKinectListening = false;
+            this.#kinectDevice.stopCameras();
+            this.#isKinectCamerasStarted = false;
+            console.log('Cameras Stopped and Listening Stopped');
+
+            if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#kinectDevice.destroyTracker();
+                console.log('Body Tracker Destroyed');
+    
+            }
+
+            return kinectStoppedlistening;
+        
+        }
+        console.log('Cameras and Listening ALREADY off');
+
+        
     }
 
 
@@ -115,7 +141,8 @@ export class Kinect {
         //console.log("Inside kinectColorVideoFeed");
         
         //First check if the Kinect is already running and don't start if it is:
-        if(this.#isKinectOn) {
+        //if(this.#isKinectOn) {
+            this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
                 //Currently doesn't reach here when going between pages... BUG
                 console.log('Color listening for data...');
@@ -135,7 +162,7 @@ export class Kinect {
                                                 data.colorImageFrame);
                 }
             });
-        }
+        //}
     }
     
 
@@ -358,10 +385,11 @@ export class Kinect {
     bodyTrackingFeed() {
         //console.log("Reached the start of BodyTrackingFeed()");
         //First check if the Kinect is already running and don't start if it is:
-        if(this.#isKinectOn) {
+        //if(this.#isKinectOn) {
+            this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
               //Debugging
-              //console.log("Started listening to data again");
+              console.log("Listening for Body Data");
               var outputImageData2 = null;
               var outputImageData3 = null;
               if (!outputImageData2 && data.colorImageFrame.width > 0) {
@@ -406,7 +434,7 @@ export class Kinect {
                 this.#outputCtx3.restore();
               }
             });
-        }
+        //}
     }
     
 
