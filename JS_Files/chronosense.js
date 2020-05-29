@@ -192,11 +192,20 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             //     the Kinect is turns on and "listens" but no data comes
             //     through on the display OR within the function (look at 
             //      console statements to see this).
-            
+            await webcam.stopVideoStream();
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
             kinect.start();
             kinect.colorVideoFeed();
+            /* Attempt some sort of check or cycle to restart
+            // until the port is open.
+            while(!kinect.getIsStreaming()){
+                await kinect.stopListeningAndCameras();
+                kinect.start();
+                kinect.colorVideoFeed();
+            }
+            */
+            
             break;
 
         case KINECT_BODY_PAGE_NUM:

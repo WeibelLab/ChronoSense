@@ -18,6 +18,7 @@ export class Kinect {
     #isKinectOpen = false;
     #isKinectCamerasStarted = false;
     #isKinectListening = false;
+    #isKinectStreaming = false;
     #depthModeRange;
     #jointWriter;
 
@@ -84,6 +85,11 @@ export class Kinect {
 
     } //End of startKinect()
 
+    /* Get isListening data for error checking */
+    getIsStreaming() {
+        return this.#isKinectStreaming;
+    }
+
     /**
     * Turns off the Kinect fully if it is currently on. This is a much easier way
     * to change the type of data you are collecting BUT it sacrifices time and 
@@ -138,6 +144,7 @@ export class Kinect {
         if(this.#isKinectListening) {
             let kinectStoppedlistening = await this.#kinectDevice.stopListening();
             this.#isKinectListening = false;
+            this.#isKinectStreaming = false;
             this.#kinectDevice.stopCameras();
             this.#isKinectCamerasStarted = false;
             console.log('Cameras Stopped and Listening Stopped');
@@ -161,14 +168,15 @@ export class Kinect {
     colorVideoFeed() {
         //First check if the Kinect is already running and don't start if it is:
         //if(this.#isKinectOn) {
-            console.log('ColorFeed() START');
+            //console.log('ColorFeed() START');
             this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
                 //Currently doesn't reach here when going between pages... BUG
-                console.log('Color listening for data...');
+                //console.log('Color listening for data...');
                 var outputImageData = null;
+                this.#isKinectStreaming = true;
                 if (!outputImageData && data.colorImageFrame.width > 0) {
-                    console.log("START RENDER REACHED");
+                    //console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
                     this.#displayCanvas.height = data.colorImageFrame.height;
                     outputImageData = this.#outputCtx.createImageData(
@@ -180,8 +188,9 @@ export class Kinect {
                     this.renderBGRA32ColorFrame(this.#outputCtx, 
                                                 outputImageData, 
                                                 data.colorImageFrame);
-                }
+                } 
             });
+
         //}
     }
     
