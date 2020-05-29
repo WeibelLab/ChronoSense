@@ -7,7 +7,7 @@ export class Webcam {
   #recordingButton;
   #camVideo;
   #dropdown;
-  webcams;
+  #webcams;
   #timesliceConstraint = 20; //milleseconds until record autosaves to file
   #recordingConstraints = 'video/mp4';
   #constraints = {
@@ -31,7 +31,7 @@ export class Webcam {
   //the current webcam to stream from, and making sure it's a secure path.
   async init() {
     await this.triggerAuthorizationPrompt();
-    this.webcams = await this.getWebcams();
+    this.#webcams = await this.getWebcams();
   }
 
   ready(){
@@ -118,7 +118,7 @@ export class Webcam {
       this.emptyDropdown(dropdown);
     }
   
-    this.webcams.forEach((cam) => {
+    this.#webcams.forEach((cam) => {
       let option = document.createElement("option");
       option.text = cam.label;
       option.value = cam.deviceId;

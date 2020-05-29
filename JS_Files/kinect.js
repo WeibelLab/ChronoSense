@@ -46,7 +46,8 @@ export class Kinect {
         //First check if device is open
         if(!this.#isKinectOpen) {
             //Not open, so open
-            this.#kinectDevice.open();
+            let openValue = this.#kinectDevice.open();
+            console.log('Boolean returned from kinect.open(): ' + openValue);
             this.#isKinectOpen = true;
             console.log('Opened Kinect');
 
@@ -78,10 +79,6 @@ export class Kinect {
 
         }
 
-
-
-
-
     } //End of startKinect()
 
     /**
@@ -95,9 +92,10 @@ export class Kinect {
     async shutOff() {
         //First check if the Kinect is on before allowing it to be shut off.
         //if(this.#isKinectOn) {
+        let stoppedListening;
         console.log('Inside shutOff beginning');
         if(this.#isKinectListening) {
-            await this.#kinectDevice.stopListening();
+            stoppedListening = await this.#kinectDevice.stopListening();
             this.#isKinectListening = false;
 
         }
@@ -114,7 +112,7 @@ export class Kinect {
 
         }
             
-            //return kinectStoppedlistening;
+        return stoppedListening;
         //}
     }
 
@@ -144,8 +142,6 @@ export class Kinect {
         
         }
         console.log('Cameras and Listening ALREADY off');
-
-        
     }
 
 
