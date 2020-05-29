@@ -3,6 +3,7 @@
  *              Azure Kinect. 
  *
  */
+import { JointWriter } from "./jointwriter.js";
 const KinectAzure = require('kinect-azure');  
 
 export class Kinect {
@@ -18,6 +19,7 @@ export class Kinect {
     #isKinectCamerasStarted = false;
     #isKinectListening = false;
     #depthModeRange;
+    #jointWriter;
 
     //List of all changeable parameters for Kinect sensor feed:
     #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
@@ -28,6 +30,7 @@ export class Kinect {
 
     constructor(displayCanvas, displayCanvas2, displayCanvas3) {
         this.#kinectDevice = new KinectAzure();
+        this.#jointWriter = new JointWriter();
         this.#displayCanvas = displayCanvas;
         this.#displayCanvas2 = displayCanvas2;
         this.#displayCanvas3 = displayCanvas3;
@@ -98,6 +101,13 @@ export class Kinect {
             stoppedListening = await this.#kinectDevice.stopListening();
             this.#isKinectListening = false;
 
+            if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
+                this.#kinectDevice.destroyTracker();
+                console.log('Body Tracker Destroyed');
+    
+            }
+
         }
 
         if(this.#isKinectCamerasStarted) {
@@ -133,6 +143,7 @@ export class Kinect {
             console.log('Cameras Stopped and Listening Stopped');
 
             if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
                 this.#kinectDevice.destroyTracker();
                 console.log('Body Tracker Destroyed');
     
@@ -398,7 +409,7 @@ export class Kinect {
             this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
               //Debugging
-              console.log("Listening for Body Data");
+              //console.log("Listening for Body Data");
               var outputImageData2 = null;
               var outputImageData3 = null;
               if (!outputImageData2 && data.colorImageFrame.width > 0) {
@@ -433,11 +444,17 @@ export class Kinect {
                 this.#outputCtx2.fillStyle = 'red';
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
-                  body.skeleton.joints.forEach(joint => {
-                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
+                    //TEST: For each body, write joint data to CSV
+                    //Gets here when I come back to the body tracking after leaving
+                    //But doesnt get past writeToFile()...
+                    //console.log('BEFORE writing to file');
+                    this.#jointWriter.writeToFile(body.skeleton);
+                    //console.log('AFTER writing to file');
+                    body.skeleton.joints.forEach(joint => {
+                        this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
                                               10, 10);
-                    this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
-                  });
+                        this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
+                    });
                 });
                 this.#outputCtx2.restore();
                 this.#outputCtx3.restore();
