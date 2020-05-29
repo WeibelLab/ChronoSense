@@ -105,29 +105,7 @@ export class Webcam {
     for (let a in dropdown_el.options) { dropdown_el.options.remove(0); }
   }
 
-
-  /*
-   * Uses the list of discovered user video devices to populate a selectable 
-   * drop-down menu.
-   *
-   */
-  populateDropDownMenu() {
   
-    //let dropdown = document.getElementById("dropdown"); put in style file
-    if(this.#dropdown){
-      this.emptyDropdown(dropdown);
-    }
-  
-    this.#webcams.forEach((cam) => {
-      let option = document.createElement("option");
-      option.text = cam.label;
-      option.value = cam.deviceId;
-      this.#dropdown.options.add(option);
-    });
-    this.#dropdown.addEventListener("change", this.onWebcamSelected);
-  }
-
-
   /*
    *  Starts streaming currently selected video source to the "webcam" html video
    *  element.
@@ -150,6 +128,28 @@ export class Webcam {
     return navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => this.#camVideo.srcObject = stream);
 
+  }
+
+
+  /*
+   * Uses the list of discovered user video devices to populate a selectable 
+   * drop-down menu.
+   *
+   */
+  populateDropDownMenu() {
+  
+    //let dropdown = document.getElementById("dropdown"); put in style file
+    if(this.#dropdown){
+      this.emptyDropdown(this.#dropdown);
+    }
+  
+    this.#webcams.forEach((cam) => {
+      let option = document.createElement("option");
+      option.text = cam.label;
+      option.value = cam.deviceId;
+      this.#dropdown.options.add(option);
+    });
+    this.#dropdown.addEventListener("change", () => this.onWebcamSelected());
   }
 
 
