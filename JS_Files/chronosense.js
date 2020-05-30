@@ -107,7 +107,6 @@ async function handleWindowControls() {
         console.log("YOU ARE HOME");
         checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
     });
-
     btnWebcam.addEventListener("click", event => {
         console.log("YOU ARE WEBCAM");
         checkClosingWindowAndChangeContent(WEBCAM_PAGE_NUM);
@@ -174,14 +173,16 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case HOME_PAGE_NUM:
             currentlyOpenPage = HOME_PAGE_NUM;
             changeWindowFeatures();
+            webcam.stopMediaStream();
+            await kinect.stopListeningAndCameras();
             break;
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
             changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
-            kinect.stopListeningAndCameras();
+            await kinect.stopListeningAndCameras();
             await webcam.init();
-            webcam.ready();
+            await webcam.ready();
             break;
 
         case KINECT_PAGE_NUM:
@@ -193,9 +194,10 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             //     through on the display OR within the function (look at 
             //      console statements to see this).
             
+            webcam.stopMediaStream();
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
-            kinect.start();
+            await kinect.start();
             kinect.colorVideoFeed();
             break;
 
@@ -204,9 +206,10 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
 
             //BUG: same as color Kinect above
+            webcam.stopMediaStream();
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
-            kinect.start();
+            await kinect.start();
             kinect.bodyTrackingFeed(); 
 
             break;
@@ -214,6 +217,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case ABOUT_PAGE_NUM:
             currentlyOpenPage = ABOUT_PAGE_NUM;
             changeWindowFeatures(); 
+            webcam.stopMediaStream();
+            await kinect.stopListeningAndCameras();
             break;
 
     }  //End of NEW page switch

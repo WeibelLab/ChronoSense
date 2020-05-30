@@ -1,3 +1,4 @@
+
 /*
  * Description: File is used to display the direct camera feed from the 
  *              Azure Kinect. 
@@ -37,12 +38,19 @@ export class Kinect {
     }
 
     /**
-    * Function starts the connect cameras with the set parameters. By default it
+    * Function starts the Kinect cameras with the set parameters. By default it
     * uses the parameters below; they can be changed later through UI options in 
     * the application [in progress].
     * 
     */
-    start() {
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async start() {
+        // Artifical delay to wait for MediaStreams to close (just in case)
+        await this.sleep(2000);
+        
         //First check if device is open
         if(!this.#isKinectOpen) {
             //Not open, so open
@@ -150,14 +158,14 @@ export class Kinect {
     colorVideoFeed() {
         //First check if the Kinect is already running and don't start if it is:
         //if(this.#isKinectOn) {
-            console.log('ColorFeed() START');
+            //console.log('ColorFeed() START');
             this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
                 //Currently doesn't reach here when going between pages... BUG
-                console.log('Color listening for data...');
+                //console.log('Color listening for data...');
                 var outputImageData = null;
                 if (!outputImageData && data.colorImageFrame.width > 0) {
-                    console.log("START RENDER REACHED");
+                    //console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
                     this.#displayCanvas.height = data.colorImageFrame.height;
                     outputImageData = this.#outputCtx.createImageData(
@@ -398,7 +406,7 @@ export class Kinect {
             this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
               //Debugging
-              console.log("Listening for Body Data");
+              //console.log("Listening for Body Data");
               var outputImageData2 = null;
               var outputImageData3 = null;
               if (!outputImageData2 && data.colorImageFrame.width > 0) {
