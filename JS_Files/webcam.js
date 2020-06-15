@@ -24,8 +24,9 @@ export class Webcam {
   constructor(recordingButton, camVideo, dropdown) {
     this.#mediaSource = new MediaSource();
     this.#mediaSource.addEventListener('sourceopen', () => this.handleSourceOpen(), false);
-    recordingButton.onclick = this.toggleRecording;
     this.#recordingButton = recordingButton;
+    //this.#recordingButton.onclick = this.toggleRecording;
+    this.#recordingButton.addEventListener("click", () => {this.toggleRecording()});
     this.#camVideo = camVideo;
     this.#dropdown = dropdown;
     
@@ -204,8 +205,10 @@ export class Webcam {
 
 
     this.#recordingButton.textContent = 'Stop Recording';
-    this.#mediaRecorder.onstop = this.handleStop;
-    this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    //this.#mediaRecorder.onstop = this.handleStop;
+    this.#mediaRecorder.addEventListener('stop', (event) => this.handleStop(event));
+    //this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    this.#mediaRecorder.addEventListener('dataavailable', (event) => this.handleDataAvailable(event));
     this.#mediaRecorder.start(this.#timesliceConstraint); // collect 10ms of data
     console.log('MediaRecorder started', this.#mediaRecorder);
   }
