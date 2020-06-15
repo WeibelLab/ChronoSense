@@ -14,6 +14,8 @@ const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
 const btnKinectOn = document.getElementById('kinect_on');
 const btnKinectOff = document.getElementById('kinect_off');
+const btnMirrorImage = document.getElementById('mirrorcheck');
+const lblMirrorImage = document.getElementById('mirrorlabel');
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
@@ -179,7 +181,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            changeWindowFeatures("none","none", "none", "inline-block", "block", "inline-block", "none", "none");
+            changeWindowFeatures("none","none", "none", "inline-block", "block", "inline-block", "none", "none", "inline-block");
             await kinect.stopListeningAndCameras();
             await webcam.init();
             await webcam.ready();
@@ -187,7 +189,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block", "inline-block");
 
             //BUG: When changing from Webcam feed to Kinect Color feed,
             //     the Kinect is turns on and "listens" but no data comes
@@ -203,7 +205,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block", "inline-block");
 
             //BUG: same as color Kinect above
             webcam.stopMediaStream();
@@ -247,7 +249,8 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
                               camVideoDisplay = "none",
                               dropdownDisplay = "none",
                               kinectButtonOnDisplay = "none",
-                              kinectButtonOffDisplay = "none") {
+                              kinectButtonOffDisplay = "none",
+                              mirrorButtonDisplay = "none") {
     displayCanvas.style.display = displayCanvasDisplay;     //Kinect Color Canvas Feed
     displayCanvas2.style.display = displayCanvas2Display;     //Kinect Body Color Canvas Feed
     displayCanvas3.style.display = displayCanvas3Display;     //Kinect Body Depth Canvas Feed
@@ -256,6 +259,8 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
     dropdown.style.display = dropdownDisplay;               //DropDown Menu
     btnKinectOn.style.display = kinectButtonOnDisplay;      //On button kinect
     btnKinectOff.style.display = kinectButtonOffDisplay;    //Off button kinect
+    btnMirrorImage.style.display = mirrorButtonDisplay;     //Display mirror btn
+    lblMirrorImage.style.display = mirrorButtonDisplay;     //Label for btn ^
 }
 
 
