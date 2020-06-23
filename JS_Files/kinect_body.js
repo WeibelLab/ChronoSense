@@ -1,3 +1,4 @@
+
 /*
  * Description: File is used to display the joint and body data from the 
  *              Azure Kinect. 
@@ -14,13 +15,13 @@ function kinectBodyTrackingFeed() {
       //Debugging: Currently does not 
       //console.log("Started listening to data again");
       var outputImageData2 = null;
-      var outputImageData3 = null;
       if (!outputImageData2 && data.colorImageFrame.width > 0) {
         displayCanvas2.width = data.colorImageFrame.width;
         displayCanvas2.height = data.colorImageFrame.height;
         outputImageData2 = outputCtx2.createImageData(displayCanvas2.width, displayCanvas2.height);
       }
 
+      var outputImageData3 = null;
       if (!outputImageData3 && data.depthImageFrame.width > 0) {
         displayCanvas3.width = data.depthImageFrame.width;
         displayCanvas3.height = data.depthImageFrame.height;
@@ -43,7 +44,7 @@ function kinectBodyTrackingFeed() {
           body.skeleton.joints.forEach(joint => {
             //console.log('Joint ' + joint.index + ': X = ' + joint.colorX + ' Y = ' + joint.colorY);
             //Add joint to the JSON file:
-            readAndWriteJointData(joint, joint.index);
+            //readAndWriteJointData(joint, joint.index);
             outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
             outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
           });

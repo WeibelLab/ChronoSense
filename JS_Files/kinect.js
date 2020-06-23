@@ -1,3 +1,4 @@
+
 /*
  * Description: File is used to display the direct camera feed from the 
  *              Azure Kinect. 
@@ -41,12 +42,19 @@ export class Kinect {
     }
 
     /**
-    * Function starts the connect cameras with the set parameters. By default it
+    * Function starts the Kinect cameras with the set parameters. By default it
     * uses the parameters below; they can be changed later through UI options in 
     * the application [in progress].
     * 
     */
-    start() {
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    async start() {
+        // Artifical delay to wait for MediaStreams to close (just in case)
+        await this.sleep(2000);
+        
         //First check if device is open
         if(!this.#isKinectOpen) {
             //Not open, so open

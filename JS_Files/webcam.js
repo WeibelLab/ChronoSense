@@ -1,5 +1,6 @@
 export class Webcam {
 
+  #openCameraStream;
   #mediaSource;
   #mediaRecorder;
   #recordedBlobs;
@@ -15,12 +16,17 @@ export class Webcam {
     video: true 
   };
 
+  getWebcamStream(){
+    return this.#openCameraStream;
+  }
+
 
   constructor(recordingButton, camVideo, dropdown) {
     this.#mediaSource = new MediaSource();
-    this.#mediaSource.addEventListener('sourceopen', this.handleSourceOpen, false);
-    recordingButton.onclick = this.toggleRecording;
+    this.#mediaSource.addEventListener('sourceopen', () => this.handleSourceOpen(), false);
     this.#recordingButton = recordingButton;
+    //this.#recordingButton.onclick = this.toggleRecording;
+    this.#recordingButton.addEventListener("click", () => {this.toggleRecording()});
     this.#camVideo = camVideo;
     this.#dropdown = dropdown;
     
@@ -30,13 +36,13 @@ export class Webcam {
   //Go through the steps of populating the webcam selections, selecting the 
   //the current webcam to stream from, and making sure it's a secure path.
   async init() {
-    await this.triggerAuthorizationPrompt();
+    // this.#mediaStream = await this.triggerAuthorizationPrompt();
     this.#webcams = await this.getWebcams();
   }
 
-  ready(){
-    this.populateDropDownMenu();
-    this.onWebcamSelected();
+  async ready(){
+    await this.populateDropDownMenu();
+    await this.startSelectedWebcam();
   }
 
 
@@ -62,10 +68,18 @@ export class Webcam {
    * Stops the feed of connected devices before closing this page in order to 
    * not interfere with other application processes.
    */
-  async stopVideoStream() {
-    
-    var stream = this.#camVideo.srcObject;
-    stream.getTracks()[0].stop();
+  async stopMediaStream() {
+    if (!this.#openCameraStream) {
+      return;
+    } else {
+      while(this.#openCameraStream.active){
+        this.#openCameraStream.getTracks().forEach(track => {
+          //console.log(track);
+          track.stop();
+        });
+      }
+      return;
+    }
 
   }
 
@@ -74,7 +88,7 @@ export class Webcam {
    * Goes through all user connected video devices and returns a list of them.
    *
    */
-  getWebcams() {
+  async getWebcams() {
       return new Promise((resolve, reject) => {
           //Filter found devices to only keep "videoInput" devices
           navigator.mediaDevices.enumerateDevices()
@@ -103,8 +117,7 @@ export class Webcam {
    *  element.
    *
    */
-  async onWebcamSelected() {
-  
+  async webcamSelected() {
     // Retrieve the webcam's device id and use it in the constraints object
     //let this.#dropdown = document.getElementById("dropdown");
     let id = this.#dropdown.options[this.#dropdown.selectedIndex].value;
@@ -119,7 +132,11 @@ export class Webcam {
     // Attach the webcam feed to a video element so we can view it
     return navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => this.#camVideo.srcObject = stream);
+  }
 
+  async startSelectedWebcam() {
+    await this.stopMediaStream();
+    this.#openCameraStream = await this.webcamSelected();
   }
 
 
@@ -128,7 +145,7 @@ export class Webcam {
    * drop-down menu.
    *
    */
-  populateDropDownMenu() {
+  async populateDropDownMenu() {
   
     //let dropdown = document.getElementById("dropdown"); put in style file
     if(this.#dropdown){
@@ -141,7 +158,7 @@ export class Webcam {
       option.value = cam.deviceId;
       this.#dropdown.options.add(option);
     });
-    this.#dropdown.addEventListener("change", () => this.onWebcamSelected());
+    this.#dropdown.addEventListener("change", () => this.startSelectedWebcam());
   }
 
 
@@ -189,8 +206,10 @@ export class Webcam {
 
 
     this.#recordingButton.textContent = 'Stop Recording';
-    this.#mediaRecorder.onstop = this.handleStop;
-    this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    //this.#mediaRecorder.onstop = this.handleStop;
+    this.#mediaRecorder.addEventListener('stop', (event) => this.handleStop(event));
+    //this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    this.#mediaRecorder.addEventListener('dataavailable', (event) => this.handleDataAvailable(event));
     this.#mediaRecorder.start(this.#timesliceConstraint); // collect 10ms of data
     console.log('MediaRecorder started', this.#mediaRecorder);
   }
