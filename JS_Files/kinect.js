@@ -4,6 +4,7 @@
  *              Azure Kinect. 
  *
  */
+import { JointWriter } from "./jointwriter.js";
 const KinectAzure = require('kinect-azure');  
 
 export class Kinect {
@@ -18,7 +19,9 @@ export class Kinect {
     #isKinectOpen = false;
     #isKinectCamerasStarted = false;
     #isKinectListening = false;
+    #isKinectStreaming = false;
     #depthModeRange;
+    #jointWriter;
 
     //List of all changeable parameters for Kinect sensor feed:
     #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
@@ -29,6 +32,7 @@ export class Kinect {
 
     constructor(displayCanvas, displayCanvas2, displayCanvas3) {
         this.#kinectDevice = new KinectAzure();
+        this.#jointWriter = new JointWriter();
         this.#displayCanvas = displayCanvas;
         this.#displayCanvas2 = displayCanvas2;
         this.#displayCanvas3 = displayCanvas3;
@@ -89,6 +93,11 @@ export class Kinect {
 
     } //End of startKinect()
 
+    /* Get isListening data for error checking */
+    getIsStreaming() {
+        return this.#isKinectStreaming;
+    }
+
     /**
     * Turns off the Kinect fully if it is currently on. This is a much easier way
     * to change the type of data you are collecting BUT it sacrifices time and 
@@ -105,6 +114,13 @@ export class Kinect {
         if(this.#isKinectListening) {
             stoppedListening = await this.#kinectDevice.stopListening();
             this.#isKinectListening = false;
+
+            if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
+                this.#kinectDevice.destroyTracker();
+                console.log('Body Tracker Destroyed');
+    
+            }
 
         }
 
@@ -136,11 +152,13 @@ export class Kinect {
         if(this.#isKinectListening) {
             let kinectStoppedlistening = await this.#kinectDevice.stopListening();
             this.#isKinectListening = false;
+            this.#isKinectStreaming = false;
             this.#kinectDevice.stopCameras();
             this.#isKinectCamerasStarted = false;
             console.log('Cameras Stopped and Listening Stopped');
 
             if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
                 this.#kinectDevice.destroyTracker();
                 console.log('Body Tracker Destroyed');
     
@@ -164,6 +182,7 @@ export class Kinect {
                 //Currently doesn't reach here when going between pages... BUG
                 //console.log('Color listening for data...');
                 var outputImageData = null;
+                this.#isKinectStreaming = true;
                 if (!outputImageData && data.colorImageFrame.width > 0) {
                     //console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
@@ -177,8 +196,9 @@ export class Kinect {
                     this.renderBGRA32ColorFrame(this.#outputCtx, 
                                                 outputImageData, 
                                                 data.colorImageFrame);
-                }
+                } 
             });
+
         //}
     }
     
@@ -441,11 +461,17 @@ export class Kinect {
                 this.#outputCtx2.fillStyle = 'red';
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
-                  body.skeleton.joints.forEach(joint => {
-                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
+                    //TEST: For each body, write joint data to CSV
+                    //Gets here when I come back to the body tracking after leaving
+                    //But doesnt get past writeToFile()...
+                    //console.log('BEFORE writing to file');
+                    this.#jointWriter.writeToFile(body.skeleton);
+                    //console.log('AFTER writing to file');
+                    body.skeleton.joints.forEach(joint => {
+                        this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
                                               10, 10);
-                    this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
-                  });
+                        this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
+                    });
                 });
                 this.#outputCtx2.restore();
                 this.#outputCtx3.restore();

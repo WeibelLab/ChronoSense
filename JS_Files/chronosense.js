@@ -197,10 +197,20 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             //      console statements to see this).
             
             webcam.stopMediaStream();
+
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
             await kinect.start();
             kinect.colorVideoFeed();
+            /* Attempt some sort of check or cycle to restart
+            // until the port is open.
+            while(!kinect.getIsStreaming()){
+                await kinect.stopListeningAndCameras();
+                kinect.start();
+                kinect.colorVideoFeed();
+            }
+            */
+            
             break;
 
         case KINECT_BODY_PAGE_NUM:
