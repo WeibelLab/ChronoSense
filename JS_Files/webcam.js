@@ -1,13 +1,14 @@
 export class Webcam {
 
-  #mediaSource = new MediaSource();
+  #openCameraStream;
+  #mediaSource;
   #mediaRecorder;
   #recordedBlobs;
   #sourceBuffer;
   #recordingButton;
   #camVideo;
   #dropdown;
-  webcams;
+  #webcams;
   #timesliceConstraint = 20; //milleseconds until record autosaves to file
   #recordingConstraints = 'video/mp4';
   #constraints = {
@@ -15,11 +16,17 @@ export class Webcam {
     video: true 
   };
 
+  getWebcamStream(){
+    return this.#openCameraStream;
+  }
+
 
   constructor(recordingButton, camVideo, dropdown) {
-    this.#mediaSource.addEventListener('sourceopen', this.handleSourceOpen, false);
-    recordingButton.onclick = this.toggleRecording;
+    this.#mediaSource = new MediaSource();
+    this.#mediaSource.addEventListener('sourceopen', () => this.handleSourceOpen(), false);
     this.#recordingButton = recordingButton;
+    //this.#recordingButton.onclick = this.toggleRecording;
+    this.#recordingButton.addEventListener("click", () => {this.toggleRecording()});
     this.#camVideo = camVideo;
     this.#dropdown = dropdown;
     
@@ -29,13 +36,13 @@ export class Webcam {
   //Go through the steps of populating the webcam selections, selecting the 
   //the current webcam to stream from, and making sure it's a secure path.
   async init() {
-    await this.triggerAuthorizationPrompt();
-    this.webcams = await this.getWebcams();
+    // this.#mediaStream = await this.triggerAuthorizationPrompt();
+    this.#webcams = await this.getWebcams();
   }
 
-  ready(){
-    this.populateDropDownMenu();
-    this.onWebcamSelected();
+  async ready(){
+    await this.populateDropDownMenu();
+    await this.startSelectedWebcam();
   }
 
 
@@ -57,12 +64,31 @@ export class Webcam {
   
   }
 
+  /*
+   * Stops the feed of connected devices before closing this page in order to 
+   * not interfere with other application processes.
+   */
+  async stopMediaStream() {
+    if (!this.#openCameraStream) {
+      return;
+    } else {
+      while(this.#openCameraStream.active){
+        this.#openCameraStream.getTracks().forEach(track => {
+          //console.log(track);
+          track.stop();
+        });
+      }
+      return;
+    }
+
+  }
+
 
   /*
    * Goes through all user connected video devices and returns a list of them.
    *
    */
-  getWebcams() {
+  async getWebcams() {
       return new Promise((resolve, reject) => {
           //Filter found devices to only keep "videoInput" devices
           navigator.mediaDevices.enumerateDevices()
@@ -85,36 +111,13 @@ export class Webcam {
     for (let a in dropdown_el.options) { dropdown_el.options.remove(0); }
   }
 
-
-  /*
-   * Uses the list of discovered user video devices to populate a selectable 
-   * drop-down menu.
-   *
-   */
-  populateDropDownMenu() {
   
-    //let dropdown = document.getElementById("dropdown"); put in style file
-    if(this.#dropdown){
-      this.emptyDropdown(dropdown);
-    }
-  
-    this.webcams.forEach((cam) => {
-      let option = document.createElement("option");
-      option.text = cam.label;
-      option.value = cam.deviceId;
-      this.#dropdown.options.add(option);
-    });
-    this.#dropdown.addEventListener("change", this.onWebcamSelected);
-  }
-
-
   /*
    *  Starts streaming currently selected video source to the "webcam" html video
    *  element.
    *
    */
-  async onWebcamSelected() {
-  
+  async webcamSelected() {
     // Retrieve the webcam's device id and use it in the constraints object
     //let this.#dropdown = document.getElementById("dropdown");
     let id = this.#dropdown.options[this.#dropdown.selectedIndex].value;
@@ -129,7 +132,33 @@ export class Webcam {
     // Attach the webcam feed to a video element so we can view it
     return navigator.mediaDevices.getUserMedia(constraints)
       .then(stream => this.#camVideo.srcObject = stream);
+  }
 
+  async startSelectedWebcam() {
+    await this.stopMediaStream();
+    this.#openCameraStream = await this.webcamSelected();
+  }
+
+
+  /*
+   * Uses the list of discovered user video devices to populate a selectable 
+   * drop-down menu.
+   *
+   */
+  async populateDropDownMenu() {
+  
+    //let dropdown = document.getElementById("dropdown"); put in style file
+    if(this.#dropdown){
+      this.emptyDropdown(this.#dropdown);
+    }
+  
+    this.#webcams.forEach((cam) => {
+      let option = document.createElement("option");
+      option.text = cam.label;
+      option.value = cam.deviceId;
+      this.#dropdown.options.add(option);
+    });
+    this.#dropdown.addEventListener("change", () => this.startSelectedWebcam());
   }
 
 
@@ -177,8 +206,10 @@ export class Webcam {
 
 
     this.#recordingButton.textContent = 'Stop Recording';
-    this.#mediaRecorder.onstop = this.handleStop;
-    this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    //this.#mediaRecorder.onstop = this.handleStop;
+    this.#mediaRecorder.addEventListener('stop', (event) => this.handleStop(event));
+    //this.#mediaRecorder.ondataavailable = this.handleDataAvailable;
+    this.#mediaRecorder.addEventListener('dataavailable', (event) => this.handleDataAvailable(event));
     this.#mediaRecorder.start(this.#timesliceConstraint); // collect 10ms of data
     console.log('MediaRecorder started', this.#mediaRecorder);
   }

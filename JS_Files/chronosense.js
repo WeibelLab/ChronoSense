@@ -14,6 +14,8 @@ const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
 const btnKinectOn = document.getElementById('kinect_on');
 const btnKinectOff = document.getElementById('kinect_off');
+const btnMirrorImage = document.getElementById('mirrorcheck');
+const lblMirrorImage = document.getElementById('mirrorlabel');
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
@@ -107,7 +109,6 @@ async function handleWindowControls() {
         console.log("YOU ARE HOME");
         checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
     });
-
     btnWebcam.addEventListener("click", event => {
         console.log("YOU ARE WEBCAM");
         checkClosingWindowAndChangeContent(WEBCAM_PAGE_NUM);
@@ -146,7 +147,7 @@ async function handleWindowControls() {
     });
 
     btnKinectOff.addEventListener("click", event => {
-        kinect.shutOff();
+        kinect.stopListeningAndCameras();
     });
 
 } //End of handleWindowControls()
@@ -174,34 +175,53 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case HOME_PAGE_NUM:
             currentlyOpenPage = HOME_PAGE_NUM;
             changeWindowFeatures();
+            webcam.stopMediaStream();
+            await kinect.stopListeningAndCameras();
             break;
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            changeWindowFeatures("none","none", "none", "none", "block", "inline-block", "none", "none");
-            await kinect.shutOff();
+            changeWindowFeatures("none","none", "none", "inline-block", "block", "inline-block", "none", "none", "inline-block");
+            await kinect.stopListeningAndCameras();
             await webcam.init();
-            webcam.ready();
+            await webcam.ready();
             break;
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block", "inline-block");
 
-            await kinect.shutOff();
+            //BUG: When changing from Webcam feed to Kinect Color feed,
+            //     the Kinect is turns on and "listens" but no data comes
+            //     through on the display OR within the function (look at 
+            //      console statements to see this).
+            
+            webcam.stopMediaStream();
+
+            await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");
-            kinect.start();
-            kinect.colorVideoFeed(); 
-        
+            await kinect.start();
+            kinect.colorVideoFeed();
+            /* Attempt some sort of check or cycle to restart
+            // until the port is open.
+            while(!kinect.getIsStreaming()){
+                await kinect.stopListeningAndCameras();
+                kinect.start();
+                kinect.colorVideoFeed();
+            }
+            */
+            
             break;
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block");
+            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block", "inline-block");
 
-            await kinect.shutOff();
+            //BUG: same as color Kinect above
+            webcam.stopMediaStream();
+            await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
-            kinect.start();
+            await kinect.start();
             kinect.bodyTrackingFeed(); 
 
             break;
@@ -209,6 +229,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
         case ABOUT_PAGE_NUM:
             currentlyOpenPage = ABOUT_PAGE_NUM;
             changeWindowFeatures(); 
+            webcam.stopMediaStream();
+            await kinect.stopListeningAndCameras();
             break;
 
     }  //End of NEW page switch
@@ -237,7 +259,8 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
                               camVideoDisplay = "none",
                               dropdownDisplay = "none",
                               kinectButtonOnDisplay = "none",
-                              kinectButtonOffDisplay = "none") {
+                              kinectButtonOffDisplay = "none",
+                              mirrorButtonDisplay = "none") {
     displayCanvas.style.display = displayCanvasDisplay;     //Kinect Color Canvas Feed
     displayCanvas2.style.display = displayCanvas2Display;     //Kinect Body Color Canvas Feed
     displayCanvas3.style.display = displayCanvas3Display;     //Kinect Body Depth Canvas Feed
@@ -246,6 +269,8 @@ function changeWindowFeatures(displayCanvasDisplay = "none",
     dropdown.style.display = dropdownDisplay;               //DropDown Menu
     btnKinectOn.style.display = kinectButtonOnDisplay;      //On button kinect
     btnKinectOff.style.display = kinectButtonOffDisplay;    //Off button kinect
+    btnMirrorImage.style.display = mirrorButtonDisplay;     //Display mirror btn
+    lblMirrorImage.style.display = mirrorButtonDisplay;     //Label for btn ^
 }
 
 

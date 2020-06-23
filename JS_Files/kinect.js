@@ -1,12 +1,14 @@
+
 /*
  * Description: File is used to display the direct camera feed from the 
  *              Azure Kinect. 
  *
  */
+import { JointWriter } from "./jointwriter.js";
 const KinectAzure = require('kinect-azure');  
 
 export class Kinect {
-    #kinectDevice = new KinectAzure();
+    #kinectDevice;
     #displayCanvas;
     #displayCanvas2;
     #displayCanvas3;
@@ -14,7 +16,12 @@ export class Kinect {
     #outputCtx2;
     #outputCtx3;
     #isKinectOn = false;
+    #isKinectOpen = false;
+    #isKinectCamerasStarted = false;
+    #isKinectListening = false;
+    #isKinectStreaming = false;
     #depthModeRange;
+    #jointWriter;
 
     //List of all changeable parameters for Kinect sensor feed:
     #CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
@@ -24,6 +31,8 @@ export class Kinect {
     #SyncMode = false;
 
     constructor(displayCanvas, displayCanvas2, displayCanvas3) {
+        this.#kinectDevice = new KinectAzure();
+        this.#jointWriter = new JointWriter();
         this.#displayCanvas = displayCanvas;
         this.#displayCanvas2 = displayCanvas2;
         this.#displayCanvas3 = displayCanvas3;
@@ -33,47 +42,61 @@ export class Kinect {
     }
 
     /**
-    * Function starts the connect cameras with the set parameters. By default it
+    * Function starts the Kinect cameras with the set parameters. By default it
     * uses the parameters below; they can be changed later through UI options in 
     * the application [in progress].
     * 
     */
-    start() {
-        //console.log(this.#DepthMode);
-        if(!this.#isKinectOn) {
-            if(this.#kinectDevice.open()) {
-                console.log('Inside KinectDeviceOpen');
-                this.#kinectDevice.startCameras({
-                    depth_mode: this.#DepthMode,
-                    color_format: this.#ColorFormat,
-                    color_resolution: this.#ColorResolution,
-                    camera_fps: this.#CameraFPS,
-                    synchronized_images_only: this.#SyncMode
-                });
-                console.log('Inside KinectDeviceOpen2');
-                if(this.#DepthMode != 0){ // if depthMode is not "off"
-                    this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
-                                                              this.#DepthMode);
-                    this.#kinectDevice.createTracker();
-                    console.log('After createTracker()');
-                }
-                this.#isKinectOn = true;
-            } else {
-            //Opening up the kinect has failed, adjust for that error...
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-            }    
-            //Debugging logs to the console:
-            console.log("Camera FPS: " + this.#CameraFPS); 
-            console.log("Color Resolution: " + this.#ColorResolution);
-            console.log("Color Format: " + this.#ColorFormat);  
-            console.log("Depth Mode: " + this.#DepthMode); 
-            console.log("Sync Mode: " + this.#SyncMode);
+    async start() {
+        // Artifical delay to wait for MediaStreams to close (just in case)
+        await this.sleep(2000);
         
-        }  //End of isKinectOn c
-        
+        //First check if device is open
+        if(!this.#isKinectOpen) {
+            //Not open, so open
+            let openValue = this.#kinectDevice.open();
+            console.log('Boolean returned from kinect.open(): ' + openValue);
+            this.#isKinectOpen = true;
+            console.log('Opened Kinect');
 
-        
+        }
+
+
+        //Second check if cameras have been started
+        if(!this.#isKinectCamerasStarted) {
+            this.#kinectDevice.startCameras({
+                camera_fps: this.#CameraFPS,
+                color_format: this.#ColorFormat,
+                color_resolution: this.#ColorResolution,
+                depth_mode: this.#DepthMode,
+                synchronized_images_only: this.#SyncMode
+            });
+
+            this.#isKinectCamerasStarted = true;
+            console.log('Started Cameras on Kinect');
+        }
+
+        //Third check if depthmode != 0 
+        if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+            this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
+                                                            this.#DepthMode);
+            this.#kinectDevice.createTracker();
+
+            console.log('Started Body Tracking');
+
+
+        }
+
     } //End of startKinect()
+
+    /* Get isListening data for error checking */
+    getIsStreaming() {
+        return this.#isKinectStreaming;
+    }
 
     /**
     * Turns off the Kinect fully if it is currently on. This is a much easier way
@@ -85,43 +108,83 @@ export class Kinect {
     */
     async shutOff() {
         //First check if the Kinect is on before allowing it to be shut off.
-        if(this.#isKinectOn) {
-            console.log('Inside shutOff beginning');
-            let kinectStoppedlistening = await this.#kinectDevice.stopListening();
-            this.#kinectDevice.stopCameras();
-            this.#kinectDevice.close();
-            this.#isKinectOn = false;
-            return kinectStoppedlistening;
+        //if(this.#isKinectOn) {
+        let stoppedListening;
+        console.log('Inside shutOff beginning');
+        if(this.#isKinectListening) {
+            stoppedListening = await this.#kinectDevice.stopListening();
+            this.#isKinectListening = false;
+
+            if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
+                this.#kinectDevice.destroyTracker();
+                console.log('Body Tracker Destroyed');
+    
+            }
+
         }
+
+        if(this.#isKinectCamerasStarted) {
+            await this.#kinectDevice.stopCameras();
+            this.#isKinectCamerasStarted = false;
+        }
+
+        if(this.#isKinectOpen) {
+            await this.#kinectDevice.close();
+            this.#isKinectOpen = false;
+
+
+        }
+            
+        return stoppedListening;
+        //}
     }
 
     /**
-    * CURRENTLY NOT WORKING!
+    * CURRENTLY WORKING
     * 
     * Function will be used to transition between capturing different data streams
     * from the kinect (e.g. RGB -> body tracking) without to completely shut off
     * the Kinect; saving time and resources.
     * 
     */
-    async stopKinectListener() {
-        let kinectStoppedlistening = await this.#kinectDevice.stopListening();
-        return kinectStoppedlistening;
+    async stopListeningAndCameras() {
+        if(this.#isKinectListening) {
+            let kinectStoppedlistening = await this.#kinectDevice.stopListening();
+            this.#isKinectListening = false;
+            this.#isKinectStreaming = false;
+            this.#kinectDevice.stopCameras();
+            this.#isKinectCamerasStarted = false;
+            console.log('Cameras Stopped and Listening Stopped');
+
+            if(this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+                this.#jointWriter.closeWrittenFile();
+                this.#kinectDevice.destroyTracker();
+                console.log('Body Tracker Destroyed');
+    
+            }
+
+            return kinectStoppedlistening;
+        
+        }
+        console.log('Cameras and Listening ALREADY off');
     }
 
 
     /* The color (RGB) video feed of the Azure Kinect is output to a display
        canvas */
     colorVideoFeed() {
-        //console.log("Inside kinectColorVideoFeed");
-        
         //First check if the Kinect is already running and don't start if it is:
-        if(this.#isKinectOn) {
+        //if(this.#isKinectOn) {
+            //console.log('ColorFeed() START');
+            this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
                 //Currently doesn't reach here when going between pages... BUG
-                console.log('Color listening for data...');
+                //console.log('Color listening for data...');
                 var outputImageData = null;
+                this.#isKinectStreaming = true;
                 if (!outputImageData && data.colorImageFrame.width > 0) {
-                    console.log("START RENDER REACHED");
+                    //console.log("START RENDER REACHED");
                     this.#displayCanvas.width = data.colorImageFrame.width;
                     this.#displayCanvas.height = data.colorImageFrame.height;
                     outputImageData = this.#outputCtx.createImageData(
@@ -133,9 +196,10 @@ export class Kinect {
                     this.renderBGRA32ColorFrame(this.#outputCtx, 
                                                 outputImageData, 
                                                 data.colorImageFrame);
-                }
+                } 
             });
-        }
+
+        //}
     }
     
 
@@ -358,10 +422,11 @@ export class Kinect {
     bodyTrackingFeed() {
         //console.log("Reached the start of BodyTrackingFeed()");
         //First check if the Kinect is already running and don't start if it is:
-        if(this.#isKinectOn) {
+        //if(this.#isKinectOn) {
+            this.#isKinectListening = true;
             this.#kinectDevice.startListening((data) => {
               //Debugging
-              //console.log("Started listening to data again");
+              //console.log("Listening for Body Data");
               var outputImageData2 = null;
               var outputImageData3 = null;
               if (!outputImageData2 && data.colorImageFrame.width > 0) {
@@ -396,17 +461,23 @@ export class Kinect {
                 this.#outputCtx2.fillStyle = 'red';
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
-                  body.skeleton.joints.forEach(joint => {
-                    this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
+                    //TEST: For each body, write joint data to CSV
+                    //Gets here when I come back to the body tracking after leaving
+                    //But doesnt get past writeToFile()...
+                    //console.log('BEFORE writing to file');
+                    this.#jointWriter.writeToFile(body.skeleton);
+                    //console.log('AFTER writing to file');
+                    body.skeleton.joints.forEach(joint => {
+                        this.#outputCtx2.fillRect(joint.colorX, joint.colorY, 
                                               10, 10);
-                    this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
-                  });
+                        this.#outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
+                    });
                 });
                 this.#outputCtx2.restore();
                 this.#outputCtx3.restore();
               }
             });
-        }
+        //}
     }
     
 

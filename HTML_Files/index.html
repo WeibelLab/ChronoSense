@@ -109,12 +109,16 @@
           <button id="kinect_off">OFF</button>
         </div>
         
-        <video id="webcam" autoplay style="display: none; border: solid 1px black; width:  100%; height: 80%; transform: scaleX(-1);"></video>
+        <video id="webcam" autoplay style="display: none; border: solid 1px black; width:  100%; height: 80%;"></video>
         <button id="record" style="display: none;">Start Recording</button>
+        
+        <input type="checkbox" id="mirrorcheck" name="mirrorcheck" value="Mirror"
+          onclick="mirrorDisplayFunc()" style="display: none;">
+        <label for="mirrorcheck" id="mirrorlabel" style="color: black; display: none;"> Mirror Video</label>
+
       </p>
     </div>
 
-    <script type='module' src="../JS_Files/chronosense.js"></script>
     <script>
       /* important! for alignment, you should make things
       * relative to the canvas' current width/height.
@@ -130,8 +134,29 @@
         ctx3.canvas.width  = window.innerWidth;
         ctx3.canvas.height = window.innerHeight;
       }
+
+      /* Called when mirror image is checked to change style of video output */
+      function mirrorDisplayFunc() {
+        var isMirrored = document.getElementById('mirrorcheck').checked;
+        console.log("Checked: " + isMirrored);
+
+        if(isMirrored) {
+          //If true, mirror
+          document.getElementById('webcam').style.transform = "scaleX(-1)";
+          document.getElementById('video_canvas').style.transform = "scaleX(-1)";
+          document.getElementById('video_canvas2').style.transform = "scaleX(-1)";
+          document.getElementById('video_canvas3').style.transform = "scaleX(-1)";
+        } else {
+          document.getElementById('webcam').style.transform = "scaleX(1)";
+          document.getElementById('video_canvas').style.transform = "scaleX(1)";
+          document.getElementById('video_canvas2').style.transform = "scaleX(1)";
+          document.getElementById('video_canvas3').style.transform = "scaleX(1)";
+        }
+
+      }
     </script>
-    
+
+    <script type='module' src="../JS_Files/chronosense.js"></script>
 
   </body>
 </html>
