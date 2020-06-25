@@ -51,7 +51,7 @@ const kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);  //Lat
 const webcam = new Webcam(recordingButton, camVideo, dropdown);      //Later have dedicated button
 
 
-// When document has loaded, initialise
+// When document has loaded, initialize
 document.onreadystatechange = () => {
     if (document.readyState == "complete") {
         handleWindowControls();
@@ -196,7 +196,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             //     through on the display OR within the function (look at 
             //      console statements to see this).
             
-            webcam.stopMediaStream();
+            await webcam.stopMediaStream();
 
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "off", "nosync");

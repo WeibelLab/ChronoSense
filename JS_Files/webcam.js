@@ -23,7 +23,7 @@ export class Webcam {
 
   constructor(recordingButton, camVideo, dropdown) {
     this.#mediaSource = new MediaSource();
-    this.#mediaSource.addEventListener('sourceopen', () => this.handleSourceOpen(), false);
+    this.#mediaSource.addEventListener('sourceopen', () => {this.handleSourceOpen()}, false);
     this.#recordingButton = recordingButton;
     //this.#recordingButton.onclick = this.toggleRecording;
     this.#recordingButton.addEventListener("click", () => {this.toggleRecording()});
@@ -78,6 +78,8 @@ export class Webcam {
           track.stop();
         });
       }
+      //Try in addition, clearing out the source of the display element
+      this.#camVideo.srcObject = null;
       return;
     }
 

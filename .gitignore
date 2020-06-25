@@ -8,6 +8,7 @@ vcomp140.dll
 
 # chronosense recordings
 saved_recordings/
+*.csv
 
 # Logs
 logs

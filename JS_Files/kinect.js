@@ -53,7 +53,8 @@ export class Kinect {
 
     async start() {
         // Artifical delay to wait for MediaStreams to close (just in case)
-        await this.sleep(2000);
+        await this.sleep(500);  //Changed to 0.5 sec to speed up process after
+                                //some other changes in webcam.
         
         //First check if device is open
         if(!this.#isKinectOpen) {
