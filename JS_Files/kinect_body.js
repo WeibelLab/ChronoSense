@@ -1,3 +1,4 @@
+
 /*
  * Description: File is used to display the joint and body data from the 
  *              Azure Kinect. 
@@ -13,14 +14,14 @@ function kinectBodyTrackingFeed() {
     kinect.startListening((data) => {
       //Debugging: Currently does not 
       //console.log("Started listening to data again");
-      outputImageData2 = null;
-      outputImageData3 = null;
+      var outputImageData2 = null;
       if (!outputImageData2 && data.colorImageFrame.width > 0) {
         displayCanvas2.width = data.colorImageFrame.width;
         displayCanvas2.height = data.colorImageFrame.height;
         outputImageData2 = outputCtx2.createImageData(displayCanvas2.width, displayCanvas2.height);
       }
 
+      var outputImageData3 = null;
       if (!outputImageData3 && data.depthImageFrame.width > 0) {
         displayCanvas3.width = data.depthImageFrame.width;
         displayCanvas3.height = data.depthImageFrame.height;
@@ -41,6 +42,9 @@ function kinectBodyTrackingFeed() {
         outputCtx3.fillStyle = 'red';
         data.bodyFrame.bodies.forEach(body => {
           body.skeleton.joints.forEach(joint => {
+            //console.log('Joint ' + joint.index + ': X = ' + joint.colorX + ' Y = ' + joint.colorY);
+            //Add joint to the JSON file:
+            //readAndWriteJointData(joint, joint.index);
             outputCtx2.fillRect(joint.colorX, joint.colorY, 10, 10);
             outputCtx3.fillRect(joint.depthX, joint.depthY, 4, 4);
           });
@@ -71,19 +75,6 @@ function map (value, inputMin, inputMax, outputMin, outputMax) {
   return (value - inputMin) * (outputMax - outputMin) / (inputMax - inputMin) + outputMin;
 }
 
-function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
-  //console.log("Start of renderBGRA32ColorFrame() reached");
-  const newPixelData = Buffer.from(imageFrame.imageData);
-  const pixelArray = canvasImageData.data;
-  for (let i = 0; i < canvasImageData.data.length; i+=4) {
-      pixelArray[i] = newPixelData[i+2];
-      pixelArray[i+1] = newPixelData[i+1];
-      pixelArray[i+2] = newPixelData[i];
-      pixelArray[i+3] = 0xff;
-  }
-  ctx.putImageData(canvasImageData, 0, 0);
-}
-
 /**
  * Def: Function that scans for body updates periodically or whenever an update
  *      occurs and adds that to a file.
@@ -91,10 +82,17 @@ function renderBGRA32ColorFrame(ctx, canvasImageData, imageFrame) {
  *  skeleton - JSFrame.JSBodyFrame.JSBody[].JSSkeleton
  * 
  */
-function readAndWriteJointData(skeleton) {
+function readAndWriteJointData(joint, index) {
   //JSSkeleton has an array of joints stored in skeleton.joints[]
   //I'm going to first try writing to a JSON file with every joint separate 
   //and write them all at the same time as they come in.
+  //First try: No memory management, keep holding and then write to file (test)
+  console.log('Reached joint write');
+  jArrX.append(joint.colorX);
+  for(let i=0; i < jArrX.length; i++) {
+    console.log(jArrX[i] + ', ');
+  }
+  console.log('\n');
 
 
 }
