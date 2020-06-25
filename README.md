@@ -14,12 +14,6 @@
 - Next enter `npm start` and the application window will open up.
 - If you get a `electron: cannot execute binary file` error, run `npm install electron@^8.0.2` then try again
 
-## Change Notes:
-- In Docker build file, added the installation of network tools in order to allow for client/server connection between Host and Docker Container. 
-- Added PowerShell script for easy container startup. Look up how to add a shortcut to run the script in Windows 10.
-- Added Webcam selection and webcam live stream to application functionality
-- Added ability to record current stream from a camera to an MP4 file with decent quality bitrate while taking into consideration quality vs. storage.
-
 ## Get Up and Running for Developing:
 1.  Clone the repository to a location of your choosing using the command:  
     `git clone https://github.com/WeibelLab/ChronoSenseV3.git`
@@ -55,3 +49,15 @@
     `npm start`
     
 10. Ready to Develop!
+
+
+## Change Notes:
+- In Docker build file, added the installation of network tools in order to allow for client/server connection between Host and Docker Container. 
+- Added PowerShell script for easy container startup. Look up how to add a shortcut to run the script in Windows 10.
+- Added Webcam selection and webcam live stream to application functionality
+- Added ability to record current stream from a camera to an MP4 file with decent quality bitrate while taking into consideration quality vs. storage.
+- Application is split up into pages for Home, Webcam, Kinect, Kinect Body Tracking, and About.
+- Kinect color feed displays properly on the Kinect Page.
+- Kinect Body Tracking works within the Kinect Body Tracking Page and displays both color and depth images spearately with joint data on top of both feeds.
+- Kinect Body Tracking data writes continuously to a CSV file. The CSV file has the naming scheme of year-month-day-hour-minute-second and can contain any data within the 'skeleton' class.
+- Elapsed time from the moment of starting to record to a CSV file is stored on said file for future reference.
