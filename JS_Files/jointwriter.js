@@ -3,6 +3,7 @@
  *
  */
 const fs = require('fs');
+const Stopwatch = require('timer-stopwatch');
 const csvWriter = require('csv-write-stream');
 //Check out: https://github.com/maxogden/csv-write-stream
 //for detailed instructions on how to use csvWriter
@@ -10,9 +11,13 @@ const csvWriter = require('csv-write-stream');
 export class JointWriter {
     #writer;
     #fileName;
+    #stopwatch;
+    #created = false; //Boolean value that indicates if the CSV has been created
+    #firstStart = true; //Boolean value indicating whether first write to file.
 
     constructor() {
-        this.startNewFile();
+        this.startNewFile(); //On start new file, also start elapsed timer
+        this.#stopwatch = new Stopwatch();  //counts up from zero
 
     }  //End of constructor
 
@@ -21,6 +26,11 @@ export class JointWriter {
     writeToFile(skeleton) {
         // skeleton.joints[] 0-31 -> joint1-joint32
         var d = new Date();
+
+        if (this.#firstStart) {
+            this.timerStart(); //Start timer on first write
+            this.#firstStart = false;
+        }
 
         //Appends or creates new file
         //Create the joint CSV writer with headers for all Joints by default.
@@ -82,7 +92,8 @@ export class JointWriter {
             header12: skeleton.joints[26].confidence,
             header13: d.getMinutes(),
             header14: d.getSeconds(),
-            header15: d.getMilliseconds()
+            header15: d.getMilliseconds(),
+            header16: this.getElapsedTime()
         });
         
 
@@ -93,11 +104,17 @@ export class JointWriter {
     closeWrittenFile() {
         this.#writer.end();
 
+        if (!this.#firstStart) {
+            //stopwatch is running, stop it.
+            this.timerStop();
+        }
+
     }
 
 
     /* Initialize the CSV file with the proper header */
     startNewFile() {
+        this.#created = true;  //The file with headers has been created.
         var d = new Date();
         //year-month-day_hour-minute-second
         this.#fileName = './' + d.getFullYear() + '-' + (d.getMonth() + 1) + "-"
@@ -115,17 +132,47 @@ export class JointWriter {
             header5: "Head Ornt Y", 
             header6: "Head Ornt Z", 
             header7: "Head Ornt W",             
-            header8: "Head color X", 
-            header9: "Head color Y", 
-            header10: "Head depth X", 
-            header11: "Head depth Y",  
-            header12: "Head conf",
+            header8: "Head Color X", 
+            header9: "Head Color Y", 
+            header10: "Head Depth X", 
+            header11: "Head Depth Y",  
+            header12: "Head Conf",
             header13: "Minutes",
             header14: "Seconds",
-            header15: "Milliseconds"
+            header15: "Milliseconds",
+            header16: "Elapsed Time"
         });
         this.closeWrittenFile();
     }
+
+
+    /* Timer function for starting timer */
+    timerStart() {
+        if (this.#created) {
+            this.#stopwatch.start();  //Start running state
+        } else {
+            console.log("The CSV file has not yet been instantiated.");
+        }
+
+    }  //End of timerToggle
+
+
+    /* Timer function for stopping timer */
+    timerStop() {
+        if (this.#created) {
+            this.#stopwatch.stop();  //Stop running state
+        } else {
+            console.log("The CSV file has not yet been instantiated.");
+        }
+
+    }  //End of timerToggle
+
+
+    /* Get the current time on the stopwatch */
+    getElapsedTime() {
+        return this.#stopwatch.ms / 1000; //div by 1000 to make it seconds !ms
+    }
+
 
 }  //End of JointWriter Class
 

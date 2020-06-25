@@ -12,6 +12,7 @@
   "dependencies": {
     "csv-write-stream": "^2.0.0",
     "electron": "^8.0.3",
-    "kinect-azure": "0.0.19"
+    "kinect-azure": "0.0.19",
+    "timer-stopwatch": "0.2.0"
   }
 }

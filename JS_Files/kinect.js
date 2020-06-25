@@ -462,8 +462,6 @@ export class Kinect {
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
                     //TEST: For each body, write joint data to CSV
-                    //Gets here when I come back to the body tracking after leaving
-                    //But doesnt get past writeToFile()...
                     //console.log('BEFORE writing to file');
                     this.#jointWriter.writeToFile(body.skeleton);
                     //console.log('AFTER writing to file');
