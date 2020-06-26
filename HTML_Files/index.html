@@ -1,6 +1,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="../CSS_Files/style.css" />
+    <link rel="stylesheet" href="../CSS_Files/pages.css" />
 
   </head>
   
@@ -41,82 +42,39 @@
       </div>
     </header>
 
-    <!-- Central Window Attributes  -->
+    <!-- Central Window Page Attributes  -->
     <div id="main">
-      <p>
-        <!--
-        <div class="kinect_parameter_options_container">
-          <div class="camera_fps">
-            <button class="camera_fps_btn">Camera FPS</button>
-            <div class="camera_fps_content">
-              <a id="5fps_value">5 Frames Per Second</a>
-              <a id="15_fps_value">15 Frames Per Second</a>
-              <a id="30_fps_value">30 Frames Per Second</a>
-            </div>
+        <div id="webcam-page">
+          <p><select name="dropdown" id="dropdown"></select></p>
+          <video id="webcam" autoplay ></video>
+          <input type="checkbox" id="mirrorcheck2" name="mirrorcheck2" value="Mirror"
+            onclick="mirrorDisplayFunc('mirrorcheck2')">
+          <label for="mirrorcheck2" id="mirrorlabel2"> Mirror Video</label>
+          <button id="record">Start Recording</button>
+        </div>
+
+        <div id="kinect-page">
+          <canvas id="video_canvas" img-fluid></canvas>
+          <div>
+            <button class="kinect_on">ON</button>
+            <button class="kinect_off">OFF</button>
           </div>
-          
-          <div class="color_resolution">
-            <button class="color_resolution_btn">Color Resolution</button>
-            <div class="color_resolution_content">
-              <a id="color_off_value">Color Camera Off</a>
-              <a id="720_value">1280x720</a>
-              <a id="1080_value">1920x1080</a>
-              <a id="1440_value">2560x1440</a>
-             <a id="1536_value">2048x1536</a>
-              <a id="2160_value">3840x2160</a>
-              <a id="3072_value">4096x3072</a>
-            </div>
-          </div>
-          
-          <div class="color_format">
-            <button class="color_format_btn">Color Format</button>
-            <div class="color_format_content">
-              <a id="mjpg_value">MJPG</a>
-              <a id="nv12_value">NV12</a>
-              <a id="yuy2_value">YUY2</a>
-              <a id="bgra32_value">BGRA32</a>
-            </div>
-          </div>
-          
-          <div class="depth_mode">
-            <button class="depth_mode_btn">Depth Mode</button>
-            <div class="depth_mode_content">
-              <a id="depth_off_value">Depth Sensor Off</a>
-              <a id="nfov2x2binned_value">NFOV 2x2 Binned</a>
-              <a id="nfovunbinned_value">NFOV Unbinned</a>
-              <a id="wfov2x2binned_value">WFOV 2x2 Binned</a>
-              <a id="wfovunbinned_value">WFOV Unbinned</a>
-              <a id="passive_ir_value">Passive IR</a>
-            </div>
-          </div>
-          
-          <div class="sync_mode">
-            <button class="sync_mode_btn">Sync Mode</button>
-           <div class="sync_mode_content">
-             <a id="sync_value">Frame Sycnhronization</a>
-             <a id="no_sync_value">No Frame Sycnhronization</a>
-           </div>
-          </div>
-          
-        </div> -->
-        <p><select name="dropdown" id="dropdown" style="margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;"></select></p>
-        <canvas id="video_canvas" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
-        <canvas id="video_canvas2" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
-        <canvas id="video_canvas3" style="width: 960px; height: 540px; margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none;" img-fluid></canvas>
-        
-        <div id="kinect_button_container">
-          <button id="kinect_on">ON</button>
-          <button id="kinect_off">OFF</button>
+          <input type="checkbox" id="mirrorcheck1" name="mirrorcheck1" value="Mirror"
+            onclick="mirrorDisplayFunc('mirrorcheck1')" >
+          <label for="mirrorcheck1" id="mirrorlabel1"> Mirror Video</label>
         </div>
         
-        <video id="webcam" autoplay style="margin-left: auto; margin-right: auto; padding-left: 0; padding-right: 0; display: none; border: solid 1px black;"></video>
-        <button id="record" style="display: none;">Start Recording</button>
-        
-        <input type="checkbox" id="mirrorcheck" name="mirrorcheck" value="Mirror"
-          onclick="mirrorDisplayFunc()" style="display: none;">
-        <label for="mirrorcheck" id="mirrorlabel" style="color: black; display: none;"> Mirror Video</label>
-
-      </p>
+        <div id="kinect-body-page">
+          <canvas id="video_canvas2" img-fluid></canvas>
+          <canvas id="video_canvas3" img-fluid></canvas>
+          <div>
+            <button class="kinect_on">ON</button>
+            <button class="kinect_off">OFF</button>
+          </div>
+          <input type="checkbox" id="mirrorcheck3" name="mirrorcheck3" value="Mirror"
+            onclick="mirrorDisplayFunc('mirrorcheck3')" >
+          <label for="mirrorcheck3" id="mirrorlabel3"> Mirror Video</label>
+        </div>
     </div>
 
     <script>
@@ -129,26 +87,26 @@
       function draw() {
 
         var ctx = (document.getElementById('video_canvas'));
-        ctx.style.width  = window.innerWidth;
-        ctx.style.height = window.innerHeight;
-        
+        //These specific calculations keep video at 16:9 aspect ratio
+        ctx.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
+        ctx.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
+
         var ctx2 = (document.getElementById('video_canvas2'));
-        ctx2.style.width  = window.innerWidth;
-        ctx2.style.height = window.innerHeight;
+        ctx2.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
+        ctx2.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
 
         var ctx3 = (document.getElementById('video_canvas3'));
-        ctx3.style.width  = window.innerWidth;
-        ctx3.style.height = window.innerHeight;
+        ctx3.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
+        ctx3.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
         
         var webcamfeed = (document.getElementById('webcam'));
-        webcamfeed.style.width  = window.innerWidth * 0.70;
-        webcamfeed.style.height = window.innerHeight * 0.70;
+        webcamfeed.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
+        webcamfeed.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
       }
 
       /* Called when mirror image is checked to change style of video output */
-      function mirrorDisplayFunc() {
-        var isMirrored = document.getElementById('mirrorcheck').checked;
-        console.log("Checked: " + isMirrored);
+      function mirrorDisplayFunc(nameOfElement) {
+        var isMirrored = document.getElementById(nameOfElement).checked;
 
         if(isMirrored) {
           //If true, mirror

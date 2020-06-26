@@ -6,16 +6,13 @@ import {Kinect} from './kinect.js';
 import {Webcam} from './webcam.js';
 
 //Variables of HTML elements for later manipulation 
-const viewerWindow = document.getElementById('content-selection');
 const btnHome = document.getElementById('homePage');
 const btnWebcam = document.getElementById('webcamPage');
 const btnKinect = document.getElementById('kinectPage');
 const btnKinectBodyTracking = document.getElementById('kinectBodyPage');
 const btnAbout = document.getElementById('aboutPage');
-const btnKinectOn = document.getElementById('kinect_on');
-const btnKinectOff = document.getElementById('kinect_off');
-const btnMirrorImage = document.getElementById('mirrorcheck');
-const lblMirrorImage = document.getElementById('mirrorlabel');
+const btnsKinectOn = document.getElementsByClassName('kinect_on');
+const btnsKinectOff = document.getElementsByClassName('kinect_off');
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
@@ -133,23 +130,28 @@ async function handleWindowControls() {
     /*
     * Add events below to buttons and items within "pages."
     */
-    btnKinectOn.addEventListener("click", event => {
-        //If no kinect object, create one
-        if(kinect == null) {
-            //kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
+    //Add to each element in the kinect button class
+    for (let i = 0; i < btnsKinectOn.length; i++) {
+        btnsKinectOn[i].addEventListener("click", async event => {
+            //If no kinect object, create one
+            if(kinect == null) {
+                //kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
+            }
 
-        }
-        kinect.start();  //Start the Kinect 
-        if(currentlyOpenPage == KINECT_PAGE_NUM) {
-            kinect.colorVideoFeed();
-        } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-            kinect.bodyTrackingFeed();
-        }
-    });
-
-    btnKinectOff.addEventListener("click", event => {
-        kinect.stopListeningAndCameras();
-    });
+            await kinect.start();  //Start the Kinect 
+            if(currentlyOpenPage == KINECT_PAGE_NUM) {
+                kinect.colorVideoFeed();
+            } else if(currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
+                kinect.bodyTrackingFeed();
+            }
+        });
+    }
+    
+    for (let i = 0; i < btnsKinectOff.length; i++) {
+        btnsKinectOff[i].addEventListener("click", event => {
+            kinect.stopListeningAndCameras();
+        });
+    }
 
 } //End of handleWindowControls()
 
@@ -182,7 +184,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case WEBCAM_PAGE_NUM:
             currentlyOpenPage = WEBCAM_PAGE_NUM;
-            changeWindowFeatures("none","none", "none", "inline-block", "block", "inline-block", "none", "none", "inline-block");
+            changeWindowFeatures(WEBCAM_PAGE_NUM);
+
             await kinect.stopListeningAndCameras();
             await webcam.init();
             await webcam.ready();
@@ -190,7 +193,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_PAGE_NUM:
             currentlyOpenPage = KINECT_PAGE_NUM;
-            changeWindowFeatures("block", "none", "none", "none", "none", "none", "inline-block", "inline-block", "inline-block");
+            changeWindowFeatures(KINECT_PAGE_NUM);
 
             //BUG: When changing from Webcam feed to Kinect Color feed,
             //     the Kinect is turns on and "listens" but no data comes
@@ -216,7 +219,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 
         case KINECT_BODY_PAGE_NUM:
             currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-            changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block", "inline-block");
+            changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
             //BUG: same as color Kinect above
             await webcam.stopMediaStream();
@@ -245,34 +248,39 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
  * the application is showing. 
  * 
  * Parameters:
- *      displayCanvasDisplay    -   video_canvas CSS display property 
- *      recordingButtonDisplay  -   record CSS display property 
- *      camVideoDisplay         -   webcam CSS display property 
- *      dropdownDisplay         -   dropdown CSS display property 
- *      kinectButtonOnDisplay   -   kinect on button CSS display property
- *      kinectButtonOffDisplay  -   kinect off button CSS display property
+ *      pageName - Page number to indicate case choice and manipulate
+ *                  DOM elements to manipulate
  */
+function changeWindowFeatures(pageNum) {
 
-function changeWindowFeatures(displayCanvasDisplay = "none",
-                              displayCanvas2Display = "none",
-                              displayCanvas3Display = "none",   
-                              recordingButtonDisplay = "none",
-                              camVideoDisplay = "none",
-                              dropdownDisplay = "none",
-                              kinectButtonOnDisplay = "none",
-                              kinectButtonOffDisplay = "none",
-                              mirrorButtonDisplay = "none") {
-    displayCanvas.style.display = displayCanvasDisplay;     //Kinect Color Canvas Feed
-    displayCanvas2.style.display = displayCanvas2Display;     //Kinect Body Color Canvas Feed
-    displayCanvas3.style.display = displayCanvas3Display;     //Kinect Body Depth Canvas Feed
-    recordingButton.style.display = recordingButtonDisplay; //Record Button 
-    camVideo.style.display = camVideoDisplay;               //Webcam Video Feed
-    dropdown.style.display = dropdownDisplay;               //DropDown Menu
-    btnKinectOn.style.display = kinectButtonOnDisplay;      //On button kinect
-    btnKinectOff.style.display = kinectButtonOffDisplay;    //Off button kinect
-    btnMirrorImage.style.display = mirrorButtonDisplay;     //Display mirror btn
-    lblMirrorImage.style.display = mirrorButtonDisplay;     //Label for btn ^
-}
+    switch (pageNum) {
+        case KINECT_PAGE_NUM:
+            (document.getElementById("webcam-page")).style.display = "none";
+            (document.getElementById("kinect-page")).style.display = "block";
+            (document.getElementById("kinect-body-page")).style.display = "none";
+            break;
+        
+        case KINECT_BODY_PAGE_NUM:
+            (document.getElementById("webcam-page")).style.display = "none";
+            (document.getElementById("kinect-page")).style.display = "none";
+            (document.getElementById("kinect-body-page")).style.display = "block";
+            break;
+            
+        case WEBCAM_PAGE_NUM:
+            (document.getElementById("webcam-page")).style.display = "block";
+            (document.getElementById("kinect-page")).style.display = "none";
+            (document.getElementById("kinect-body-page")).style.display = "none";
+            break;
+
+        default:
+            //Default to home page
+            (document.getElementById("webcam-page")).style.display = "none";
+            (document.getElementById("kinect-page")).style.display = "none";
+            (document.getElementById("kinect-body-page")).style.display = "none";
+
+    }
+    
+}  //End of changeWindowFeatures
 
 
 

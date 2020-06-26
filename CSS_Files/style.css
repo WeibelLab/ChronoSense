@@ -1,3 +1,8 @@
+/* Contains styling for the entire window/application. Other CSS files will have
+ * styling for the pages within the HTML page.
+ */
+
+
 /* Basic styling */
 * {margin: 0; padding: 0; border: 0; vertical-align: baseline;}
 html {box-sizing: border-box;}

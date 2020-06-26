@@ -1,0 +1,106 @@
+/* Used for styling individual "pages" within the larger single HTML page
+ * that contains them all without actually switching to a different HTML page.
+ */
+
+
+/* Styling for the Webcam Page */
+#webcam-page {
+    display: none;
+
+}
+
+#dropdown {
+    display: inline; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 0; 
+    padding-right: 0;
+
+}
+
+#webcam {
+    display: block; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 0; 
+    padding-right: 0; 
+    border: solid 1px black;
+
+}
+
+#mirrorcheck2 {
+    display: inline;
+
+}
+
+#mirrorlabel2 {
+    display: inline;
+    color: black;
+}
+
+#record {
+    display: inline;
+
+}
+
+
+/* Styling for the Kinect Page */
+#kinect-page {
+    display: none;
+}
+
+#video_canvas {
+    width: 960px;
+    height: 540px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 0; 
+    padding-right: 0;
+
+}
+
+#mirrorcheck1 {
+    display: inline;
+
+}
+
+#mirrorlabel1 {
+    display: inline;
+    color: black;
+}
+
+
+/* Styling for the Kinect Body Page */
+#kinect-body-page {
+    display: none;
+}
+
+#video_canvas2 {
+    width: 960px;
+    height: 540px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 0; 
+    padding-right: 0;
+
+}
+
+#video_canvas3 {
+    width: 960px;
+    height: 540px; 
+    margin-left: auto; 
+    margin-right: auto; 
+    padding-left: 0; 
+    padding-right: 0;
+
+}
+
+#mirrorcheck3 {
+    display: inline;
+
+}
+
+#mirrorlabel3 {
+    display: inline;
+    color: black;
+}
