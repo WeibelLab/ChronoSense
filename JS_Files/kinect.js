@@ -53,7 +53,8 @@ export class Kinect {
 
     async start() {
         // Artifical delay to wait for MediaStreams to close (just in case)
-        await this.sleep(2000);
+        await this.sleep(1000);  //Changed to 1.0 sec to speed up process after
+                                //some other changes in webcam.
         
         //First check if device is open
         if(!this.#isKinectOpen) {
@@ -462,8 +463,6 @@ export class Kinect {
                 this.#outputCtx3.fillStyle = 'red';
                 data.bodyFrame.bodies.forEach(body => {
                     //TEST: For each body, write joint data to CSV
-                    //Gets here when I come back to the body tracking after leaving
-                    //But doesnt get past writeToFile()...
                     //console.log('BEFORE writing to file');
                     this.#jointWriter.writeToFile(body.skeleton);
                     //console.log('AFTER writing to file');
