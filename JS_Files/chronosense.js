@@ -54,6 +54,7 @@ const webcam = new Webcam(recordingButton, camVideo, dropdown);      //Later hav
 // When document has loaded, initialize
 document.onreadystatechange = () => {
     if (document.readyState == "complete") {
+        draw();
         handleWindowControls();
     }
 };
@@ -218,7 +219,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             changeWindowFeatures("none", "block", "block", "none", "none", "none", "inline-block", "inline-block", "inline-block");
 
             //BUG: same as color Kinect above
-            webcam.stopMediaStream();
+            await webcam.stopMediaStream();
             await kinect.stopListeningAndCameras();
             kinect.changeParameters("fps30", "BGRA32", "res1080", "wfov2x2binned", "nosync");
             await kinect.start();
