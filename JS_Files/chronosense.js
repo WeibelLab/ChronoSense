@@ -4,6 +4,8 @@
 const remote = require('electron').remote;
 import {Kinect} from './kinect.js';
 import {Webcam} from './webcam.js';
+import {AudioRecorder} from './audio_recorder.js'
+
 
 //Variables of HTML elements for later manipulation 
 const btnHome = document.getElementById('homePage');
@@ -166,6 +168,7 @@ async function handleWindowControls() {
  *      newPageNum -    Holds one of the global constant page values to 
  *                      determine what should be displayed or hidden.
  */
+
 async function checkClosingWindowAndChangeContent(newPageNum) {
     //Check which window is closing; if changing to same as before, don't 
     //refresh
@@ -235,6 +238,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
             changeWindowFeatures(); 
             webcam.stopMediaStream();
             await kinect.stopListeningAndCameras();
+            const audio_recorder = new AudioRecorder();
+            await audio_recorder.init();
             break;
 
     }  //End of NEW page switch
@@ -283,14 +288,13 @@ function changeWindowFeatures(pageNum) {
 }  //End of changeWindowFeatures
 
 
-
 /**
  * Function that is called to make sure all devices are properly shut down 
  * before the application shuts down. 
  * Acts as an EventHandler for Node.
  */
 global.onbeforeunload = () => {
-    kinect.shutOff();
 
+    kinect.shutOff();
 
 }
