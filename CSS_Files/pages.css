@@ -2,105 +2,167 @@
  * that contains them all without actually switching to a different HTML page.
  */
 
+/* * Universal Page Styling */
+.white-background {
+	padding-bottom: 0.2em;
+	padding-left: 0.5em;
+	background-color: var(--primaryDarkContrastColor);
+	width: 7.5em;
+	border-radius: 3px;
+}
 
-/* Styling for the Webcam Page */
+.mirrorcheck {
+	position: relative;
+	top: 2px;
+	right: 2px;
+	display: inline;
+}
+
+.mirrorlabel {
+	position: relative;
+	left: 4px;
+	display: inline;
+	color: var(--primaryLightContrastColor);
+	font-weight: 400;
+}
+
+/* * Styling for the Webcam Page */
 #webcam-page {
-    display: none;
-
+	display: none;
 }
 
 #dropdown {
-    display: inline; 
-    margin-left: auto; 
-    margin-right: auto; 
-    padding-left: 0; 
-    padding-right: 0;
-
+	display: inline;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
 }
 
 #webcam {
-    display: block; 
-    margin-left: auto; 
-    margin-right: auto; 
-    padding-left: 0; 
-    padding-right: 0; 
-    border: solid 1px black;
-
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
+	border: solid 1px black;
 }
 
 #mirrorcheck2 {
-    display: inline;
-
+	display: inline;
 }
 
 #mirrorlabel2 {
-    display: inline;
-    color: black;
+	display: inline;
 }
 
 #record {
-    display: inline;
-
+	display: block;
 }
 
-
-/* Styling for the Kinect Page */
+/* * Styling for the Kinect Page */
 #kinect-page {
-    display: none;
+	display: none;
 }
 
 #video_canvas {
-    width: 960px;
-    height: 540px; 
-    margin-left: auto; 
-    margin-right: auto; 
-    padding-left: 0; 
-    padding-right: 0;
-
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
+	border: solid 1px black;
 }
 
 #mirrorcheck1 {
-    display: inline;
-
+	position: relative;
+	top: 2px;
+	right: 2px;
+	display: inline;
 }
 
 #mirrorlabel1 {
-    display: inline;
-    color: black;
+	position: relative;
+	left: 4px;
+	display: inline;
+	color: var(--primaryLightContrastColor);
+	font-weight: 400;
 }
 
+#kinect-dropdown-button {
+	text-decoration: none;
+	display: block;
+	text-align: center;
+	width: 8em;
+	color: var(--primaryDarkContrastColor);
+	background-color: #f1f1f1;
+	font-weight: 700;
+	padding: 8px;
+	border-style: solid;
+	border-width: thin;
+	border-color: var(--primaryDarkContrastColor);
+	border-radius: 1px;
+	cursor: pointer;
+}
 
-/* Styling for the Kinect Body Page */
+/* Small animation as if pressing a button */
+#kinect-dropdown-button:active {
+	transform: scale(0.99);
+}
+
+#kinect-dropdown {
+	position: relative;
+	width: 8em;
+}
+
+#kinect-dropdown-content {
+	display: none; /* Change to block when button clicked */
+	position: absolute;
+	background-color: #f1f1f1;
+	min-width: 8em;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+}
+
+#kinect-dropdown-content a {
+	color: var(--primaryDarkContrastColor);
+	display: block;
+	padding: 0.5em 1em;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+#kinect-dropdown-content a:hover {
+	background-color: #cccccc;
+}
+
+/* * Styling for the Kinect Body Page */
 #kinect-body-page {
-    display: none;
+	display: none;
 }
 
 #video_canvas2 {
-    width: 960px;
-    height: 540px; 
-    margin-left: auto; 
-    margin-right: auto; 
-    padding-left: 0; 
-    padding-right: 0;
-
+	width: 960px;
+	height: 540px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
 }
 
 #video_canvas3 {
-    width: 960px;
-    height: 540px; 
-    margin-left: auto; 
-    margin-right: auto; 
-    padding-left: 0; 
-    padding-right: 0;
-
+	width: 960px;
+	height: 540px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
 }
 
 #mirrorcheck3 {
-    display: inline;
-
+	display: inline;
 }
 
 #mirrorlabel3 {
-    display: inline;
-    color: black;
+	display: inline;
 }

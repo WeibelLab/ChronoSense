@@ -1,130 +1,212 @@
 <html>
-  <head>
-    <link rel="stylesheet" href="../CSS_Files/style.css" />
-    <link rel="stylesheet" href="../CSS_Files/pages.css" />
+	<head>
+		<link rel="stylesheet" href="../CSS_Files/style.css" />
+		<link rel="stylesheet" href="../CSS_Files/pages.css" />
+	</head>
 
-  </head>
-  
-  <body>
+	<body>
+		<!-- Window Properties: Close, expand, etc. -->
+		<ul id="navigation-bar">
+			<li class="nav-bar-item"><a id="homePage">Home</a></li>
+			<li class="nav-bar-item"><a id="webcamPage">Webcam</a></li>
+			<li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
+			<li class="nav-bar-item">
+				<a id="kinectBodyPage">Kinect Body Tracking</a>
+			</li>
+			<li class="nav-bar-item"><a id="aboutPage">About</a></li>
+		</ul>
 
-    <!-- Window Properties: Close, expand, etc. -->
-    <ul id="navigation-bar">
-      <li class="nav-bar-item"><a id="homePage">Home</a></li>
-      <li class="nav-bar-item"><a id="webcamPage">Webcam</a></li>
-      <li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
-      <li class="nav-bar-item"><a id="kinectBodyPage">Kinect Body Tracking</a></li>
-      <li class="nav-bar-item"><a id="aboutPage">About</a></li>
-    </ul>
+		<header id="titlebar">
+			<div id="drag-region">
+				<div id="window-title">
+					<span>ChronoSense</span>
+				</div>
 
-    <header id="titlebar">
-      <div id="drag-region">
-  
-        <div id="window-title">
-          <span>ChronoSense</span>
-        </div>
-          
-  
-        <div id="window-controls">
-          <div class="button" id="min-button">
-            <span>&#xE921;</span>
-          </div>
-          <div class="button" id="max-button">
-            <span>&#xE922;</span>
-          </div>
-          <div class="button" id="restore-button">
-            <span>&#xE923;</span>
-          </div>
-          <div class="button" id="close-button">
-            <span>&#xE8BB;</span>
-          </div>
-        </div>
-        
-      </div>
-    </header>
+				<div id="window-controls">
+					<div class="button" id="min-button">
+						<span>&#xE921;</span>
+					</div>
+					<div class="button" id="max-button">
+						<span>&#xE922;</span>
+					</div>
+					<div class="button" id="restore-button">
+						<span>&#xE923;</span>
+					</div>
+					<div class="button" id="close-button">
+						<span>&#xE8BB;</span>
+					</div>
+				</div>
+			</div>
+		</header>
 
-    <!-- Central Window Page Attributes  -->
-    <div id="main">
-        <div id="webcam-page">
-          <p><select name="dropdown" id="dropdown"></select></p>
-          <video id="webcam" autoplay ></video>
-          <input type="checkbox" id="mirrorcheck2" name="mirrorcheck2" value="Mirror"
-            onclick="mirrorDisplayFunc('mirrorcheck2')">
-          <label for="mirrorcheck2" id="mirrorlabel2"> Mirror Video</label>
-          <button id="record">Start Recording</button>
-        </div>
+		<!-- Central Window Page Attributes  -->
+		<div id="main">
+			<div id="webcam-page">
+				<p><select name="dropdown" id="dropdown"></select></p>
+				<video id="webcam" autoplay></video>
+				<div class="white-background">
+					<input
+						type="checkbox"
+						class="mirrorcheck"
+						id="mirrorcheck2"
+						name="mirrorcheck2"
+						value="Mirror"
+						onclick="mirrorDisplayFunc('mirrorcheck2')"
+					/>
+					<label
+						for="mirrorcheck2"
+						class="mirrorlabel"
+						id="mirrorlabel2"
+					>
+						Mirror Video</label
+					>
+				</div>
+				<button id="record">Start Recording</button>
+			</div>
 
-        <div id="kinect-page">
-          <canvas id="video_canvas" img-fluid></canvas>
-          <div>
-            <button class="kinect_on">ON</button>
-            <button class="kinect_off">OFF</button>
-          </div>
-          <input type="checkbox" id="mirrorcheck1" name="mirrorcheck1" value="Mirror"
-            onclick="mirrorDisplayFunc('mirrorcheck1')" >
-          <label for="mirrorcheck1" id="mirrorlabel1"> Mirror Video</label>
-        </div>
-        
-        <div id="kinect-body-page">
-          <canvas id="video_canvas2" img-fluid></canvas>
-          <canvas id="video_canvas3" img-fluid></canvas>
-          <div>
-            <button class="kinect_on">ON</button>
-            <button class="kinect_off">OFF</button>
-          </div>
-          <input type="checkbox" id="mirrorcheck3" name="mirrorcheck3" value="Mirror"
-            onclick="mirrorDisplayFunc('mirrorcheck3')" >
-          <label for="mirrorcheck3" id="mirrorlabel3"> Mirror Video</label>
-        </div>
-    </div>
+			<div id="kinect-page">
+				<div id="kinect-dropdown">
+					<a href="#" id="kinect-dropdown-button">Kinect Devices</a>
+					<div id="kinect-dropdown-content">
+						<!-- Dynamically fill when Kinect devices are connected -->
+						<a href="#k1">Test 1</a>
+						<a href="#k2">Test 2</a>
+					</div>
+				</div>
+				<canvas id="video_canvas" img-fluid></canvas>
+				<div>
+					<button class="kinect_on">ON</button>
+					<button class="kinect_off">OFF</button>
+				</div>
+				<div class="white-background">
+					<input
+						type="checkbox"
+						class="mirrorcheck"
+						id="mirrorcheck1"
+						name="mirrorcheck1"
+						value="Mirror"
+						onclick="mirrorDisplayFunc('mirrorcheck1')"
+					/>
+					<label
+						for="mirrorcheck1"
+						class="mirrorlabel"
+						id="mirrorlabel1"
+					>
+						Mirror Feed</label
+					>
+				</div>
+			</div>
 
-    <script>
-      /* important! for alignment, you should make things
-      * relative to the canvas' current width/height.
-      */
-      /* First make sure draw is called on resize then declare func */
-      window.onresize = draw;
+			<div id="kinect-body-page">
+				<canvas id="video_canvas2" img-fluid></canvas>
+				<canvas id="video_canvas3" img-fluid></canvas>
+				<div>
+					<button class="kinect_on">ON</button>
+					<button class="kinect_off">OFF</button>
+				</div>
+				<div class="white-background">
+					<input
+						type="checkbox"
+						class="mirrorcheck"
+						id="mirrorcheck3"
+						name="mirrorcheck3"
+						value="Mirror"
+						onclick="mirrorDisplayFunc('mirrorcheck3')"
+					/>
+					<label
+						for="mirrorcheck3"
+						class="mirrorlabel"
+						id="mirrorlabel3"
+					>
+						Mirror Video</label
+					>
+				</div>
+			</div>
+		</div>
 
-      function draw() {
+		<script>
+			/* important! for alignment, you should make things
+			 * relative to the canvas' current width/height.
+			 */
+			/* First make sure draw is called on resize then declare func */
+			window.onresize = draw;
 
-        var ctx = (document.getElementById('video_canvas'));
-        //These specific calculations keep video at 16:9 aspect ratio
-        ctx.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
-        ctx.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
+			function draw() {
+				var ctx = document.getElementById("video_canvas");
+				//These specific calculations keep video at 16:9 aspect ratio
+				ctx.style.width =
+					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+				ctx.style.height =
+					(9 * (window.innerHeight * window.innerWidth)) / 21000;
 
-        var ctx2 = (document.getElementById('video_canvas2'));
-        ctx2.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
-        ctx2.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
+				var ctx2 = document.getElementById("video_canvas2");
+				ctx2.style.width =
+					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+				ctx2.style.height =
+					(9 * (window.innerHeight * window.innerWidth)) / 21000;
 
-        var ctx3 = (document.getElementById('video_canvas3'));
-        ctx3.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
-        ctx3.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
-        
-        var webcamfeed = (document.getElementById('webcam'));
-        webcamfeed.style.width  = 16 * (window.innerHeight * window.innerWidth) / 21000;
-        webcamfeed.style.height = 9 * (window.innerHeight * window.innerWidth) / 21000;
-      }
+				var ctx3 = document.getElementById("video_canvas3");
+				ctx3.style.width =
+					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+				ctx3.style.height =
+					(9 * (window.innerHeight * window.innerWidth)) / 21000;
 
-      /* Called when mirror image is checked to change style of video output */
-      function mirrorDisplayFunc(nameOfElement) {
-        var isMirrored = document.getElementById(nameOfElement).checked;
+				var webcamfeed = document.getElementById("webcam");
+				webcamfeed.style.width =
+					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+				webcamfeed.style.height =
+					(9 * (window.innerHeight * window.innerWidth)) / 21000;
+			}
 
-        if(isMirrored) {
-          //If true, mirror
-          document.getElementById('webcam').style.transform = "scaleX(-1)";
-          document.getElementById('video_canvas').style.transform = "scaleX(-1)";
-          document.getElementById('video_canvas2').style.transform = "scaleX(-1)";
-          document.getElementById('video_canvas3').style.transform = "scaleX(-1)";
-        } else {
-          document.getElementById('webcam').style.transform = "scaleX(1)";
-          document.getElementById('video_canvas').style.transform = "scaleX(1)";
-          document.getElementById('video_canvas2').style.transform = "scaleX(1)";
-          document.getElementById('video_canvas3').style.transform = "scaleX(1)";
-        }
+			/* Called when mirror image is checked to change style of video output */
+			function mirrorDisplayFunc(nameOfElement) {
+				var isMirrored = document.getElementById(nameOfElement).checked;
 
-      }
-    </script>
+				if (isMirrored) {
+					//If true, mirror
+					document.getElementById("webcam").style.transform =
+						"scaleX(-1)";
+					document.getElementById("video_canvas").style.transform =
+						"scaleX(-1)";
+					document.getElementById("video_canvas2").style.transform =
+						"scaleX(-1)";
+					document.getElementById("video_canvas3").style.transform =
+						"scaleX(-1)";
+				} else {
+					document.getElementById("webcam").style.transform =
+						"scaleX(1)";
+					document.getElementById("video_canvas").style.transform =
+						"scaleX(1)";
+					document.getElementById("video_canvas2").style.transform =
+						"scaleX(1)";
+					document.getElementById("video_canvas3").style.transform =
+						"scaleX(1)";
+				}
+			}
 
-    <script type='module' src="../JS_Files/chronosense.js"></script>
+			//Add event where Kinect button click reveals selectable options
+			var isListOpen = false;
+			document.addEventListener("click", (evt) => {
+				const kinectList = document.getElementById("kinect-dropdown");
+				let clickedElement = evt.target;
 
-  </body>
+				do {
+					if (kinectList == clickedElement) {
+						document.getElementById(
+							"kinect-dropdown-content"
+						).style.display = "block";
+						return;
+					}
+					// Go up the DOM
+					clickedElement = clickedElement.parentNode;
+				} while (clickedElement);
+				//Clicked outside of Kinect devices list
+				document.getElementById(
+					"kinect-dropdown-content"
+				).style.display = "none";
+			});
+		</script>
+
+		<script type="module" src="../JS_Files/chronosense.js"></script>
+	</body>
 </html>
