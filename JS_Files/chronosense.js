@@ -155,6 +155,56 @@ async function handleWindowControls() {
 	}
 
 	/*
+	 * Complete an initial scan for Kinect devices already plugged in and
+	 * populate the Kinect Devices list in the UI.
+	 */
+	let deviceList = usb.getDeviceList();
+	for (let i = 0; i < deviceList.length; i++) {
+		var currDevice = deviceList[i];
+
+		try {
+			//Check for Kinect and then update the device in the dropdown menu.
+			//Depth camera on Kinect is the only one with Serial number attached
+			if (
+				currDevice.deviceDescriptor.idVendor === 0x045e &&
+				currDevice.deviceDescriptor.idProduct === 0x097c
+			) {
+				console.log("FOUND A KINECT PLUGGED IN");
+				console.log(currDevice.deviceAddress);
+				var currDeviceAddress = currDevice.deviceAddress;
+				currDevice.open();
+				console.log("KINECT OPENED");
+				currDevice.getStringDescriptor(
+					currDevice.deviceDescriptor.iSerialNumber,
+					(error, data) => {
+						if (data != null) {
+							console.log(data);
+							//Add kinect to drop down menu
+							let newDeviceElem = document.createElement("a");
+							newDeviceElem.href = "#" + data; //#serial
+							newDeviceElem.text = "Kinect (" + data + ")";
+							newDeviceElem.id = currDeviceAddress;
+							document
+								.getElementById("kinect-dropdown-content")
+								.appendChild(newDeviceElem);
+						} else {
+							console.log("NO DATA TO TRANSFER");
+						}
+					}
+				);
+				currDevice.close();
+			}
+		} catch (error) {
+			//Device is unknown by installed drivers
+			/*
+			console.log(
+				"Serial number of device NOT read due to lack of installed drivers"
+            );
+            */
+		}
+	}
+
+	/*
 	 * Add events for plugging and unplugging USB devices (kinect, webcam, etc.)
 	 */
 
@@ -190,6 +240,7 @@ async function handleWindowControls() {
 						}
 					}
 				);
+				device.close();
 			}
 		} catch (error) {
 			//Device is unknown by installed drivers
@@ -210,6 +261,7 @@ async function handleWindowControls() {
 				device.deviceDescriptor.idProduct === 0x097c
 			) {
 				console.log("DISCONNECTED A KINECT");
+				console.log(device.deviceAddress);
 
 				let deletedElem = document.getElementById(device.deviceAddress);
 				deletedElem.parentNode.removeChild(deletedElem);
