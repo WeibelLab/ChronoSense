@@ -74,26 +74,111 @@
 					</div>
 				</div>
 				<canvas id="video_canvas" img-fluid></canvas>
-				<div>
-					<button class="kinect_on">ON</button>
-					<button class="kinect_off">OFF</button>
+				<div class="kinect-option-button-container">
+					<div
+						class="kinect-option-dropdown"
+						id="kinect-option-dropdown-fps"
+					>
+						<a href="#" class="kinect-option-dropdown-button"
+							>FPS</a
+						>
+						<div
+							class="kinect-option-dropdown-content"
+							id="kinect-option-dropdown-content-fps"
+						>
+							<!-- Dynamically fill when Kinect devices are connected -->
+							<a href="#">Test 1</a>
+							<a href="#">Test 2</a>
+						</div>
+					</div>
+					<div
+						class="kinect-option-dropdown"
+						id="kinect-option-dropdown-res"
+					>
+						<a href="#" class="kinect-option-dropdown-button"
+							>Resolution</a
+						>
+						<div
+							class="kinect-option-dropdown-content"
+							id="kinect-option-dropdown-content-res"
+						>
+							<!-- Dynamically fill when Kinect devices are connected -->
+							<a href="#">Test 1</a>
+							<a href="#">Test 2</a>
+						</div>
+					</div>
+					<div
+						class="kinect-option-dropdown"
+						id="kinect-option-dropdown-format"
+					>
+						<a href="#" class="kinect-option-dropdown-button"
+							>Color Format</a
+						>
+						<div
+							class="kinect-option-dropdown-content"
+							id="kinect-option-dropdown-content-format"
+						>
+							<!-- Dynamically fill when Kinect devices are connected -->
+							<a href="#">Test 1</a>
+							<a href="#">Test 2</a>
+						</div>
+					</div>
+					<div
+						class="kinect-option-dropdown"
+						id="kinect-option-dropdown-depth"
+					>
+						<a href="#" class="kinect-option-dropdown-button"
+							>Depth</a
+						>
+						<div
+							class="kinect-option-dropdown-content"
+							id="kinect-option-dropdown-content-depth"
+						>
+							<!-- Dynamically fill when Kinect devices are connected -->
+							<a href="#">Test 1</a>
+							<a href="#">Test 2</a>
+						</div>
+					</div>
+					<div
+						class="kinect-option-dropdown"
+						id="kinect-option-dropdown-sync"
+					>
+						<a href="#" class="kinect-option-dropdown-button"
+							>Sync</a
+						>
+						<div
+							class="kinect-option-dropdown-content"
+							id="kinect-option-dropdown-content-sync"
+						>
+							<!-- Dynamically fill when Kinect devices are connected -->
+							<a href="#">Test 1</a>
+							<a href="#">Test 2</a>
+						</div>
+					</div>
 				</div>
-				<div class="white-background">
-					<input
-						type="checkbox"
-						class="mirrorcheck"
-						id="mirrorcheck1"
-						name="mirrorcheck1"
-						value="Mirror"
-						onclick="mirrorDisplayFunc('mirrorcheck1')"
-					/>
-					<label
-						for="mirrorcheck1"
-						class="mirrorlabel"
-						id="mirrorlabel1"
-					>
-						Mirror Feed</label
-					>
+
+				<div class="kinect-video-control-container">
+					<div>
+						<button class="kinect_on">ON</button>
+						<button class="kinect_off">OFF</button>
+					</div>
+					<div class="white-background">
+						<input
+							type="checkbox"
+							class="mirrorcheck"
+							id="mirrorcheck1"
+							name="mirrorcheck1"
+							value="Mirror"
+							onclick="mirrorDisplayFunc('mirrorcheck1')"
+						/>
+						<label
+							for="mirrorcheck1"
+							class="mirrorlabel"
+							id="mirrorlabel1"
+						>
+							Mirror Feed</label
+						>
+					</div>
 				</div>
 			</div>
 
@@ -188,6 +273,21 @@
 			var isListOpen = false;
 			document.addEventListener("click", (evt) => {
 				const kinectList = document.getElementById("kinect-dropdown");
+				const kinectOptionFPS = document.getElementById(
+					"kinect-option-dropdown-fps"
+				);
+				const kinectOptionRes = document.getElementById(
+					"kinect-option-dropdown-res"
+				);
+				const kinectOptionFormat = document.getElementById(
+					"kinect-option-dropdown-format"
+				);
+				const kinectOptionDepth = document.getElementById(
+					"kinect-option-dropdown-depth"
+				);
+				const kinectOptionSync = document.getElementById(
+					"kinect-option-dropdown-sync"
+				);
 				let clickedElement = evt.target;
 
 				do {
@@ -197,12 +297,62 @@
 						).style.display = "block";
 						return;
 					}
+					if (kinectOptionFPS == clickedElement) {
+						document.getElementById(
+							"kinect-option-dropdown-content-fps"
+						).style.display = "block";
+						return;
+					}
+					if (kinectOptionRes == clickedElement) {
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "block";
+						return;
+					}
+					if (kinectOptionFormat == clickedElement) {
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "block";
+						return;
+					}
+					if (kinectOptionDepth == clickedElement) {
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "block";
+						return;
+					}
+					if (kinectOptionSync == clickedElement) {
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "block";
+						return;
+					}
 					// Go up the DOM
 					clickedElement = clickedElement.parentNode;
 				} while (clickedElement);
 				//Clicked outside of Kinect devices list
 				document.getElementById(
 					"kinect-dropdown-content"
+				).style.display = "none";
+
+				document.getElementById(
+					"kinect-option-dropdown-content-fps"
+				).style.display = "none";
+
+				document.getElementById(
+					"kinect-option-dropdown-content-res"
+				).style.display = "none";
+
+				document.getElementById(
+					"kinect-option-dropdown-content-format"
+				).style.display = "none";
+
+				document.getElementById(
+					"kinect-option-dropdown-content-depth"
+				).style.display = "none";
+
+				document.getElementById(
+					"kinect-option-dropdown-content-sync"
 				).style.display = "none";
 			});
 		</script>

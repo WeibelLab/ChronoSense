@@ -242,6 +242,9 @@ body {
 	color: var(--primaryLightContrastColor);
 }
 
+.center-items {
+}
+
 /*
 .kinect_parameter_options_container {
   text-align: center;

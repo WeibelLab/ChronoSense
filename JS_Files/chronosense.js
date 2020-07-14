@@ -169,6 +169,7 @@ async function handleWindowControls() {
 			) {
 				console.log("CONNECTED A KINECT");
 				//console.log(device.deviceDescriptor);
+				console.log(device.deviceAddress);
 				device.open();
 
 				device.getStringDescriptor(
@@ -176,6 +177,14 @@ async function handleWindowControls() {
 					(error, data) => {
 						if (data != null) {
 							console.log(data);
+							//Add kinect to drop down menu
+							let newDeviceElem = document.createElement("a");
+							newDeviceElem.href = "#" + data; //#serial
+							newDeviceElem.text = "Kinect (" + data + ")";
+							newDeviceElem.id = device.deviceAddress;
+							document
+								.getElementById("kinect-dropdown-content")
+								.appendChild(newDeviceElem);
 						} else {
 							console.log("NO DATA TO TRANSFER");
 						}
@@ -193,7 +202,19 @@ async function handleWindowControls() {
 	}); //End of USB attach event
 
 	usb.on("detach", function (device) {
-		console.log("Device unplugged");
+		//Remove disconnected device by their device identifier (through usb)
+		try {
+			//Check for Kinect and then delete from list of devices
+			if (
+				device.deviceDescriptor.idVendor === 0x045e &&
+				device.deviceDescriptor.idProduct === 0x097c
+			) {
+				console.log("DISCONNECTED A KINECT");
+
+				let deletedElem = document.getElementById(device.deviceAddress);
+				deletedElem.parentNode.removeChild(deletedElem);
+			}
+		} catch (error) {}
 	}); //End of USB detach event
 } //End of handleWindowControls()
 

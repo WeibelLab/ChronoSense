@@ -136,6 +136,86 @@
 	background-color: #cccccc;
 }
 
+.kinect-option-button-container {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 10px;
+}
+
+.kinect-option-dropdown {
+	position: relative;
+	width: 8em;
+}
+
+.kinect-option-dropdown-button {
+	text-decoration: none;
+	display: block;
+	text-align: center;
+	width: 8em;
+	color: var(--primaryDarkContrastColor);
+	background-color: #f1f1f1;
+	font-weight: 700;
+	padding: 8px;
+	border-style: solid;
+	border-width: thin;
+	border-color: var(--primaryDarkContrastColor);
+	border-radius: 1px;
+	cursor: pointer;
+}
+
+.kinect-option-dropdown-button:active {
+	transform: scale(0.99);
+}
+
+.kinect-option-dropdown-content {
+	display: none; /* Change to block when button clicked */
+	position: absolute;
+	background-color: #f1f1f1;
+	min-width: 8em;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+}
+
+.kinect-option-dropdown-content a {
+	color: var(--primaryDarkContrastColor);
+	display: block;
+	padding: 0.5em 1em;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.kinect-option-dropdown-content a:hover {
+	background-color: #cccccc;
+}
+
+.kinect-video-control-container {
+	display: flex;
+	justify-content: space-between;
+	width: 40em;
+	margin: auto;
+}
+
+.kinect_on {
+	text-decoration: none;
+	background-color: var(--primaryDarkContrastColor);
+	width: 6em;
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	height: 2em;
+}
+
+.kinect_off {
+	text-decoration: none;
+
+	background-color: var(--primaryDarkContrastColor);
+	width: 6em;
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	height: 2em;
+}
+
 /* * Styling for the Kinect Body Page */
 #kinect-body-page {
 	display: none;
