@@ -69,8 +69,8 @@
 					<a href="#" id="kinect-dropdown-button">Kinect Devices</a>
 					<div id="kinect-dropdown-content">
 						<!-- Dynamically fill when Kinect devices are connected -->
-						<a href="#k1">Test 1</a>
-						<a href="#k2">Test 2</a>
+						<a href="#">Test 1</a>
+						<a href="#">Test 2</a>
 					</div>
 				</div>
 				<canvas id="video_canvas" img-fluid></canvas>
@@ -86,9 +86,9 @@
 							class="kinect-option-dropdown-content"
 							id="kinect-option-dropdown-content-fps"
 						>
-							<!-- Dynamically fill when Kinect devices are connected -->
-							<a href="#">Test 1</a>
-							<a href="#">Test 2</a>
+							<a href="#fps5">5 FPS</a>
+							<a href="#fps15">15 FPS</a>
+							<a href="#fps30">30 FPS</a>
 						</div>
 					</div>
 					<div
@@ -102,9 +102,12 @@
 							class="kinect-option-dropdown-content"
 							id="kinect-option-dropdown-content-res"
 						>
-							<!-- Dynamically fill when Kinect devices are connected -->
-							<a href="#">Test 1</a>
-							<a href="#">Test 2</a>
+							<a href="#720">1280x720</a>
+							<a href="#1080">1920x1080</a>
+							<a href="#1440">2560x1440</a>
+							<a href="#1536">2048x1536</a>
+							<a href="#2160">3840x2160</a>
+							<a href="#3072">4096x3072</a>
 						</div>
 					</div>
 					<div
@@ -118,9 +121,10 @@
 							class="kinect-option-dropdown-content"
 							id="kinect-option-dropdown-content-format"
 						>
-							<!-- Dynamically fill when Kinect devices are connected -->
-							<a href="#">Test 1</a>
-							<a href="#">Test 2</a>
+							<a href="#MJPG">MJPG</a>
+							<a href="#NV12">NV12</a>
+							<a href="#YUY2">YUY2</a>
+							<a href="#BGRA32">BGRA32</a>
 						</div>
 					</div>
 					<div
@@ -134,9 +138,12 @@
 							class="kinect-option-dropdown-content"
 							id="kinect-option-dropdown-content-depth"
 						>
-							<!-- Dynamically fill when Kinect devices are connected -->
-							<a href="#">Test 1</a>
-							<a href="#">Test 2</a>
+							<a href="#Off">Off</a>
+							<a href="#NFOV 2x2 Binned">NFOV 2x2 Binned</a>
+							<a href="#NFOV Unbinned">NFOV Unbinned</a>
+							<a href="#WFOV 2x2 Binned">WFOV 2x2 Binned</a>
+							<a href="#WFOV Unbinned">WFOV Unbinned</a>
+							<a href="#Passive IR">Passive IR</a>
 						</div>
 					</div>
 					<div
@@ -150,9 +157,7 @@
 							class="kinect-option-dropdown-content"
 							id="kinect-option-dropdown-content-sync"
 						>
-							<!-- Dynamically fill when Kinect devices are connected -->
-							<a href="#">Test 1</a>
-							<a href="#">Test 2</a>
+							<a href="#">Temp</a>
 						</div>
 					</div>
 				</div>
@@ -220,27 +225,27 @@
 				var ctx = document.getElementById("video_canvas");
 				//These specific calculations keep video at 16:9 aspect ratio
 				ctx.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				ctx.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 21000;
+					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
 				var ctx2 = document.getElementById("video_canvas2");
 				ctx2.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				ctx2.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 21000;
+					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
 				var ctx3 = document.getElementById("video_canvas3");
 				ctx3.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				ctx3.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 21000;
+					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
 				var webcamfeed = document.getElementById("webcam");
 				webcamfeed.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 21000;
+					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				webcamfeed.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 21000;
+					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 			}
 
 			/* Called when mirror image is checked to change style of video output */
@@ -270,7 +275,12 @@
 			}
 
 			//Add event where Kinect button click reveals selectable options
-			var isListOpen = false;
+			var isKinectOpen = false;
+			var isFpsOpen = false;
+			var isResOpen = false;
+			var isFormatOpen = false;
+			var isDepthOpen = false;
+			var isSyncOpen = false;
 			document.addEventListener("click", (evt) => {
 				const kinectList = document.getElementById("kinect-dropdown");
 				const kinectOptionFPS = document.getElementById(
@@ -293,39 +303,249 @@
 				do {
 					if (kinectList == clickedElement) {
 						document.getElementById(
-							"kinect-dropdown-content"
-						).style.display = "block";
-						return;
+							"kinect-option-dropdown-content-fps"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "none";
+
+						isFpsOpen = false;
+						isResOpen = false;
+						isFormatOpen = false;
+						isDepthOpen = false;
+						isSyncOpen = false;
+
+						if (!isKinectOpen) {
+							isKinectOpen = true;
+							document.getElementById(
+								"kinect-dropdown-content"
+							).style.display = "block";
+							return;
+						} else {
+							isKinectOpen = false;
+							document.getElementById(
+								"kinect-dropdown-content"
+							).style.display = "none";
+							return;
+						}
 					}
 					if (kinectOptionFPS == clickedElement) {
 						document.getElementById(
-							"kinect-option-dropdown-content-fps"
-						).style.display = "block";
-						return;
+							"kinect-dropdown-content"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "none";
+
+						isKinectOpen = false;
+						isResOpen = false;
+						isFormatOpen = false;
+						isDepthOpen = false;
+						isSyncOpen = false;
+
+						if (!isFpsOpen) {
+							isFpsOpen = true;
+							document.getElementById(
+								"kinect-option-dropdown-content-fps"
+							).style.display = "block";
+							return;
+						} else {
+							isFpsOpen = false;
+							document.getElementById(
+								"kinect-option-dropdown-content-fps"
+							).style.display = "none";
+							return;
+						}
 					}
 					if (kinectOptionRes == clickedElement) {
 						document.getElementById(
-							"kinect-option-dropdown-content-res"
-						).style.display = "block";
-						return;
+							"kinect-dropdown-content"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-fps"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "none";
+
+						isKinectOpen = false;
+						isFpsOpen = false;
+						isFormatOpen = false;
+						isDepthOpen = false;
+						isSyncOpen = false;
+
+						if (!isResOpen) {
+							isResOpen = true;
+							document.getElementById(
+								"kinect-option-dropdown-content-res"
+							).style.display = "block";
+							return;
+						} else {
+							isResOpen = false;
+							document.getElementById(
+								"kinect-option-dropdown-content-res"
+							).style.display = "none";
+							return;
+						}
 					}
 					if (kinectOptionFormat == clickedElement) {
 						document.getElementById(
-							"kinect-option-dropdown-content-format"
-						).style.display = "block";
-						return;
+							"kinect-dropdown-content"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-fps"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "none";
+
+						isKinectOpen = false;
+						isFpsOpen = false;
+						isResOpen = false;
+						isDepthOpen = false;
+						isSyncOpen = false;
+
+						if (!isFormatOpen) {
+							isFormatOpen = true;
+							document.getElementById(
+								"kinect-option-dropdown-content-format"
+							).style.display = "block";
+							return;
+						} else {
+							isFormatOpen = false;
+							document.getElementById(
+								"kinect-option-dropdown-content-format"
+							).style.display = "none";
+							return;
+						}
 					}
 					if (kinectOptionDepth == clickedElement) {
 						document.getElementById(
-							"kinect-option-dropdown-content-depth"
-						).style.display = "block";
-						return;
+							"kinect-dropdown-content"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-fps"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-sync"
+						).style.display = "none";
+
+						isKinectOpen = false;
+						isFpsOpen = false;
+						isResOpen = false;
+						isFormatOpen = false;
+						isSyncOpen = false;
+
+						if (!isDepthOpen) {
+							isDepthOpen = true;
+							document.getElementById(
+								"kinect-option-dropdown-content-depth"
+							).style.display = "block";
+							return;
+						} else {
+							isDepthOpen = false;
+							document.getElementById(
+								"kinect-option-dropdown-content-depth"
+							).style.display = "none";
+							return;
+						}
 					}
 					if (kinectOptionSync == clickedElement) {
 						document.getElementById(
-							"kinect-option-dropdown-content-sync"
-						).style.display = "block";
-						return;
+							"kinect-dropdown-content"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-fps"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-res"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-format"
+						).style.display = "none";
+
+						document.getElementById(
+							"kinect-option-dropdown-content-depth"
+						).style.display = "none";
+
+						isKinectOpen = false;
+						isFpsOpen = false;
+						isResOpen = false;
+						isFormatOpen = false;
+						isDepthOpen = false;
+
+						if (!isSyncOpen) {
+							isSyncOpen = true;
+							document.getElementById(
+								"kinect-option-dropdown-content-sync"
+							).style.display = "block";
+							return;
+						} else {
+							isSyncOpen = false;
+							document.getElementById(
+								"kinect-option-dropdown-content-sync"
+							).style.display = "none";
+							return;
+						}
 					}
 					// Go up the DOM
 					clickedElement = clickedElement.parentNode;
@@ -354,6 +574,13 @@
 				document.getElementById(
 					"kinect-option-dropdown-content-sync"
 				).style.display = "none";
+
+				isKinectOpen = false;
+				isFpsOpen = false;
+				isResOpen = false;
+				isFormatOpen = false;
+				isDepthOpen = false;
+				isSyncOpen = false;
 			});
 		</script>
 
