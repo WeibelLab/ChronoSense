@@ -23,7 +23,7 @@ const displayCanvas3 = document.getElementById("video_canvas3");
 
 //Used in webcam methods
 const recordingButton = document.getElementById("record");
-const camVideo = document.getElementById("webcam");
+const camVideo = document.getElementById("webcam-video");
 const dropdown = document.getElementById("dropdown");
 
 //Constants for application to know which "page" is displayed.
@@ -45,7 +45,6 @@ let currentlyOpenPage = false;
 
 //Variable for the open KinectDevice & webcam
 const kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3); //Later have dedicated button
-const webcam = new Webcam(recordingButton, camVideo, dropdown); //Later have dedicated button
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
@@ -153,6 +152,11 @@ async function handleWindowControls() {
 			kinect.stopListeningAndCameras();
 		});
 	}
+
+	/* Add event everytime the webcam drop down menu is selected */
+	dropdown.addEventListener("change", (evt) => {
+		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
+	});
 
 	/*
 	 * Complete an initial scan for Kinect devices already plugged in and
@@ -293,7 +297,6 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case HOME_PAGE_NUM:
 			currentlyOpenPage = HOME_PAGE_NUM;
 			changeWindowFeatures();
-			webcam.stopMediaStream();
 			await kinect.stopListeningAndCameras();
 			break;
 
@@ -301,21 +304,13 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = WEBCAM_PAGE_NUM;
 			changeWindowFeatures(WEBCAM_PAGE_NUM);
 
+			populateWebcamList();
 			await kinect.stopListeningAndCameras();
-			await webcam.init();
-			await webcam.ready();
 			break;
 
 		case KINECT_PAGE_NUM:
 			currentlyOpenPage = KINECT_PAGE_NUM;
 			changeWindowFeatures(KINECT_PAGE_NUM);
-
-			//BUG: When changing from Webcam feed to Kinect Color feed,
-			//     the Kinect is turns on and "listens" but no data comes
-			//     through on the display OR within the function (look at
-			//      console statements to see this).
-
-			await webcam.stopMediaStream();
 
 			await kinect.stopListeningAndCameras();
 			kinect.changeParameters(
@@ -342,8 +337,6 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
 			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
-			//BUG: same as color Kinect above
-			await webcam.stopMediaStream();
 			await kinect.stopListeningAndCameras();
 			kinect.changeParameters(
 				"fps30",
@@ -360,7 +353,6 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			webcam.stopMediaStream();
 			await kinect.stopListeningAndCameras();
 			break;
 	} //End of NEW page switch
@@ -401,6 +393,85 @@ function changeWindowFeatures(pageNum) {
 			document.getElementById("kinect-body-page").style.display = "none";
 	}
 } //End of changeWindowFeatures
+
+/**
+ * Function used to return an array of all audio/video inputs capable of
+ * display/recording. The ONLY filtering is looking for input devices.
+ *
+ * Returns: array of objects with each device's properties
+ *          -> "deviceId, groupId, kind, label"
+ */
+async function getInputDevices() {
+	var devices = await navigator.mediaDevices.enumerateDevices();
+	var inputDevices = [];
+	for (var i = 0; i < devices.length; i++) {
+		if (
+			devices[i].kind.localeCompare("audioinput") == 0 ||
+			devices[i].kind.localeCompare("videoinput") == 0
+		) {
+			inputDevices.push(devices[i]);
+		}
+	}
+	console.log(inputDevices);
+	return inputDevices;
+}
+
+/**
+ * Function used to return an array of all unique audio/video inputs capable
+ * of display/recording.
+ *
+ * Returns: array of objects with each device's properties
+ *          -> "deviceId, groupId, kind, label"
+ */
+async function getUniqueInputDevices() {
+	var devices = await navigator.mediaDevices.enumerateDevices();
+	var uniqueInputDevices = [];
+	for (var i = 0; i < devices.length; i++) {
+		if (
+			devices[i].kind.localeCompare("audioinput") == 0 ||
+			devices[i].kind.localeCompare("videoinput") == 0
+		) {
+			//Now search through added devices if it already exists
+			var matched = false;
+			for (var j = 0; j < uniqueInputDevices.length; j++) {
+				if (
+					uniqueInputDevices[j].groupId.localeCompare(
+						devices[i].groupId
+					) == 0
+				) {
+					matched = true;
+					break; //If match, break out and don't add to
+				}
+			}
+
+			if (
+				!matched &&
+				devices[i].deviceId.localeCompare("default") != 0 &&
+				devices[i].deviceId.localeCompare("communications") != 0
+			) {
+				//Filter out "default" and "communications" so there is a alphanumeric
+				//identifier.
+				uniqueInputDevices.push(devices[i]);
+			}
+		}
+	}
+	console.log(uniqueInputDevices);
+	return uniqueInputDevices;
+}
+
+/**
+ * Function used to populate the webcam dropdown menu with all unique input
+ * devices
+ */
+async function populateWebcamList() {
+	var currentDevices = await getUniqueInputDevices();
+	for (var i = 0; i < currentDevices.length; i++) {
+		var option = document.createElement("option");
+		option.text = currentDevices[i].label;
+		option.value = currentDevices[i].deviceId;
+		dropdown.add(option, 0);
+	}
+}
 
 /**
  * Function that is called to make sure all devices are properly shut down
