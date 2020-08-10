@@ -23,8 +23,12 @@ const displayCanvas3 = document.getElementById("video_canvas3");
 
 //Used in webcam methods
 const recordingButton = document.getElementById("record");
-const camVideo = document.getElementById("webcam");
-const dropdown = document.getElementById("dropdown");
+const camVideo = document.getElementById("webcam-video");
+const webcamDropdown = document.getElementById("dropdown");
+
+//Arrays for all devices
+var kinectDevices = []; //All from class Kinect
+var otherVideoDevices = []; //All from class Webcam
 
 //Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
@@ -43,15 +47,18 @@ const ABOUT_PAGE_NUM = 4;
 // 4 - About
 let currentlyOpenPage = false;
 
-//Variable for the open KinectDevice & webcam
-const kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3); //Later have dedicated button
-const webcam = new Webcam(recordingButton, camVideo, dropdown); //Later have dedicated button
-
 // When document has loaded, initialize
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		draw();
-		handleWindowControls();
+		//handleWindowControls();
+		//createKinect("238132", kinectDevices); Works when not in handleWindowControls()
+		var kinector = new Kinect();
+		var serial = kinector.getSerial();
+		console.log(serial == 0 ? false : true);
+		kinector.open();
+		var serial = kinector.getSerial();
+		console.log(serial == 0 ? false : true);
 	}
 };
 
@@ -154,60 +161,43 @@ async function handleWindowControls() {
 		});
 	}
 
+	/* Add event everytime the webcam drop down menu is selected */
+	dropdown.addEventListener("change", (evt) => {
+		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
+	});
+
 	/*
 	 * Complete an initial scan for Kinect devices already plugged in and
 	 * populate the Kinect Devices list in the UI.
+	 *
+	 * Note: When opening a device, only use the appropriate API/SDK associated
+	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
+	 *
 	 */
-	let deviceList = usb.getDeviceList();
-	for (let i = 0; i < deviceList.length; i++) {
-		var currDevice = deviceList[i];
+	var tempKinect = Kinect(); //Used to call Kinect specific getter methods for general info
+	var kinectCount = tempKinect.getInstalledCount();
 
-		try {
-			//Check for Kinect and then update the device in the dropdown menu.
-			//Depth camera on Kinect is the only one with Serial number attached
-			if (
-				currDevice.deviceDescriptor.idVendor === 0x045e &&
-				currDevice.deviceDescriptor.idProduct === 0x097c
-			) {
-				console.log("FOUND A KINECT PLUGGED IN");
-				console.log(currDevice.deviceAddress);
-				var currDeviceAddress = currDevice.deviceAddress;
-				currDevice.open();
-				console.log("KINECT OPENED");
-				currDevice.getStringDescriptor(
-					currDevice.deviceDescriptor.iSerialNumber,
-					(error, data) => {
-						if (data != null) {
-							console.log(data);
-							//Add kinect to drop down menu
-							let newDeviceElem = document.createElement("a");
-							newDeviceElem.href = "#" + data; //#serial
-							newDeviceElem.text = "Kinect (" + data + ")";
-							newDeviceElem.id = currDeviceAddress;
-							document
-								.getElementById("kinect-dropdown-content")
-								.appendChild(newDeviceElem);
-						} else {
-							console.log("NO DATA TO TRANSFER");
-						}
-					}
-				);
-				currDevice.close();
-			}
-		} catch (error) {
-			//Device is unknown by installed drivers
-			/*
-			console.log(
-				"Serial number of device NOT read due to lack of installed drivers"
-            );
-            */
-		}
+	//i represents the Kinect indices
+	for (var i = 0; i < kinectCount; i++) {
+		//Create the object, then add to the device array
+		let kinect = new Kinect(serial);
+		deviceArr.push(kinect);
 	}
+
+	/* Steps to add Kinect device to the application page:
+			//Add kinect to drop down menu
+			let newDeviceElem = document.createElement("a");
+			newDeviceElem.title = data.toString(); //serial
+			newDeviceElem.text = "Kinect (" + data + ")";
+			newDeviceElem.id = currDeviceAddress;
+			document
+				.getElementById("kinect-dropdown-content")
+				.appendChild(newDeviceElem);
+	*/
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, webcam, etc.)
 	 */
-
 	usb.on("attach", function (device) {
 		//The below correctly gets the serial number of the device
 		try {
@@ -217,6 +207,7 @@ async function handleWindowControls() {
 				device.deviceDescriptor.idVendor === 0x045e &&
 				device.deviceDescriptor.idProduct === 0x097c
 			) {
+				var kinectSerialNumber = null;
 				console.log("CONNECTED A KINECT");
 				//console.log(device.deviceDescriptor);
 				console.log(device.deviceAddress);
@@ -227,9 +218,10 @@ async function handleWindowControls() {
 					(error, data) => {
 						if (data != null) {
 							console.log(data);
+							kinectSerialNumber = data.toString();
 							//Add kinect to drop down menu
 							let newDeviceElem = document.createElement("a");
-							newDeviceElem.href = "#" + data; //#serial
+							newDeviceElem.title = data.toString(); //serial
 							newDeviceElem.text = "Kinect (" + data + ")";
 							newDeviceElem.id = device.deviceAddress;
 							document
@@ -241,6 +233,10 @@ async function handleWindowControls() {
 					}
 				);
 				device.close();
+				//Call after closing since USB can't be open in multiple apps/apis
+				if (kinectSerialNumber != null) {
+					createKinect(kinectSerialNumber, kinectDevices);
+				}
 			}
 		} catch (error) {
 			//Device is unknown by installed drivers
@@ -264,6 +260,7 @@ async function handleWindowControls() {
 				console.log(device.deviceAddress);
 
 				let deletedElem = document.getElementById(device.deviceAddress);
+				destroyKinect(deletedElem.title, kinectDevices);
 				deletedElem.parentNode.removeChild(deletedElem);
 			}
 		} catch (error) {}
@@ -293,30 +290,26 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case HOME_PAGE_NUM:
 			currentlyOpenPage = HOME_PAGE_NUM;
 			changeWindowFeatures();
-			webcam.stopMediaStream();
+			/*
 			await kinect.stopListeningAndCameras();
+			*/
 			break;
 
 		case WEBCAM_PAGE_NUM:
 			currentlyOpenPage = WEBCAM_PAGE_NUM;
 			changeWindowFeatures(WEBCAM_PAGE_NUM);
 
-			await kinect.stopListeningAndCameras();
-			await webcam.init();
-			await webcam.ready();
+			populateWebcamList(webcamDropdown);
+			/*
+			await kinect.stopListeningAndCameras(); 
+			*/
 			break;
 
 		case KINECT_PAGE_NUM:
 			currentlyOpenPage = KINECT_PAGE_NUM;
 			changeWindowFeatures(KINECT_PAGE_NUM);
 
-			//BUG: When changing from Webcam feed to Kinect Color feed,
-			//     the Kinect is turns on and "listens" but no data comes
-			//     through on the display OR within the function (look at
-			//      console statements to see this).
-
-			await webcam.stopMediaStream();
-
+			/*
 			await kinect.stopListeningAndCameras();
 			kinect.changeParameters(
 				"fps30",
@@ -327,6 +320,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			);
 			await kinect.start();
 			kinect.colorVideoFeed();
+			*/
 			/* Attempt some sort of check or cycle to restart
             // until the port is open.
             while(!kinect.getIsStreaming()){
@@ -342,8 +336,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
 			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
-			//BUG: same as color Kinect above
-			await webcam.stopMediaStream();
+			/*
 			await kinect.stopListeningAndCameras();
 			kinect.changeParameters(
 				"fps30",
@@ -354,14 +347,15 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			);
 			await kinect.start();
 			kinect.bodyTrackingFeed();
-
+			*/
 			break;
 
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			webcam.stopMediaStream();
+			/*
 			await kinect.stopListeningAndCameras();
+			*/
 			break;
 	} //End of NEW page switch
 }
@@ -403,10 +397,186 @@ function changeWindowFeatures(pageNum) {
 } //End of changeWindowFeatures
 
 /**
+ * Function used to return an array of all audio/video inputs capable of
+ * display/recording. The ONLY filtering is looking for input devices.
+ *
+ * Returns: array of objects with each device's properties
+ *          -> "deviceId, groupId, kind, label"
+ */
+async function getInputDevices() {
+	var devices = await navigator.mediaDevices.enumerateDevices();
+	var inputDevices = [];
+	for (var i = 0; i < devices.length; i++) {
+		if (
+			devices[i].kind.localeCompare("audioinput") == 0 ||
+			devices[i].kind.localeCompare("videoinput") == 0
+		) {
+			inputDevices.push(devices[i]);
+		}
+	}
+	console.log(inputDevices);
+	return inputDevices;
+}
+
+/**
+ * Function used to return an array of all unique audio/video inputs capable
+ * of display/recording.
+ *
+ * Returns: array of objects with each device's properties
+ *          -> "deviceId, groupId, kind, label"
+ */
+async function getUniqueInputDevices() {
+	var devices = await navigator.mediaDevices.enumerateDevices();
+	var uniqueInputDevices = [];
+	for (var i = 0; i < devices.length; i++) {
+		if (
+			devices[i].kind.localeCompare("audioinput") == 0 ||
+			devices[i].kind.localeCompare("videoinput") == 0
+		) {
+			//Now search through added devices if it already exists
+			var matched = false;
+			for (var j = 0; j < uniqueInputDevices.length; j++) {
+				if (
+					uniqueInputDevices[j].groupId.localeCompare(
+						devices[i].groupId
+					) == 0
+				) {
+					matched = true;
+					break; //If match, break out and don't add to
+				}
+			}
+
+			if (
+				!matched &&
+				devices[i].deviceId.localeCompare("default") != 0 &&
+				devices[i].deviceId.localeCompare("communications") != 0
+			) {
+				//Filter out "default" and "communications" so there is a alphanumeric
+				//identifier.
+				uniqueInputDevices.push(devices[i]);
+			}
+		}
+	}
+	console.log(uniqueInputDevices);
+	return uniqueInputDevices;
+}
+
+/**
+ * Function used to return an array of all unique video inputs capable
+ * of display/recording.
+ *
+ * Returns: array of objects with each device's properties
+ *          -> "deviceId, groupId, kind, label"
+ */
+async function getUniqueVideoInputDevices() {
+	var devices = await navigator.mediaDevices.enumerateDevices();
+	var uniqueInputDevices = [];
+	for (var i = 0; i < devices.length; i++) {
+		if (devices[i].kind.localeCompare("videoinput") == 0) {
+			//Now search through added devices if it already exists
+			var matched = false;
+			for (var j = 0; j < uniqueInputDevices.length; j++) {
+				if (
+					uniqueInputDevices[j].groupId.localeCompare(
+						devices[i].groupId
+					) == 0
+				) {
+					matched = true;
+					break; //If match, break out and don't add to
+				}
+			}
+
+			if (
+				!matched &&
+				devices[i].deviceId.localeCompare("default") != 0 &&
+				devices[i].deviceId.localeCompare("communications") != 0
+			) {
+				//Filter out "default" and "communications" so there is a alphanumeric
+				//identifier and no duplicates.
+				uniqueInputDevices.push(devices[i]);
+			}
+		}
+	}
+	console.log(uniqueInputDevices);
+	return uniqueInputDevices;
+}
+
+/**
+ * Function used to populate the webcam dropdown menu with all unique input
+ * devices
+ */
+async function populateWebcamList(dropdown) {
+	/* First clear the list */
+	clearDropdown(dropdown);
+	let selectionMessage = document.createElement("option");
+	selectionMessage.value = "";
+	selectionMessage.disabled = true;
+	selectionMessage.selected = true;
+	selectionMessage.hidden = true;
+	selectionMessage.textContent = "Select Device";
+	document.getElementById("dropdown").appendChild(selectionMessage);
+
+	var currentDevices = await getUniqueVideoInputDevices();
+	for (var i = 0; i < currentDevices.length; i++) {
+		var option = document.createElement("option");
+		option.text = currentDevices[i].label;
+		option.value = currentDevices[i].deviceId;
+		dropdown.add(option);
+	}
+}
+
+/**
+ * Function that clears all of the options in a dropdown menu
+ */
+function clearDropdown(dropdown) {
+	var i,
+		length = dropdown.options.length;
+	for (i = length - 1; i >= 0; i--) {
+		dropdown.remove(i);
+	}
+}
+
+/**
+ * Creats a Kinect object and adds it to the array of devices
+ *
+ */
+function createKinect(serial, deviceArr) {
+	//Check if serial number is already in use.
+	let i,
+		length = deviceArr.length;
+	for (i = 0; i < length; i++) {
+		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
+			console.log("Device is already in the list");
+			return;
+		}
+	}
+
+	//Create the object, then add to the device array
+	let kinect = new Kinect(serial);
+	deviceArr.push(kinect);
+}
+
+/**
+ * destroys a Kinect object and adds it to the array of devices
+ *
+ */
+function destroyKinect(serial, deviceArr) {
+	console.log(serial);
+	//Check if serial number is already in use.
+	let i,
+		length = deviceArr.length;
+	for (i = 0; i < length; i++) {
+		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
+			// ! TODO - ADD SHUTDOWN PROCEDURES FOR KINECT DEVICES
+			deviceArr = deviceArr.splice(i, 1);
+			return;
+		}
+	}
+}
+
+/**
  * Function that is called to make sure all devices are properly shut down
  * before the application shuts down.
  * Acts as an EventHandler for Node.
  */
-global.onbeforeunload = () => {
-	kinect.shutOff();
-};
+global.onbeforeunload = () => {};
