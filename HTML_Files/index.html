@@ -42,8 +42,15 @@
 		<!-- Central Window Page Attributes  -->
 		<div id="main">
 			<div id="webcam-page">
-				<p><select name="dropdown" id="dropdown"></select></p>
-				<video id="webcam" autoplay></video>
+				<p>
+					<select name="dropdown" id="dropdown">
+						<!-- Dynamically Add Devices -->
+					</select>
+				</p>
+				<video id="webcam-video" autoplay></video>
+
+				<canvas img-fluid id="webcam-video-canvas"></canvas>
+
 				<div class="white-background">
 					<input
 						type="checkbox"
@@ -69,8 +76,6 @@
 					<a href="#" id="kinect-dropdown-button">Kinect Devices</a>
 					<div id="kinect-dropdown-content">
 						<!-- Dynamically fill when Kinect devices are connected -->
-						<a href="#">Test 1</a>
-						<a href="#">Test 2</a>
 					</div>
 				</div>
 				<canvas id="video_canvas" img-fluid></canvas>
@@ -241,7 +246,7 @@
 				ctx3.style.height =
 					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
-				var webcamfeed = document.getElementById("webcam");
+				var webcamfeed = document.getElementById("webcam-video");
 				webcamfeed.style.width =
 					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				webcamfeed.style.height =
@@ -254,7 +259,7 @@
 
 				if (isMirrored) {
 					//If true, mirror
-					document.getElementById("webcam").style.transform =
+					document.getElementById("webcam-video").style.transform =
 						"scaleX(-1)";
 					document.getElementById("video_canvas").style.transform =
 						"scaleX(-1)";
@@ -263,7 +268,7 @@
 					document.getElementById("video_canvas3").style.transform =
 						"scaleX(-1)";
 				} else {
-					document.getElementById("webcam").style.transform =
+					document.getElementById("webcam-video").style.transform =
 						"scaleX(1)";
 					document.getElementById("video_canvas").style.transform =
 						"scaleX(1)";

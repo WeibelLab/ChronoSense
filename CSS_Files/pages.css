@@ -39,13 +39,9 @@
 	padding-right: 0;
 }
 
-#webcam {
-	display: block;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 0;
-	padding-right: 0;
-	border: solid 1px black;
+#webcam-video {
+	/* Do not display. This is only used to interpret video files and send to canvas */
+	display: none;
 }
 
 #mirrorcheck2 {

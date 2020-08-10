@@ -4,16 +4,17 @@
  *
  */
 import { JointWriter } from "./jointwriter.js";
-const KinectAzure = require("kinect-azure");
+const KinectAzure = require("../azure-kinect-changes/kinect-azure");
 
 export class Kinect {
 	#kinectDevice;
+	#serial;
 	#displayCanvas;
-	#displayCanvas2;
-	#displayCanvas3;
+	#displayCanvas2; //Deprecated - will delete soon
+	#displayCanvas3; //Deprecated - will delete soon
 	#outputCtx;
-	#outputCtx2;
-	#outputCtx3;
+	#outputCtx2; //Deprecated - will delete soon
+	#outputCtx3; //Deprecated - will delete soon
 	#isKinectOn = false;
 	#isKinectOpen = false;
 	#isKinectCamerasStarted = false;
@@ -29,15 +30,36 @@ export class Kinect {
 	#DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
 	#SyncMode = false;
 
-	constructor(displayCanvas, displayCanvas2, displayCanvas3) {
+	/**
+	 * Constructor for a Kinect object that is a SINGLE Kinect device.
+	 *
+	 * @param {string} serial - Default = 0, temp # until changed later
+	 */
+	constructor(serial = 0) {
+		this.#serial = serial; //Temp serial number until set later
 		this.#kinectDevice = new KinectAzure();
+		//this.#kinectDevice.open(serial);
 		//this.#jointWriter = new JointWriter();
-		this.#displayCanvas = displayCanvas;
-		this.#displayCanvas2 = displayCanvas2;
-		this.#displayCanvas3 = displayCanvas3;
-		this.#outputCtx = displayCanvas.getContext("2d");
-		this.#outputCtx2 = displayCanvas2.getContext("2d");
-		this.#outputCtx3 = displayCanvas3.getContext("2d");
+		//this.#displayCanvas = displayCanvas;
+		//this.#outputCtx = displayCanvas.getContext("2d");
+	}
+
+	/**
+	 * Getter function to retrieve the devices serial number
+	 *
+	 * @return String of device serial number
+	 *
+	 */
+	getSerial() {
+		return this.#kinectDevice.getSerialNumber();
+	}
+
+	getInstalledCount() {
+		return this.#kinectDevice.getInstalledCount();
+	}
+
+	open(index) {
+		return this.#kinectDevice.open(index);
 	}
 
 	/**
