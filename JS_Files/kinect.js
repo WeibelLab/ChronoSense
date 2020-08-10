@@ -4,7 +4,7 @@
  *
  */
 import { JointWriter } from "./jointwriter.js";
-const KinectAzure = require("../azure-kinect-changes/kinect-azure");
+const KinectAzure = require("../kinect-azure");
 
 export class Kinect {
 	#kinectDevice;

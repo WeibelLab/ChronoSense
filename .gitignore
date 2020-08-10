@@ -117,3 +117,6 @@ dist
 
 # Extra files from VSCode
 .vscode/
+
+# Build file created by GYP
+build/
