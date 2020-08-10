@@ -51,14 +51,7 @@ let currentlyOpenPage = false;
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		draw();
-		//handleWindowControls();
-		//createKinect("238132", kinectDevices); Works when not in handleWindowControls()
-		var kinector = new Kinect();
-		var serial = kinector.getSerial();
-		console.log(serial == 0 ? false : true);
-		kinector.open();
-		var serial = kinector.getSerial();
-		console.log(serial == 0 ? false : true);
+		handleWindowControls();
 	}
 };
 
@@ -175,7 +168,7 @@ async function handleWindowControls() {
 	 *
 	 */
 	var tempKinect = Kinect(); //Used to call Kinect specific getter methods for general info
-	var kinectCount = tempKinect.getInstalledCount();
+	var kinectCount = await tempKinect.getInstalledCount();
 
 	//i represents the Kinect indices
 	for (var i = 0; i < kinectCount; i++) {
@@ -539,35 +532,29 @@ function clearDropdown(dropdown) {
 /**
  * Creats a Kinect object and adds it to the array of devices
  *
+ * @param {number} - Index of the Kinect Device in the SDK
+ * @param {array} - Array of Kinect devices where new device is added
  */
-function createKinect(serial, deviceArr) {
-	//Check if serial number is already in use.
-	let i,
-		length = deviceArr.length;
-	for (i = 0; i < length; i++) {
-		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
-			console.log("Device is already in the list");
-			return;
-		}
-	}
-
+function createKinect(index, deviceArr) {
 	//Create the object, then add to the device array
-	let kinect = new Kinect(serial);
+	let kinect = new Kinect(index);
 	deviceArr.push(kinect);
 }
 
 /**
- * destroys a Kinect object and adds it to the array of devices
+ * Destroys a Kinect object and deletes it to the array of devices
  *
+ * @param {string} - Serial number of the Kinect Device to destroy
+ * @param {array} - Array of Kinect devices where specific device is stored
  */
 function destroyKinect(serial, deviceArr) {
-	console.log(serial);
-	//Check if serial number is already in use.
+	console.log(`[chronosense destroyKinect] - serial #: ${serial}`);
+	//Check if a device has specified serial number
 	let i,
 		length = deviceArr.length;
 	for (i = 0; i < length; i++) {
 		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
-			// ! TODO - ADD SHUTDOWN PROCEDURES FOR KINECT DEVICES
+			deviceArr[i].close();
 			deviceArr = deviceArr.splice(i, 1);
 			return;
 		}

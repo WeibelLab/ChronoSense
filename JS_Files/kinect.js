@@ -10,11 +10,7 @@ export class Kinect {
 	#kinectDevice;
 	#serial;
 	#displayCanvas;
-	#displayCanvas2; //Deprecated - will delete soon
-	#displayCanvas3; //Deprecated - will delete soon
 	#outputCtx;
-	#outputCtx2; //Deprecated - will delete soon
-	#outputCtx3; //Deprecated - will delete soon
 	#isKinectOn = false;
 	#isKinectOpen = false;
 	#isKinectCamerasStarted = false;
@@ -33,33 +29,80 @@ export class Kinect {
 	/**
 	 * Constructor for a Kinect object that is a SINGLE Kinect device.
 	 *
-	 * @param {string} serial - Default = 0, temp # until changed later
+	 * @param {number} index - Default = 0; used to select Kinect
 	 */
-	constructor(serial = 0) {
-		this.#serial = serial; //Temp serial number until set later
+	constructor(index = 0) {
 		this.#kinectDevice = new KinectAzure();
-		//this.#kinectDevice.open(serial);
+		if (this.open(index)) {
+			//Device open
+			this.#serial = this.#kinectDevice.getSerialNumber();
+			if (this.#serial === "\0") {
+				//Failed to get serial
+				console.log(
+					"[Kinect Class Constructor] - Failed to get Kinect Serial Number"
+				);
+			}
+			this.close();
+		}
 		//this.#jointWriter = new JointWriter();
 		//this.#displayCanvas = displayCanvas;
 		//this.#outputCtx = displayCanvas.getContext("2d");
 	}
 
 	/**
-	 * Getter function to retrieve the devices serial number
+	 * Getter function to retrieve the device's serial number
 	 *
-	 * @return String of device serial number
+	 * @return String of device serial number (from Kinect Class)
 	 *
 	 */
 	getSerial() {
-		return this.#kinectDevice.getSerialNumber();
+		return this.#serial;
 	}
 
+	/**
+	 * Getter function to retrieve the amount of Kinect devices currently
+	 * connected to the system.
+	 *
+	 * @return {number} Number of connected Kinect devices
+	 */
 	getInstalledCount() {
 		return this.#kinectDevice.getInstalledCount();
 	}
 
+	/**
+	 *	Open the Kinect Device through the SDK (kinect-azure package)
+	 *
+	 * @param {number} index of the Kinect Device in the SDK
+	 * @return {bool} - true if success, false if fail
+	 */
 	open(index) {
-		return this.#kinectDevice.open(index);
+		if (this.#kinectDevice.open(index)) {
+			return true;
+		}
+
+		//Device didn't open. Either doesn't exist or failed.
+		console.log(
+			"[Kinect Class Constructor] - Kinect Device Failed to open"
+		);
+		return false;
+	}
+
+	/**
+	 * Close the Kinect Device through the SDK (kinect-azure package)
+	 *
+	 * @return {bool} - true if success, false if fail
+	 */
+	close() {
+		if (this.#kinectDevice.close()) {
+			//Device Close Successful
+			return true;
+		}
+
+		//Device Close Unsuccessful
+		console.log(
+			"[Kinect Class Constructor] - Kinect Device Failed to close"
+		);
+		return false;
 	}
 
 	/**
