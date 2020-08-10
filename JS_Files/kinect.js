@@ -33,11 +33,11 @@ export class Kinect {
 	/**
 	 * Constructor for a Kinect object that is a SINGLE Kinect device.
 	 *
-	 * @param {string} serial
+	 * @param {string} serial - Default = 0, temp # until changed later
 	 */
-	constructor(serial) {
-		this.#serial = serial;
-		this.#kinectDevice = new KinectAzure(); //Need to make it accept a serial number (in addition to a normal default to index 0) - kinect-azure changes necessary
+	constructor(serial = 0) {
+		this.#serial = serial; //Temp serial number until set later
+		this.#kinectDevice = new KinectAzure();
 		//this.#kinectDevice.open(serial);
 		//this.#jointWriter = new JointWriter();
 		//this.#displayCanvas = displayCanvas;
@@ -51,16 +51,15 @@ export class Kinect {
 	 *
 	 */
 	getSerial() {
-		return this.#kinectDevice.getSerialNumber(0);
-		//return this.#serial;
+		return this.#kinectDevice.getSerialNumber();
 	}
 
 	getInstalledCount() {
 		return this.#kinectDevice.getInstalledCount();
 	}
 
-	getKinectIndex(serial) {
-		return this.#kinectDevice.getKinectIndex(serial);
+	open(index) {
+		return this.#kinectDevice.open(index);
 	}
 
 	/**

@@ -53,11 +53,12 @@ document.onreadystatechange = () => {
 		draw();
 		//handleWindowControls();
 		//createKinect("238132", kinectDevices); Works when not in handleWindowControls()
-		//Below used for kinect-azure change testing
-		var kinector = new Kinect("4234234");
-		var serialNum = kinector.getSerial();
-		console.log(serialNum);
-		console.log(kinector.getKinectIndex(serialNum));
+		var kinector = new Kinect();
+		var serial = kinector.getSerial();
+		console.log(serial == 0 ? false : true);
+		kinector.open();
+		var serial = kinector.getSerial();
+		console.log(serial == 0 ? false : true);
 	}
 };
 
@@ -169,79 +170,30 @@ async function handleWindowControls() {
 	 * Complete an initial scan for Kinect devices already plugged in and
 	 * populate the Kinect Devices list in the UI.
 	 *
+	 * Note: When opening a device, only use the appropriate API/SDK associated
+	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
+	 *
 	 */
+	var tempKinect = Kinect(); //Used to call Kinect specific getter methods for general info
+	var kinectCount = tempKinect.getInstalledCount();
 
-	let deviceList = usb.getDeviceList();
-	for (let i = 0; i < deviceList.length; i++) {
-		var currDevice = deviceList[i];
-
-		try {
-			//Check for Kinect and then update the device in the dropdown menu.
-			//Depth camera on Kinect is the only one with Serial number attached
-			if (
-				currDevice.deviceDescriptor.idVendor === 0x045e &&
-				currDevice.deviceDescriptor.idProduct === 0x097c
-			) {
-				var kinectSerialNumber = null;
-				console.log("FOUND A KINECT PLUGGED IN");
-				console.log(currDevice.deviceAddress);
-				var currDeviceAddress = currDevice.deviceAddress;
-				currDevice.open();
-				console.log("KINECT OPENED");
-				currDevice.getStringDescriptor(
-					currDevice.deviceDescriptor.iSerialNumber,
-					(error, data) => {
-						if (data != null) {
-							console.log("data: " + data);
-							//Create a kinect object and add to the list
-							kinectSerialNumber = data;
-							//Add kinect to drop down menu
-							let newDeviceElem = document.createElement("a");
-							newDeviceElem.title = data.toString(); //serial
-							newDeviceElem.text = "Kinect (" + data + ")";
-							newDeviceElem.id = currDeviceAddress;
-							document
-								.getElementById("kinect-dropdown-content")
-								.appendChild(newDeviceElem);
-						} else {
-							console.log("NO DATA TO TRANSFER");
-						}
-
-						currDevice.close();
-						setTimeout(() => {
-							console.log(
-								"kinectSerialNumber " + kinectSerialNumber
-							);
-							createKinect(kinectSerialNumber, kinectDevices);
-						}, 8000); //Works with huge delay
-					}
-				);
-				/*
-				currDevice.close();
-				console.log("DEVICE CLOSED");
-				console.log("Kinect Serial Number:" + kinectSerialNumber);
-				// ! ERROR - opening the Kinect fails potentially due to USB not fully closing?
-				// ! ERROR UPDATE - If you put the createKinect() call outside of handleWindowControls() and comment out the call to the handleWindowControls(),
-				// ! then everything works properly.
-				//Call after closing since USB can't be open in multiple apps/apis
-				if (kinectSerialNumber != null) {
-					console.log(
-						"SERIAL BEFORE CREATION: " + kinectSerialNumber
-					);
-					createKinect(kinectSerialNumber, kinectDevices);
-				}
-				*/
-			}
-		} catch (error) {
-			//Device is unknown by installed drivers OR device doesn't close/open
-			console.log(error);
-			/*
-			console.log(
-				"Serial number of device NOT read due to lack of installed drivers"
-            );
-            */
-		}
+	//i represents the Kinect indices
+	for (var i = 0; i < kinectCount; i++) {
+		//Create the object, then add to the device array
+		let kinect = new Kinect(serial);
+		deviceArr.push(kinect);
 	}
+
+	/* Steps to add Kinect device to the application page:
+			//Add kinect to drop down menu
+			let newDeviceElem = document.createElement("a");
+			newDeviceElem.title = data.toString(); //serial
+			newDeviceElem.text = "Kinect (" + data + ")";
+			newDeviceElem.id = currDeviceAddress;
+			document
+				.getElementById("kinect-dropdown-content")
+				.appendChild(newDeviceElem);
+	*/
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, webcam, etc.)
