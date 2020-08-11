@@ -5,6 +5,7 @@ const remote = require("electron").remote;
 const usb = require("usb");
 import { Kinect } from "./kinect.js";
 import { Webcam } from "./webcam.js";
+import { AudioRecorder } from "./audio_recorder.js";
 
 //Variables of HTML elements for later manipulation
 const btnHome = document.getElementById("homePage");
@@ -254,6 +255,7 @@ function setupDevices() {
  *      newPageNum -    Holds one of the global constant page values to
  *                      determine what should be displayed or hidden.
  */
+
 async function checkClosingWindowAndChangeContent(newPageNum) {
 	//Check which window is closing; if changing to same as before, don't
 	//refresh
