@@ -316,9 +316,8 @@ export class Kinect {
 	/**
 	 * Function that allows the user to set the CAMERA FPS of the Kinect.
 	 *
-	 * Paramters:
-	 *      a - string variable that dictates selection and change kinect param
-	 *          {"fps5", "fps15", "fps30"}
+	 * @param {string} a - 	string variable that dictates selection and change kinect param
+	 *          			{"fps5", "fps15", "fps30"}
 	 *
 	 */
 	setCameraFPS(a) {
@@ -343,9 +342,8 @@ export class Kinect {
 	/**
 	 * Function that allows the user to set the COLOR FORMAT of the Kinect.
 	 *
-	 * Parameters:
-	 *      b - string variable that dictates selection and change kinect param
-	 *          {"mjpg", "nv12", "yuy2", "BGRA32"}
+	 * @param {string} b - 	string variable that dictates selection and change kinect param
+	 *          			{"mjpg", "nv12", "yuy2", "BGRA32"}
 	 *
 	 */
 	setColorFormat(b) {
@@ -374,10 +372,9 @@ export class Kinect {
 	/**
 	 * Function that allows the user to set the COLOR RESOLUTION of the Kinect.
 	 *
-	 * Parameters:
-	 *      c - string variable that dictates selection and change kinect param
-	 *          {"off", "res720", "res1080", "res1440", "res1536", "res2160",
-	 *           "res3072"}
+	 * @param {string} c - 	string variable that dictates selection and change kinect param
+	 *          			{"off", "res720", "res1080", "res1440", "res1536", "res2160",
+	 *           			"res3072"}
 	 *
 	 */
 	setColorResolution(c) {
@@ -419,10 +416,9 @@ export class Kinect {
 	/**
 	 * Function that allows the user to set the DEPTH mode of the Kinect.
 	 *
-	 * Parameters:
-	 *      d - string variable that dictates selection and change kinect param
-	 *          {"off", "nfov2x2binned", "nfovunbinned", "wfov2x2binned",
-	 *           "wfovunbinned", "passive"}
+	 * @param {string} d - 	string variable that dictates selection and change kinect param
+	 *          			{"off", "nfov2x2binned", "nfovunbinned", "wfov2x2binned",
+	 *           			"wfovunbinned", "passive"}
 	 *
 	 */
 	setDepthMode(d) {
@@ -460,9 +456,8 @@ export class Kinect {
 	/**
 	 * Function that allows the user to only allow SYNCHRONIZED IMAGES only.
 	 *
-	 * Parameters:
-	 *      e - string variable that dictates cselection and change kinect param
-	 *          {"sync", "nosync"}
+	 * @param {string} e - 	string variable that dictates cselection and change kinect param
+	 *          			{"sync", "nosync"}
 	 */
 	setSyncMode(e) {
 		switch (e) {
@@ -483,17 +478,16 @@ export class Kinect {
 	/**
 	 * Condensed function that allows the above functions to be set in one call
 	 *
-	 * Parameters:
-	 *      fps     -   Camera FPS string [see setCameraFPS for details on
-	 *                  passable strings]
-	 *      format  -   Color Format string [see setColorFormat for details on
-	 *                  passable strings]
-	 *      res     -   Color Resolution string [see setColorResolution for
-	 *                  details on passable strings]
-	 *      depth   -   Depth Mode string [see setDepthMode for details on
-	 *                  passable strings]
-	 *      sync    -   Sync Mode string [see setSyncMode for details on
-	 *                  passable strings]
+	 * @param {string} fps - 	Camera FPS string [see setCameraFPS for details on
+	 *                  		passable strings]
+	 * @param {string} format - Color Format string [see setColorFormat for details on
+	 *                  		passable strings]
+	 * @param {string} res -   	Color Resolution string [see setColorResolution for
+	 *                  		details on passable strings]
+	 * @param {string} depth - 	Depth Mode string [see setDepthMode for details on
+	 *                  		passable strings]
+	 * @param {string} sync -	Sync Mode string [see setSyncMode for details on
+	 *                  		passable strings]
 	 */
 	changeParameters(fps, format, res, depth, sync) {
 		this.setCameraFPS(fps);

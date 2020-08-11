@@ -29,7 +29,7 @@ const cameraDropdown = document.getElementById("dropdown");
 
 //Arrays for all devices
 var kinectDevices = []; //All from class Kinect
-var videoDevices = []; //All from class Camera
+var cameraDevices = []; //All from class Camera
 
 //Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
@@ -157,7 +157,7 @@ async function handleWindowControls() {
 		});
 	}
 
-	/* Add event everytime the camera drop down menu is selected */
+	/* Add event everytime the CAMERA drop down menu is selected */
 	dropdown.addEventListener("change", (evt) => {
 		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
 	});
@@ -199,6 +199,17 @@ function setupDevices() {
 			.getElementById("kinect-dropdown-content")
 			.appendChild(newDeviceElem);
 	}
+
+	/*
+	 * Complete an initial scan for Camera devices already plugged in and
+	 * populate the Camera Devices list in the UI.
+	 *
+	 * Note: When opening a device, only use the appropriate API/SDK associated
+	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
+	 *
+	 */
+	//! TODO
+	var currentDevices = getUniqueVideoInputDevices();
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, camera, etc.)
@@ -251,9 +262,8 @@ function setupDevices() {
  *
  * Also serves as the function that manipulates the webviewer!
  *
- * Parameters:
- *      newPageNum -    Holds one of the global constant page values to
- *                      determine what should be displayed or hidden.
+ * @param {number} newPageNum - Holds one of the global constant page values to
+ *                      		determine what should be displayed or hidden.
  */
 
 async function checkClosingWindowAndChangeContent(newPageNum) {
@@ -346,9 +356,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
  * Changes certain aspects of the application based on the current "page" that
  * the application is showing.
  *
- * Parameters:
- *      pageName - Page number to indicate case choice and manipulate
- *                  DOM elements to manipulate
+ * @param {number} pageNum - Page number to indicate case choice and manipulate
+ *                  		 DOM elements
  */
 function changeWindowFeatures(pageNum) {
 	switch (pageNum) {
@@ -382,8 +391,8 @@ function changeWindowFeatures(pageNum) {
  * Function used to return an array of all audio/video inputs capable of
  * display/recording. The ONLY filtering is looking for input devices.
  *
- * Returns: array of objects with each device's properties
- *          -> "deviceId, groupId, kind, label"
+ * @return {array} 	of objects with each device's properties
+ *          		-> "deviceId, groupId, kind, label"
  */
 async function getInputDevices() {
 	var devices = await navigator.mediaDevices.enumerateDevices();
@@ -404,8 +413,8 @@ async function getInputDevices() {
  * Function used to return an array of all unique audio/video inputs capable
  * of display/recording.
  *
- * Returns: array of objects with each device's properties
- *          -> "deviceId, groupId, kind, label"
+ * @return {array} 	of objects with each device's properties
+ *          		-> "deviceId, groupId, kind, label"
  */
 async function getUniqueInputDevices() {
 	var devices = await navigator.mediaDevices.enumerateDevices();
@@ -447,8 +456,8 @@ async function getUniqueInputDevices() {
  * Function used to return an array of all unique video inputs capable
  * of display/recording.
  *
- * Returns: array of objects with each device's properties
- *          -> "deviceId, groupId, kind, label"
+ * @return {array} 	of objects with each device's properties
+ *          		-> "deviceId, groupId, kind, label"
  */
 async function getUniqueVideoInputDevices() {
 	var devices = await navigator.mediaDevices.enumerateDevices();
@@ -486,6 +495,8 @@ async function getUniqueVideoInputDevices() {
 /**
  * Function used to populate the camera dropdown menu with all unique input
  * devices
+ *
+ * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
  */
 async function populateCameraList(dropdown) {
 	/* First clear the list */
@@ -509,6 +520,8 @@ async function populateCameraList(dropdown) {
 
 /**
  * Function that clears all of the options in a dropdown menu
+ *
+ * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
  */
 function clearDropdown(dropdown) {
 	var i,
@@ -551,8 +564,8 @@ function refreshKinectDevices() {
 /**
  * Creats a Kinect object and adds it to the array of devices
  *
- * @param {number} - Index of the Kinect Device in the SDK
- * @param {array} - Array of Kinect devices where new device is added
+ * @param {number} index - Index of the Kinect Device in the SDK
+ * @param {array} deviceArr - Array of Kinect devices where new device is added
  */
 function createKinect(index, deviceArr) {
 	//Create the object, then add to the device array
@@ -561,10 +574,10 @@ function createKinect(index, deviceArr) {
 }
 
 /**
- * Destroys a Kinect object and deletes it to the array of devices
+ * Destroys a Kinect object and deletes it from the array of devices
  *
- * @param {string} - Serial number of the Kinect Device to destroy
- * @param {array} - Array of Kinect devices where specific device is stored
+ * @param {string} serial - Serial number of the Kinect Device to destroy
+ * @param {array} deviceArr - Array of Kinect devices where specific device is stored
  */
 function destroyKinect(serial, deviceArr) {
 	console.log(`[chronosense destroyKinect] - serial #: ${serial}`);
@@ -584,7 +597,7 @@ function destroyKinect(serial, deviceArr) {
 /**
  * Destroy all of the kinects in the device array.
  *
- * @param {array} - Array of Kinect devices
+ * @param {array} deviceArr - Array of Kinect devices
  */
 function destroyAllKinects(deviceArr) {
 	//Go through all kinects closing and clearing the array
@@ -593,6 +606,53 @@ function destroyAllKinects(deviceArr) {
 	for (i = 0; i < length; i++) {
 		deviceArr[i].stopListeningAndCameras();
 		deviceArr[i].close();
+	}
+
+	deviceArr.length = 0;
+}
+
+/**
+ * Create a Camera object and add it to the array of devices
+ *
+ * @param {array} deviceArr - Array of Camera devices
+ * @param {string} deviceId - Device identifier for local video devices
+ */
+function createCamera(deviceArr, deviceId) {
+	let camera = new Camera(deviceId);
+	deviceArr.push(camera);
+}
+
+/**
+ * Destroys a Camera object and deletes it from the array of devices
+ *
+ * @param {array} deviceArr - Array of Camera devices where specific device is stored
+ * @param {string} deviceId - Device identifier for local video devices
+ */
+function destroyCamera(deviceArr, deviceId) {
+	console.log(`[chronosense destroyCamera] -  deviceId: ${deviceId}`);
+	//Check if a device has specified deviceId
+	let i,
+		length = deviceArr.length;
+	for (i = 0; i < length; i++) {
+		if (deviceId.localeCompare(deviceArr[i].getDeviceId()) == 0) {
+			// ! TODO: Add shutdown process of Camera object before deletion
+			deviceArr = deviceArr.splice(i, 1);
+			return;
+		}
+	}
+}
+
+/**
+ * Destroy all of Cameras in the device array.
+ *
+ * @param {array} deviceArr - Array of Camera devices
+ */
+function destroyAllCameras(deviceArr) {
+	//Go through all Cameras closing and clearing the array
+	let i,
+		length = deviceArr.length;
+	for (i = 0; i < length; i++) {
+		// ! TODO: Add shutdown process of Camera object before deletion
 	}
 
 	deviceArr.length = 0;
