@@ -52,6 +52,7 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		draw();
 		handleWindowControls();
+		setupDevices();
 	}
 };
 
@@ -128,29 +129,30 @@ async function handleWindowControls() {
 		checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
 	});
 
+	//! TODO: Remove buttons/functionality and attach later to specific devices
+	//! 	  when streaming from them.
 	/*
 	 * Add events below to buttons and items within "pages."
 	 */
 	//Add to each element in the kinect button class
 	for (let i = 0; i < btnsKinectOn.length; i++) {
-		btnsKinectOn[i].addEventListener("click", async (event) => {
-			//If no kinect object, create one
-			if (kinect == null) {
-				//kinect = new Kinect(displayCanvas, displayCanvas2, displayCanvas3);
-			}
+		btnsKinectOn[i].addEventListener("click", (event) => {
+			kinectDevices[0].setDisplayCanvas(displayCanvas);
+			kinectDevices[0].start();
 
-			await kinect.start(); //Start the Kinect
 			if (currentlyOpenPage == KINECT_PAGE_NUM) {
-				kinect.colorVideoFeed();
+				kinectDevices[0].colorVideoFeed();
 			} else if (currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-				kinect.bodyTrackingFeed();
+				kinectDevices[0].bodyTrackingFeed();
 			}
 		});
 	}
 
+	//! TODO: Remove buttons/functionality and attach later to specific devices
+	//! 	  when streaming from them.
 	for (let i = 0; i < btnsKinectOff.length; i++) {
 		btnsKinectOff[i].addEventListener("click", (event) => {
-			kinect.stopListeningAndCameras();
+			kinectDevices[0].stopListeningAndCameras();
 		});
 	}
 
@@ -159,6 +161,20 @@ async function handleWindowControls() {
 		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
 	});
 
+	/* Add event to refresh Kinect Devices on push - WORKS*/
+	document
+		.getElementById("kinect-refresh-btn")
+		.addEventListener("click", (evt) => {
+			refreshKinectDevices();
+		});
+} //End of handleWindowControls()
+
+/**
+ * Searches for all devices connected on startup for organizing and initializing.
+ * Also, it adds events for plugging and unplugging USB devices.
+ *
+ */
+function setupDevices() {
 	/*
 	 * Complete an initial scan for Kinect devices already plugged in and
 	 * populate the Kinect Devices list in the UI.
@@ -167,26 +183,21 @@ async function handleWindowControls() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	var tempKinect = Kinect(); //Used to call Kinect specific getter methods for general info
-	var kinectCount = await tempKinect.getInstalledCount();
+	var tempKinect = new Kinect(); //Used to call Kinect specific getter methods for general info
+	var kinectCount = tempKinect.getInstalledCount();
 
 	//i represents the Kinect indices
 	for (var i = 0; i < kinectCount; i++) {
 		//Create the object, then add to the device array
-		let kinect = new Kinect(serial);
-		deviceArr.push(kinect);
-	}
+		createKinect(i, kinectDevices);
 
-	/* Steps to add Kinect device to the application page:
-			//Add kinect to drop down menu
-			let newDeviceElem = document.createElement("a");
-			newDeviceElem.title = data.toString(); //serial
-			newDeviceElem.text = "Kinect (" + data + ")";
-			newDeviceElem.id = currDeviceAddress;
-			document
-				.getElementById("kinect-dropdown-content")
-				.appendChild(newDeviceElem);
-	*/
+		let newDeviceElem = document.createElement("a");
+		newDeviceElem.title = kinectDevices[i].getSerial(); //serial
+		newDeviceElem.text = "Kinect (" + kinectDevices[i].getSerial() + ")";
+		document
+			.getElementById("kinect-dropdown-content")
+			.appendChild(newDeviceElem);
+	}
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, webcam, etc.)
@@ -200,36 +211,10 @@ async function handleWindowControls() {
 				device.deviceDescriptor.idVendor === 0x045e &&
 				device.deviceDescriptor.idProduct === 0x097c
 			) {
-				var kinectSerialNumber = null;
 				console.log("CONNECTED A KINECT");
-				//console.log(device.deviceDescriptor);
-				console.log(device.deviceAddress);
-				device.open();
-
-				device.getStringDescriptor(
-					device.deviceDescriptor.iSerialNumber,
-					(error, data) => {
-						if (data != null) {
-							console.log(data);
-							kinectSerialNumber = data.toString();
-							//Add kinect to drop down menu
-							let newDeviceElem = document.createElement("a");
-							newDeviceElem.title = data.toString(); //serial
-							newDeviceElem.text = "Kinect (" + data + ")";
-							newDeviceElem.id = device.deviceAddress;
-							document
-								.getElementById("kinect-dropdown-content")
-								.appendChild(newDeviceElem);
-						} else {
-							console.log("NO DATA TO TRANSFER");
-						}
-					}
-				);
-				device.close();
-				//Call after closing since USB can't be open in multiple apps/apis
-				if (kinectSerialNumber != null) {
-					createKinect(kinectSerialNumber, kinectDevices);
-				}
+				//Don't do anything immediately. Wait for user to select refresh button.
+			} else {
+				// ! TODO: All other device actions
 			}
 		} catch (error) {
 			//Device is unknown by installed drivers
@@ -250,15 +235,13 @@ async function handleWindowControls() {
 				device.deviceDescriptor.idProduct === 0x097c
 			) {
 				console.log("DISCONNECTED A KINECT");
-				console.log(device.deviceAddress);
-
-				let deletedElem = document.getElementById(device.deviceAddress);
-				destroyKinect(deletedElem.title, kinectDevices);
-				deletedElem.parentNode.removeChild(deletedElem);
+				//Don't do anything immediately. Wait for user to select refresh button.
+			} else {
+				// ! TODO: All other device actions
 			}
 		} catch (error) {}
 	}); //End of USB detach event
-} //End of handleWindowControls()
+}
 
 /**
  * Function that checks which windows are being closed out in order to call
@@ -301,6 +284,10 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case KINECT_PAGE_NUM:
 			currentlyOpenPage = KINECT_PAGE_NUM;
 			changeWindowFeatures(KINECT_PAGE_NUM);
+			// ! TEMP Hard Coded - For example and testing; change later!
+			kinectDevices[0].setDisplayCanvas(displayCanvas);
+			kinectDevices[0].start();
+			kinectDevices[0].colorVideoFeed();
 
 			/*
 			await kinect.stopListeningAndCameras();
@@ -530,6 +517,36 @@ function clearDropdown(dropdown) {
 }
 
 /**
+ * Refreshes the entire list of Kinect Devices. Deleting missing devices and
+ * adding new devices.
+ */
+function refreshKinectDevices() {
+	destroyAllKinects(kinectDevices); //Close and clear all devices
+	//Remove all kinect list <a> elements
+	//Currently an ad hoc (hard coded) method for specific app page and will change later
+	var myList = document.getElementById("kinect-dropdown-content");
+	while (myList.firstElementChild) {
+		myList.removeChild(myList.lastElementChild);
+	}
+
+	var tempKinect = new Kinect(); //Used to call Kinect specific getter methods for general info
+	var kinectCount = tempKinect.getInstalledCount();
+
+	//i represents the Kinect indices
+	for (var i = 0; i < kinectCount; i++) {
+		//Create the object, then add to the device array
+		createKinect(i, kinectDevices);
+
+		let newDeviceElem = document.createElement("a");
+		newDeviceElem.title = kinectDevices[i].getSerial(); //serial
+		newDeviceElem.text = "Kinect (" + kinectDevices[i].getSerial() + ")";
+		document
+			.getElementById("kinect-dropdown-content")
+			.appendChild(newDeviceElem);
+	}
+}
+
+/**
  * Creats a Kinect object and adds it to the array of devices
  *
  * @param {number} - Index of the Kinect Device in the SDK
@@ -554,11 +571,29 @@ function destroyKinect(serial, deviceArr) {
 		length = deviceArr.length;
 	for (i = 0; i < length; i++) {
 		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
+			deviceArr[i].stopListeningAndCameras();
 			deviceArr[i].close();
 			deviceArr = deviceArr.splice(i, 1);
 			return;
 		}
 	}
+}
+
+/**
+ * Destroy all of the kinects in the device array.
+ *
+ * @param {array} - Array of Kinect devices
+ */
+function destroyAllKinects(deviceArr) {
+	//Go through all kinects closing and clearing the array
+	let i,
+		length = deviceArr.length;
+	for (i = 0; i < length; i++) {
+		deviceArr[i].stopListeningAndCameras();
+		deviceArr[i].close();
+	}
+
+	deviceArr.length = 0;
 }
 
 /**

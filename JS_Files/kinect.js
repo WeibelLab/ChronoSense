@@ -9,7 +9,7 @@ const KinectAzure = require("../kinect-azure");
 export class Kinect {
 	#kinectDevice;
 	#serial;
-	#displayCanvas;
+	#displayCanvas; //Display canvas and outputctx used to display feed
 	#outputCtx;
 	#isKinectOn = false;
 	#isKinectOpen = false;
@@ -44,9 +44,8 @@ export class Kinect {
 			}
 			this.close();
 		}
+
 		//this.#jointWriter = new JointWriter();
-		//this.#displayCanvas = displayCanvas;
-		//this.#outputCtx = displayCanvas.getContext("2d");
 	}
 
 	/**
@@ -77,12 +76,30 @@ export class Kinect {
 	 */
 	open(index) {
 		if (this.#kinectDevice.open(index)) {
+			this.#isKinectOpen = true;
+			return true;
+		}
+
+		//Device didn't open. Either doesn't exist or failed.
+		console.log("[Kinect Class Open()] - Kinect Device Failed to open");
+		return false;
+	}
+
+	/**
+	 * Open the Kinect Device through the SDK via serial # saved in object
+	 * (from constructor)
+	 *
+	 * @return {bool} - true if success, false if fail
+	 */
+	serialOpen() {
+		if (this.#kinectDevice.serialOpen(this.#serial)) {
+			this.#isKinectOpen = true;
 			return true;
 		}
 
 		//Device didn't open. Either doesn't exist or failed.
 		console.log(
-			"[Kinect Class Constructor] - Kinect Device Failed to open"
+			"[Kinect Class serialOpen()] - Kinect Device Failed to open"
 		);
 		return false;
 	}
@@ -95,13 +112,12 @@ export class Kinect {
 	close() {
 		if (this.#kinectDevice.close()) {
 			//Device Close Successful
+			this.#isKinectOpen = false;
 			return true;
 		}
 
 		//Device Close Unsuccessful
-		console.log(
-			"[Kinect Class Constructor] - Kinect Device Failed to close"
-		);
+		console.log("[Kinect Class close()] - Kinect Device Failed to close");
 		return false;
 	}
 
@@ -115,17 +131,14 @@ export class Kinect {
 		return new Promise((resolve) => setTimeout(resolve, ms));
 	}
 
-	async start() {
-		// Artifical delay to wait for MediaStreams to close (just in case)
-		await this.sleep(1000); //Changed to 1.0 sec to speed up process after
-		//some other changes in webcam.
-
+	/**
+	 * Start up the Kinect and make sure the device is ready to steam to feed
+	 *
+	 */
+	start() {
 		//First check if device is open
 		if (!this.#isKinectOpen) {
-			//Not open, so open
-			let openValue = this.#kinectDevice.open();
-			console.log("Boolean returned from kinect.open(): " + openValue);
-			this.#isKinectOpen = true;
+			this.serialOpen();
 			console.log("Opened Kinect");
 		}
 
@@ -154,9 +167,33 @@ export class Kinect {
 		}
 	} //End of startKinect()
 
-	/* Get isListening data for error checking */
+	/**
+	 *  Get isListening data for error checking
+	 *
+	 * @return {boolean} isKinectStreaming variable value
+	 */
+
 	getIsStreaming() {
 		return this.#isKinectStreaming;
+	}
+
+	/**
+	 * Set the canvas where the Kinect stream will display.
+	 *
+	 * @param {object} canvas for stream display (HTML element)
+	 * @return {bool} - true if success, false if fail
+	 */
+	setDisplayCanvas(canvas) {
+		if (canvas instanceof HTMLCanvasElement) {
+			this.#displayCanvas = canvas;
+			this.#outputCtx = canvas.getContext("2d");
+			return true;
+		}
+
+		console.log(
+			"[Kinect Class setDisplayCanvas()] - ERROR: Passed element is NOT a canvas!"
+		);
+		return false;
 	}
 
 	/**
@@ -167,6 +204,7 @@ export class Kinect {
 	 * NOTE: Look into creating additional function to stop listening and allow
 	 *       quick setting change or transition to capture a different data stream.
 	 */
+	/*
 	async shutOff() {
 		//First check if the Kinect is on before allowing it to be shut off.
 		//if(this.#isKinectOn) {
@@ -196,6 +234,7 @@ export class Kinect {
 		return stoppedListening;
 		//}
 	}
+	*/
 
 	/**
 	 * CURRENTLY WORKING
@@ -205,6 +244,7 @@ export class Kinect {
 	 * the Kinect; saving time and resources.
 	 *
 	 */
+
 	async stopListeningAndCameras() {
 		if (this.#isKinectListening) {
 			let kinectStoppedlistening = await this.#kinectDevice.stopListening();
@@ -215,7 +255,7 @@ export class Kinect {
 			console.log("Cameras Stopped and Listening Stopped");
 
 			if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
-				this.#jointWriter.closeWrittenFile();
+				//this.#jointWriter.closeWrittenFile();
 				this.#kinectDevice.destroyTracker();
 				console.log("Body Tracker Destroyed");
 			}
@@ -226,37 +266,35 @@ export class Kinect {
 	}
 
 	/* The color (RGB) video feed of the Azure Kinect is output to a display
-       canvas */
+	   canvas */
 	colorVideoFeed() {
 		//First check if the Kinect is already running and don't start if it is:
-		//if(this.#isKinectOn) {
-		//console.log('ColorFeed() START');
-		this.#isKinectListening = true;
-		this.#kinectDevice.startListening((data) => {
-			//Currently doesn't reach here when going between pages... BUG
-			//console.log('Color listening for data...');
-			var outputImageData = null;
-			this.#isKinectStreaming = true;
-			if (!outputImageData && data.colorImageFrame.width > 0) {
-				//console.log("START RENDER REACHED");
-				this.#displayCanvas.width = data.colorImageFrame.width;
-				this.#displayCanvas.height = data.colorImageFrame.height;
-				outputImageData = this.#outputCtx.createImageData(
-					this.#displayCanvas.width,
-					this.#displayCanvas.height
-				);
-			}
+		if (!this.#isKinectListening) {
+			this.#isKinectListening = true;
+			this.#kinectDevice.startListening((data) => {
+				//Currently doesn't reach here when going between pages... BUG
+				//console.log('Color listening for data...');
+				var outputImageData = null;
+				this.#isKinectStreaming = true;
+				if (!outputImageData && data.colorImageFrame.width > 0) {
+					//console.log("START RENDER REACHED");
+					this.#displayCanvas.width = data.colorImageFrame.width;
+					this.#displayCanvas.height = data.colorImageFrame.height;
+					outputImageData = this.#outputCtx.createImageData(
+						this.#displayCanvas.width,
+						this.#displayCanvas.height
+					);
+				}
 
-			if (outputImageData) {
-				this.renderBGRA32ColorFrame(
-					this.#outputCtx,
-					outputImageData,
-					data.colorImageFrame
-				);
-			}
-		});
-
-		//}
+				if (outputImageData) {
+					this.renderBGRA32ColorFrame(
+						this.#outputCtx,
+						outputImageData,
+						data.colorImageFrame
+					);
+				}
+			});
+		}
 	}
 
 	/* Function used to render data retrieved from Kinect to the canvas */
@@ -464,6 +502,7 @@ export class Kinect {
 	}
 
 	/* Takes in the video and depth data to show image with overlayed joints */
+	/*
 	bodyTrackingFeed() {
 		//console.log("Reached the start of BodyTrackingFeed()");
 		//First check if the Kinect is already running and don't start if it is:
@@ -516,7 +555,7 @@ export class Kinect {
 					//TEST: For each body, write joint data to CSV
 					//console.log('BEFORE writing to file');
 					// * Commented out while developing other features
-					/* this.#jointWriter.writeToFile(body.skeleton); */
+					/* this.#jointWriter.writeToFile(body.skeleton); 
 					//console.log('AFTER writing to file');
 					body.skeleton.joints.forEach((joint) => {
 						this.#outputCtx2.fillRect(
@@ -539,6 +578,7 @@ export class Kinect {
 		});
 		//}
 	}
+	*/
 
 	/* Render the DepthFrame image as grey scale on canvas */
 	renderDepthFrameAsGreyScale(ctx, canvasImageData, imageFrame) {

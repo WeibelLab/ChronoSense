@@ -85,6 +85,11 @@
 	font-weight: 400;
 }
 
+#kinect-refresh-btn {
+	display: block;
+	margin: 0 auto;
+}
+
 #kinect-dropdown-button {
 	text-decoration: none;
 	display: block;
