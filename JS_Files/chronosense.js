@@ -4,12 +4,12 @@
 const remote = require("electron").remote;
 const usb = require("usb");
 import { Kinect } from "./kinect.js";
-import { Webcam } from "./webcam.js";
+import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
 
 //Variables of HTML elements for later manipulation
 const btnHome = document.getElementById("homePage");
-const btnWebcam = document.getElementById("webcamPage");
+const btnCamera = document.getElementById("cameraPage");
 const btnKinect = document.getElementById("kinectPage");
 const btnKinectBodyTracking = document.getElementById("kinectBodyPage");
 const btnAbout = document.getElementById("aboutPage");
@@ -22,18 +22,18 @@ const displayCanvas = document.getElementById("video_canvas");
 const displayCanvas2 = document.getElementById("video_canvas2");
 const displayCanvas3 = document.getElementById("video_canvas3");
 
-//Used in webcam methods
+//Used in camera methods
 const recordingButton = document.getElementById("record");
-const camVideo = document.getElementById("webcam-video");
-const webcamDropdown = document.getElementById("dropdown");
+const camVideo = document.getElementById("camera-video");
+const cameraDropdown = document.getElementById("dropdown");
 
 //Arrays for all devices
 var kinectDevices = []; //All from class Kinect
-var otherVideoDevices = []; //All from class Webcam
+var videoDevices = []; //All from class Camera
 
 //Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
-const WEBCAM_PAGE_NUM = 1;
+const CAMERA_PAGE_NUM = 1;
 const KINECT_PAGE_NUM = 2;
 const KINECT_BODY_PAGE_NUM = 3;
 const ABOUT_PAGE_NUM = 4;
@@ -42,7 +42,7 @@ const ABOUT_PAGE_NUM = 4;
 //functions to call from which page.
 //Legend:
 // 0 - Home
-// 1 - Webcam
+// 1 - Camera
 // 2 - Kinect
 // 3 - Kinect Body Tracking
 // 4 - About
@@ -104,15 +104,15 @@ async function handleWindowControls() {
 	 * navigation bar for the application. Mainly to switch src of webview to
 	 * change the contents of the page.
 	 *
-	 * Buttons: homePage, webcamPage, kinectPage, kinectBodyPage, aboutPage
+	 * Buttons: homePage, cameraPage, kinectPage, kinectBodyPage, aboutPage
 	 */
 	btnHome.addEventListener("click", (event) => {
 		console.log("YOU ARE HOME");
 		checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
 	});
-	btnWebcam.addEventListener("click", (event) => {
-		console.log("YOU ARE WEBCAM");
-		checkClosingWindowAndChangeContent(WEBCAM_PAGE_NUM);
+	btnCamera.addEventListener("click", (event) => {
+		console.log("YOU ARE CAMERA");
+		checkClosingWindowAndChangeContent(CAMERA_PAGE_NUM);
 	});
 
 	btnKinect.addEventListener("click", (event) => {
@@ -157,7 +157,7 @@ async function handleWindowControls() {
 		});
 	}
 
-	/* Add event everytime the webcam drop down menu is selected */
+	/* Add event everytime the camera drop down menu is selected */
 	dropdown.addEventListener("change", (evt) => {
 		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
 	});
@@ -184,7 +184,7 @@ function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	var tempKinect = new Kinect(); //Used to call Kinect specific getter methods for general info
+	var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
 	var kinectCount = tempKinect.getInstalledCount();
 
 	//i represents the Kinect indices
@@ -201,7 +201,7 @@ function setupDevices() {
 	}
 
 	/*
-	 * Add events for plugging and unplugging USB devices (kinect, webcam, etc.)
+	 * Add events for plugging and unplugging USB devices (kinect, camera, etc.)
 	 */
 	usb.on("attach", function (device) {
 		//The below correctly gets the serial number of the device
@@ -273,11 +273,11 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			*/
 			break;
 
-		case WEBCAM_PAGE_NUM:
-			currentlyOpenPage = WEBCAM_PAGE_NUM;
-			changeWindowFeatures(WEBCAM_PAGE_NUM);
+		case CAMERA_PAGE_NUM:
+			currentlyOpenPage = CAMERA_PAGE_NUM;
+			changeWindowFeatures(CAMERA_PAGE_NUM);
 
-			populateWebcamList(webcamDropdown);
+			populateCameraList(cameraDropdown);
 			/*
 			await kinect.stopListeningAndCameras(); 
 			*/
@@ -353,26 +353,26 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 function changeWindowFeatures(pageNum) {
 	switch (pageNum) {
 		case KINECT_PAGE_NUM:
-			document.getElementById("webcam-page").style.display = "none";
+			document.getElementById("camera-page").style.display = "none";
 			document.getElementById("kinect-page").style.display = "block";
 			document.getElementById("kinect-body-page").style.display = "none";
 			break;
 
 		case KINECT_BODY_PAGE_NUM:
-			document.getElementById("webcam-page").style.display = "none";
+			document.getElementById("camera-page").style.display = "none";
 			document.getElementById("kinect-page").style.display = "none";
 			document.getElementById("kinect-body-page").style.display = "block";
 			break;
 
-		case WEBCAM_PAGE_NUM:
-			document.getElementById("webcam-page").style.display = "block";
+		case CAMERA_PAGE_NUM:
+			document.getElementById("camera-page").style.display = "block";
 			document.getElementById("kinect-page").style.display = "none";
 			document.getElementById("kinect-body-page").style.display = "none";
 			break;
 
 		default:
 			//Default to home page
-			document.getElementById("webcam-page").style.display = "none";
+			document.getElementById("camera-page").style.display = "none";
 			document.getElementById("kinect-page").style.display = "none";
 			document.getElementById("kinect-body-page").style.display = "none";
 	}
@@ -484,10 +484,10 @@ async function getUniqueVideoInputDevices() {
 }
 
 /**
- * Function used to populate the webcam dropdown menu with all unique input
+ * Function used to populate the camera dropdown menu with all unique input
  * devices
  */
-async function populateWebcamList(dropdown) {
+async function populateCameraList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
 	let selectionMessage = document.createElement("option");
@@ -531,7 +531,7 @@ function refreshKinectDevices() {
 		myList.removeChild(myList.lastElementChild);
 	}
 
-	var tempKinect = new Kinect(); //Used to call Kinect specific getter methods for general info
+	var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
 	var kinectCount = tempKinect.getInstalledCount();
 
 	//i represents the Kinect indices

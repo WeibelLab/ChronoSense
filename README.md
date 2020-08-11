@@ -4,6 +4,8 @@
 
 generalized_cameras branch is used to make all camera devices that are plugged in (or already plugged in at launch) update on the application central, universal list of devices that are then available for the application to use in any manner. They will be automatically connected to the necessary SDKs/APIs to optimize their performance.
 
+-   Merged dev/audio_recorder into this branch and deleted it from Github repo
+
 ## Installation / run with Docker
 
 -   Clone/pull this repository and move into it with `cd chronosense`
@@ -74,12 +76,9 @@ generalized_cameras branch is used to make all camera devices that are plugged i
 ## Fixes
 
 -   Fix for "Uncaught Error: The module '//........'
-![alt text](./readme_images/electronRebuildError.PNG "Error Notification")
-    1. Rebuild the Electron package  
-        i. Run a fresh install: `npm install`  
-        ii. Run the command: `npm i -D electron-rebuild`  
-        iii. Run this from your application's base directory: `./node_modules/.bin/electron-rebuild.cmd`
-    2. Reset node_modules/  
-        i. Delete your current node_modules directory  
-        ii. Follow the steps in (1.) above
-
+    ![alt text](./readme_images/electronRebuildError.PNG "Error Notification") 1. Rebuild the Electron package  
+     i. Run a fresh install: `npm install`  
+     ii. Run the command: `npm i -D electron-rebuild`  
+     iii. Run this from your application's base directory: `./node_modules/.bin/electron-rebuild.cmd` 2. Reset node_modules/  
+     i. Delete your current node_modules directory  
+     ii. Follow the steps in (1.) above

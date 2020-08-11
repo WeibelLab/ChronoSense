@@ -29,20 +29,22 @@ export class Kinect {
 	/**
 	 * Constructor for a Kinect object that is a SINGLE Kinect device.
 	 *
-	 * @param {number} index - Default = 0; used to select Kinect
+	 * @param {number} index - Used to select Kinect, index = -1 does NOT open Kinect device (use to get device count).
 	 */
 	constructor(index = 0) {
 		this.#kinectDevice = new KinectAzure();
-		if (this.open(index)) {
-			//Device open
-			this.#serial = this.#kinectDevice.getSerialNumber();
-			if (this.#serial === "\0") {
-				//Failed to get serial
-				console.log(
-					"[Kinect Class Constructor] - Failed to get Kinect Serial Number"
-				);
+		if (index != -1) {
+			if (this.open(index)) {
+				//Device open
+				this.#serial = this.#kinectDevice.getSerialNumber();
+				if (this.#serial === "\0") {
+					//Failed to get serial
+					console.log(
+						"[Kinect Class Constructor Index] - Failed to get Kinect Serial Number"
+					);
+				}
+				this.close();
 			}
-			this.close();
 		}
 
 		//this.#jointWriter = new JointWriter();

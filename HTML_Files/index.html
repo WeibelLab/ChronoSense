@@ -8,7 +8,7 @@
 		<!-- Window Properties: Close, expand, etc. -->
 		<ul id="navigation-bar">
 			<li class="nav-bar-item"><a id="homePage">Home</a></li>
-			<li class="nav-bar-item"><a id="webcamPage">Webcam</a></li>
+			<li class="nav-bar-item"><a id="cameraPage">Camera</a></li>
 			<li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
 			<li class="nav-bar-item">
 				<a id="kinectBodyPage">Kinect Body Tracking</a>
@@ -41,15 +41,15 @@
 
 		<!-- Central Window Page Attributes  -->
 		<div id="main">
-			<div id="webcam-page">
+			<div id="camera-page">
 				<p>
 					<select name="dropdown" id="dropdown">
 						<!-- Dynamically Add Devices -->
 					</select>
 				</p>
-				<video id="webcam-video" autoplay></video>
+				<video id="camera-video" autoplay></video>
 
-				<canvas img-fluid id="webcam-video-canvas"></canvas>
+				<canvas img-fluid id="camera-video-canvas"></canvas>
 
 				<div class="white-background">
 					<input
@@ -76,6 +76,14 @@
 					<a href="#" id="kinect-dropdown-button">Kinect Devices</a>
 					<div id="kinect-dropdown-content">
 						<!-- Dynamically fill when Kinect devices are connected -->
+						<!-- TODO: create checkbox structure in menu 
+							<div>
+							<label>
+								<input type="checkbox" />
+								<span class="custom-checkbox"></span>
+							</label>
+							Kinect
+						</div> -->
 					</div>
 				</div>
 				<button id="kinect-refresh-btn">Refresh Kinect Devices</button>
@@ -247,10 +255,10 @@
 				ctx3.style.height =
 					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
-				var webcamfeed = document.getElementById("webcam-video");
-				webcamfeed.style.width =
+				var camerafeed = document.getElementById("camera-video");
+				camerafeed.style.width =
 					(16 * (window.innerHeight * window.innerWidth)) / 33000;
-				webcamfeed.style.height =
+				camerafeed.style.height =
 					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 			}
 
@@ -260,7 +268,7 @@
 
 				if (isMirrored) {
 					//If true, mirror
-					document.getElementById("webcam-video").style.transform =
+					document.getElementById("camera-video").style.transform =
 						"scaleX(-1)";
 					document.getElementById("video_canvas").style.transform =
 						"scaleX(-1)";
@@ -269,7 +277,7 @@
 					document.getElementById("video_canvas3").style.transform =
 						"scaleX(-1)";
 				} else {
-					document.getElementById("webcam-video").style.transform =
+					document.getElementById("camera-video").style.transform =
 						"scaleX(1)";
 					document.getElementById("video_canvas").style.transform =
 						"scaleX(1)";

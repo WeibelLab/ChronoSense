@@ -1,4 +1,4 @@
-export class Webcam {
+export class Camera {
 	#mediaSource;
 	#videoElement;
 	#canvasElement;
@@ -40,4 +40,4 @@ export class Webcam {
 			console.log(navigator.mediaDevices.enumerateDevices());
 		}
 	}
-} //End of Webcam Class
+} //End of Camera Class
