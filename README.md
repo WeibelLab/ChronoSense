@@ -70,3 +70,16 @@ generalized_cameras branch is used to make all camera devices that are plugged i
 -   Kinect Body Tracking works within the Kinect Body Tracking Page and displays both color and depth images spearately with joint data on top of both feeds.
 -   Kinect Body Tracking data writes continuously to a CSV file. The CSV file has the naming scheme of year-month-day-hour-minute-second and can contain any data within the 'skeleton' class.
 -   Elapsed time from the moment of starting to record to a CSV file is stored on said file for future reference.
+
+## Fixes
+
+-   Fix for "Uncaught Error: The module '//........'
+![alt text](./readme_images/electronRebuildError.PNG "Error Notification")
+    1. Rebuild the Electron package  
+        i. Run a fresh install: `npm install`  
+        ii. Run the command: `npm i -D electron-rebuild`  
+        iii. Run this from your application's base directory: `./node_modules/.bin/electron-rebuild.cmd`
+    2. Reset node_modules/  
+        i. Delete your current node_modules directory  
+        ii. Follow the steps in (1.) above
+
