@@ -20,6 +20,12 @@ export class Camera {
 		return this.#deviceId;
 	}
 
+	// ! List of Functions to create:
+	// ! 1. Set quality, bitrate, etc.
+	// ! 2. Set output canvas/video
+	// ! 3. Get bool values for ifStreaming, ifOpen, ifValuesSet, etc.
+	// ! 4. Start streaming to set canvas
+
 	/**
 	 * Function used for setting the <Video> element that will interpret the video content
 	 * and the <Canvas> element that will display the video content.

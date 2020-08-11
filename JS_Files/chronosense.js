@@ -208,7 +208,7 @@ function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	//! TODO
+	// ! TODO: Create the initial scan for Camera devices on startup
 	var currentDevices = getUniqueVideoInputDevices();
 
 	/*
