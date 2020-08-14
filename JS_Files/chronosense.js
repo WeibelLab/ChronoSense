@@ -18,9 +18,8 @@ const btnsKinectOff = document.getElementsByClassName("kinect_off");
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
-const displayCanvas = document.getElementById("video_canvas");
-const displayCanvas2 = document.getElementById("video_canvas2");
-const displayCanvas3 = document.getElementById("video_canvas3");
+const displayCanvas = document.getElementById("video_canvas"); //For Kinect page
+const displayCanvas2 = document.getElementById("video_canvas2"); //For Camera page
 
 //Used in camera methods
 const recordingButton = document.getElementById("record");
@@ -209,7 +208,29 @@ function setupDevices() {
 	 *
 	 */
 	// ! TODO: Create the initial scan for Camera devices on startup
+	// ! BUG: The delay/async property of getUniqueVideoInputDevices() is
+	// !      leading to missing data for the following checks and creation of camera devices.
+	// ! START OF BUG AREA
+
 	var currentDevices = getUniqueVideoInputDevices();
+
+	console.log(currentDevices.length);
+
+	for (let k = 0; currentDevices.length; k++) {
+		if (
+			!(
+				currentDevices[k].label.includes("kinect") ||
+				currentDevices[k].label.includes("Kinect")
+			)
+		) {
+			//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
+			createCamera(cameraDevices, currentDevices[k]);
+		}
+	} //All camera devices added to the correct array
+
+	console.log(cameraDevices);
+
+	// ! END OF BUG AREA
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, camera, etc.)
@@ -615,10 +636,15 @@ function destroyAllKinects(deviceArr) {
  * Create a Camera object and add it to the array of devices
  *
  * @param {array} deviceArr - Array of Camera devices
- * @param {string} deviceId - Device identifier for local video devices
+ * @param {string} device - Device object retrieved from getInputDevices containing necessary properties
  */
-function createCamera(deviceArr, deviceId) {
-	let camera = new Camera(deviceId);
+function createCamera(deviceArr, device) {
+	var camera = new Camera(
+		device.deviceId,
+		device.groupId,
+		device.kind,
+		device.label
+	);
 	deviceArr.push(camera);
 }
 

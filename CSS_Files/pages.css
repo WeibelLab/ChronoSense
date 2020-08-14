@@ -44,6 +44,15 @@
 	display: none;
 }
 
+#video_canvas2 {
+	width: 960px;
+	height: 540px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-left: 0;
+	padding-right: 0;
+}
+
 #mirrorcheck2 {
 	display: inline;
 }
@@ -272,15 +281,6 @@
 /* * Styling for the Kinect Body Page */
 #kinect-body-page {
 	display: none;
-}
-
-#video_canvas2 {
-	width: 960px;
-	height: 540px;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 0;
-	padding-right: 0;
 }
 
 #video_canvas3 {
