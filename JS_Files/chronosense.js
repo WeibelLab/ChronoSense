@@ -207,34 +207,28 @@ function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	// ! TODO: Create the initial scan for Camera devices on startup
-	// ! BUG: The delay/async property of getUniqueVideoInputDevices() is
-	// !      leading to missing data for the following checks and creation of camera devices.
-	// ! START OF BUG AREA
+	getUniqueVideoInputDevices().then((currentDevices) => {
+		console.log(currentDevices.length);
+		console.log(currentDevices);
 
-	var currentDevices = getUniqueVideoInputDevices();
-
-	console.log(currentDevices.length);
-
-	for (let k = 0; currentDevices.length; k++) {
-		if (
-			!(
-				currentDevices[k].label.includes("kinect") ||
-				currentDevices[k].label.includes("Kinect")
-			)
-		) {
-			//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-			createCamera(cameraDevices, currentDevices[k]);
-		}
-	} //All camera devices added to the correct array
-
-	console.log(cameraDevices);
-
-	// ! END OF BUG AREA
+		for (var k = 0; k < currentDevices.length; k++) {
+			if (
+				!(
+					currentDevices[k].label.includes("kinect") ||
+					currentDevices[k].label.includes("Kinect")
+				)
+			) {
+				//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
+				createCamera(cameraDevices, currentDevices[k]);
+			}
+		} //All camera devices added to the correct array
+		console.log(cameraDevices);
+	});
 
 	/*
 	 * Add events for plugging and unplugging USB devices (kinect, camera, etc.)
 	 */
+	// ! TODO: Set up handling of plugging in devices
 	usb.on("attach", function (device) {
 		//The below correctly gets the serial number of the device
 		try {
@@ -259,6 +253,7 @@ function setupDevices() {
 		}
 	}); //End of USB attach event
 
+	// ! TODO: Set up handling of unplugging devices
 	usb.on("detach", function (device) {
 		//Remove disconnected device by their device identifier (through usb)
 		try {
@@ -434,83 +429,89 @@ async function getInputDevices() {
  * Function used to return an array of all unique audio/video inputs capable
  * of display/recording.
  *
- * @return {array} 	of objects with each device's properties
- *          		-> "deviceId, groupId, kind, label"
+ * @return {Promise} - A promise that resolves to an array of objects with each
+ * 						device's properties -> "deviceId, groupId, kind, label"
  */
 async function getUniqueInputDevices() {
-	var devices = await navigator.mediaDevices.enumerateDevices();
-	var uniqueInputDevices = [];
-	for (var i = 0; i < devices.length; i++) {
-		if (
-			devices[i].kind.localeCompare("audioinput") == 0 ||
-			devices[i].kind.localeCompare("videoinput") == 0
-		) {
-			//Now search through added devices if it already exists
-			var matched = false;
-			for (var j = 0; j < uniqueInputDevices.length; j++) {
+	return navigator.mediaDevices.enumerateDevices().then((devices) => {
+		var uniqueInputDevices = [];
+		for (var i = 0; i < devices.length; i++) {
+			if (
+				devices[i].kind.localeCompare("audioinput") == 0 ||
+				devices[i].kind.localeCompare("videoinput") == 0
+			) {
+				//Now search through added devices if it already exists
+				var matched = false;
+				for (var j = 0; j < uniqueInputDevices.length; j++) {
+					if (
+						uniqueInputDevices[j].groupId.localeCompare(
+							devices[i].groupId
+						) == 0
+					) {
+						matched = true;
+						break; //If match, break out and don't add to
+					}
+				}
+
 				if (
-					uniqueInputDevices[j].groupId.localeCompare(
-						devices[i].groupId
-					) == 0
+					!matched &&
+					devices[i].deviceId.localeCompare("default") != 0 &&
+					devices[i].deviceId.localeCompare("communications") != 0
 				) {
-					matched = true;
-					break; //If match, break out and don't add to
+					//Filter out "default" and "communications" so there is a alphanumeric
+					//identifier.
+					uniqueInputDevices.push(devices[i]);
 				}
 			}
-
-			if (
-				!matched &&
-				devices[i].deviceId.localeCompare("default") != 0 &&
-				devices[i].deviceId.localeCompare("communications") != 0
-			) {
-				//Filter out "default" and "communications" so there is a alphanumeric
-				//identifier.
-				uniqueInputDevices.push(devices[i]);
-			}
 		}
-	}
-	console.log(uniqueInputDevices);
-	return uniqueInputDevices;
+		console.log(uniqueInputDevices);
+		return new Promise((resolve, reject) => {
+			resolve(uniqueInputDevices);
+		});
+	});
 }
 
 /**
  * Function used to return an array of all unique video inputs capable
  * of display/recording.
  *
- * @return {array} 	of objects with each device's properties
- *          		-> "deviceId, groupId, kind, label"
+ * @return {Promise} - A promise that resolves to an array of objects with each
+ * 					   device's properties -> "deviceId, groupId, kind, label"
  */
 async function getUniqueVideoInputDevices() {
-	var devices = await navigator.mediaDevices.enumerateDevices();
-	var uniqueInputDevices = [];
-	for (var i = 0; i < devices.length; i++) {
-		if (devices[i].kind.localeCompare("videoinput") == 0) {
-			//Now search through added devices if it already exists
-			var matched = false;
-			for (var j = 0; j < uniqueInputDevices.length; j++) {
+	return navigator.mediaDevices.enumerateDevices().then((devices) => {
+		var uniqueInputDevices = [];
+		for (var i = 0; i < devices.length; i++) {
+			if (devices[i].kind.localeCompare("videoinput") == 0) {
+				//Now search through added devices if it already exists
+				var matched = false;
+				for (var j = 0; j < uniqueInputDevices.length; j++) {
+					if (
+						uniqueInputDevices[j].groupId.localeCompare(
+							devices[i].groupId
+						) == 0
+					) {
+						matched = true;
+						break; //If match, break out and don't add to
+					}
+				}
+
 				if (
-					uniqueInputDevices[j].groupId.localeCompare(
-						devices[i].groupId
-					) == 0
+					!matched &&
+					devices[i].deviceId.localeCompare("default") != 0 &&
+					devices[i].deviceId.localeCompare("communications") != 0
 				) {
-					matched = true;
-					break; //If match, break out and don't add to
+					//Filter out "default" and "communications" so there is a alphanumeric
+					//identifier and no duplicates.
+					uniqueInputDevices.push(devices[i]);
 				}
 			}
-
-			if (
-				!matched &&
-				devices[i].deviceId.localeCompare("default") != 0 &&
-				devices[i].deviceId.localeCompare("communications") != 0
-			) {
-				//Filter out "default" and "communications" so there is a alphanumeric
-				//identifier and no duplicates.
-				uniqueInputDevices.push(devices[i]);
-			}
 		}
-	}
-	console.log(uniqueInputDevices);
-	return uniqueInputDevices;
+		console.log(uniqueInputDevices);
+		return new Promise((resolve, reject) => {
+			resolve(uniqueInputDevices);
+		});
+	});
 }
 
 /**
@@ -689,4 +690,9 @@ function destroyAllCameras(deviceArr) {
  * before the application shuts down.
  * Acts as an EventHandler for Node.
  */
-global.onbeforeunload = () => {};
+global.onbeforeunload = () => {
+	//Close all Kinects
+	for (var i = 0; i < kinectDevices.length; i++) {
+		kinectDevices[i].close();
+	}
+};
