@@ -6,8 +6,8 @@ export class Camera {
 	#videoElement = null;
 	#canvasElement = null;
 
-	#videoResolutionWidth = 3840; //Default to 4k
-	#videoResolutionHeight = 2160; //Default to 4k
+	#videoResolutionWidth = 1280; //Default to 4k
+	#videoResolutionHeight = 720; //Default to 4k
 
 	/**
 	 *
@@ -148,7 +148,7 @@ export class Camera {
 	 * @return {bool} - true if success, false if fail
 	 */
 
-	startCameraStream() {
+	async startCameraStream() {
 		/* First check that the canvas and video elements are valid */
 		if (this.#videoElement == null || this.#canvasElement == null) {
 			console.log(
@@ -180,14 +180,18 @@ export class Camera {
 
 		/* Try to open cameras and start the stream */
 		try {
-			stream = navigator.mediaDevices.getUserMedia(constraints);
+			stream = await navigator.mediaDevices.getUserMedia(constraints);
+			console.log(`type of stream: ${typeof stream}`);
 			this.#videoElement.srcObject = stream;
-			this.drawToCanvas(
-				this.#videoElement,
-				canvasContext,
-				canvasWidth,
-				canvasHeight
-			);
+
+			requestAnimationFrame(() => {
+				this.drawToCanvas(
+					this.#videoElement,
+					canvasContext,
+					canvasWidth,
+					canvasHeight
+				);
+			});
 		} catch (err) {
 			console.log(
 				`camera.js:startCameraStream()] - ERROR: ${err.message}`
@@ -207,15 +211,15 @@ export class Camera {
 	 *
 	 */
 	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
+		canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
 		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
-		//Refresh canvas at ~60 frames per second
-		setTimeout(
-			drawToCanvas,
-			17,
-			video,
-			canvasContext,
-			canvasWidth,
-			canvasHeight
-		);
+		requestAnimationFrame(() => {
+			this.drawToCanvas(
+				this.#videoElement,
+				canvasContext,
+				canvasWidth,
+				canvasHeight
+			);
+		});
 	}
 } //End of Camera Class

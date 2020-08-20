@@ -158,7 +158,8 @@ async function handleWindowControls() {
 
 	/* Add event everytime the CAMERA drop down menu is selected */
 	dropdown.addEventListener("change", (evt) => {
-		/* CURRENTLY ONLY VIDEO SO JUST START STREAMING */
+		var option = dropdown.options[dropdown.selectedIndex];
+		onCameraDropdownChange(option);
 	});
 
 	/* Add event to refresh Kinect Devices on push - WORKS*/
@@ -515,6 +516,55 @@ async function getUniqueVideoInputDevices() {
 }
 
 /**
+ * On Camera dropdown menu change, use selected option to start streaming video.
+ *
+ * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
+ */
+function onCameraDropdownChange(option) {
+	//Check if Kinect or generic camera/webcam
+	if (option.text.includes("kinect") || option.text.includes("Kinect")) {
+		//Kinect
+		var serialNumber = option.value; //serial number
+		var kinect = null; //Kinect device object
+		//Look through Kinects to find specified device
+		for (var i = 0; i < kinectDevices.length; i++) {
+			if (kinectDevices[i].getSerial().localeCompare(serialNumber) == 0) {
+				console.log(
+					"[chronosense.js:onCameraDropdownChange()] - FOUND KINECT MATCH"
+				);
+				kinect = kinectDevices[i];
+				break;
+			}
+		}
+
+		if (kinect != null) {
+			kinect.setDisplayCanvas(displayCanvas2);
+			kinect.start();
+			kinect.colorVideoFeed();
+		}
+	} else {
+		//NOT a Kinect
+		var deviceId = option.value;
+		var camera = null;
+		//Look through cameras for specified device
+		for (var j = 0; j < cameraDevices.length; j++) {
+			if (cameraDevices[j].getDeviceId().localeCompare(deviceId) == 0) {
+				console.log(
+					"[chronosense.js:onCameraDropdownChange()] - FOUND CAMERA MATCH"
+				);
+				camera = cameraDevices[j];
+				break;
+			}
+		}
+
+		if (camera != null) {
+			camera.setInputAndOutput(camVideo, displayCanvas2);
+			camera.startCameraStream();
+		}
+	}
+}
+
+/**
  * Function used to populate the camera dropdown menu with all unique input
  * devices
  *
@@ -541,7 +591,7 @@ function populateCameraList(dropdown) {
 		);
 		let option = document.createElement("option");
 		option.text = `Azure Kinect (${kinectDevices[i].getSerial()})`;
-		option.value = kinectDevices[i].deviceId;
+		option.value = kinectDevices[i].getSerial();
 		dropdown.add(option);
 	}
 	//Camera Devices
