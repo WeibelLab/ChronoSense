@@ -520,7 +520,7 @@ async function getUniqueVideoInputDevices() {
  *
  * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
  */
-async function populateCameraList(dropdown) {
+function populateCameraList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
 	let selectionMessage = document.createElement("option");
@@ -531,11 +531,27 @@ async function populateCameraList(dropdown) {
 	selectionMessage.textContent = "Select Device";
 	document.getElementById("dropdown").appendChild(selectionMessage);
 
-	var currentDevices = await getUniqueVideoInputDevices();
-	for (var i = 0; i < currentDevices.length; i++) {
-		var option = document.createElement("option");
-		option.text = currentDevices[i].label;
-		option.value = currentDevices[i].deviceId;
+	//Use Kinect device list and Camera device list to populate dropdown
+	//Kinect Devices
+	for (var i = 0; i < kinectDevices.length; i++) {
+		console.log(
+			`Creating dropdown option: Azure Kinect (${kinectDevices[
+				i
+			].getSerial()})`
+		);
+		let option = document.createElement("option");
+		option.text = `Azure Kinect (${kinectDevices[i].getSerial()})`;
+		option.value = kinectDevices[i].deviceId;
+		dropdown.add(option);
+	}
+	//Camera Devices
+	for (var j = 0; j < cameraDevices.length; j++) {
+		console.log(
+			`Creating dropdown option: Camera (${cameraDevices[j].getLabel()})`
+		);
+		let option = document.createElement("option");
+		option.text = cameraDevices[j].getLabel();
+		option.value = cameraDevices[j].getDeviceId();
 		dropdown.add(option);
 	}
 }
