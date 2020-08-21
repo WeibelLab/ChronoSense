@@ -159,8 +159,6 @@ async function handleWindowControls() {
 
 	/* Add event everytime the CAMERA drop down menu is selected */
 	dropdown.addEventListener("change", (evt) => {
-		//Hide dropdown while computation happens in background
-		dropdown.hide();
 		var option = dropdown.options[dropdown.selectedIndex];
 		onCameraDropdownChange(option);
 	});
@@ -308,6 +306,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			stopAllKinectStream(kinectDevices);
 
 			populateCameraList(cameraDropdown);
+
 			/*
 			await kinect.stopListeningAndCameras(); 
 			*/
@@ -354,20 +353,10 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
 			//Stop cameras and Kinect
-			console.log(
-				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before stopping streams"
-			);
-
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices).then(() => {
 				// ! TEMP Hard Coded - For example and testing; change later!
-				console.log(
-					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before setting display canvas"
-				);
 				kinectDevices[0].setDisplayCanvas(displayCanvas3);
-				console.log(
-					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before changing parameters"
-				);
 				kinectDevices[0].changeParameters(
 					"fps30",
 					"BGRA32",
@@ -375,28 +364,9 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 					"wfov2x2binned",
 					"nosync"
 				);
-				console.log(
-					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting streams"
-				);
 				kinectDevices[0].start();
-				console.log(
-					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting bodytracking"
-				);
 				kinectDevices[0].bodyTrackingFeed();
 			});
-
-			/*
-			await kinect.stopListeningAndCameras();
-			kinect.changeParameters(
-				"fps30",
-				"BGRA32",
-				"res1080",
-				"wfov2x2binned",
-				"nosync"
-			);
-			await kinect.start();
-			kinect.bodyTrackingFeed();
-			*/
 			break;
 
 		case ABOUT_PAGE_NUM:

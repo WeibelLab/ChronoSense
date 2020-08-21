@@ -47,7 +47,7 @@ export class Kinect {
 			}
 		}
 
-		this.#jointWriter = new JointWriter();
+		//this.#jointWriter = new JointWriter();
 	}
 
 	/**
@@ -563,7 +563,7 @@ export class Kinect {
 						//TEST: For each body, write joint data to CSV
 						//console.log('BEFORE writing to file');
 						// * Commented out while developing other features
-						this.#jointWriter.writeToFile(body.skeleton);
+						//this.#jointWriter.writeToFile(body.skeleton);
 						//console.log('AFTER writing to file');
 						body.skeleton.joints.forEach((joint) => {
 							this.#outputCtx.fillRect(
