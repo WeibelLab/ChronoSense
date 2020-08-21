@@ -41,19 +41,19 @@
 
 #camera-video {
 	/* Do not display. This is only used to interpret video files and send to canvas */
-	display: block;
-	width: 1280px;
-	height: 720px;
+	display: none;
+	width: 1920px;
+	height: 1080px;
 }
 
 #video_canvas2 {
-	width: 1280px;
-	height: 720px;
+	width: 1920px;
+	height: 1080px;
 	margin-left: auto;
 	margin-right: auto;
 	padding-left: 0;
 	padding-right: 0;
-	background: black;
+	background: #05386b;
 }
 
 #mirrorcheck2 {

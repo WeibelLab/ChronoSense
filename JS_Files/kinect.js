@@ -83,7 +83,7 @@ export class Kinect {
 		}
 
 		//Device didn't open. Either doesn't exist or failed.
-		console.log("[Kinect Class Open()] - Kinect Device Failed to open");
+		console.log("[kinect.js:Open()] - Kinect Device Failed to open");
 		return false;
 	}
 
@@ -100,9 +100,7 @@ export class Kinect {
 		}
 
 		//Device didn't open. Either doesn't exist or failed.
-		console.log(
-			"[Kinect Class serialOpen()] - Kinect Device Failed to open"
-		);
+		console.log("[kinect.js:serialOpen()] - Kinect Device Failed to open");
 		return false;
 	}
 
@@ -119,7 +117,7 @@ export class Kinect {
 		}
 
 		//Device Close Unsuccessful
-		console.log("[Kinect Class close()] - Kinect Device Failed to close");
+		console.log("[kinect.js:close()] - Kinect Device Failed to close");
 		return false;
 	}
 
@@ -141,7 +139,7 @@ export class Kinect {
 		//First check if device is open
 		if (!this.#isKinectOpen) {
 			this.serialOpen();
-			console.log("Opened Kinect");
+			this.#isKinectOpen = true;
 		}
 
 		//Second check if cameras have been started
@@ -155,17 +153,14 @@ export class Kinect {
 			});
 
 			this.#isKinectCamerasStarted = true;
-			console.log("Started Cameras on Kinect");
 		}
 
 		//Third check if depthmode != 0
-		if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+		if (this.#DepthMode !== KinectAzure.K4A_DEPTH_MODE_OFF) {
 			this.#depthModeRange = this.#kinectDevice.getDepthModeRange(
 				this.#DepthMode
 			);
 			this.#kinectDevice.createTracker();
-
-			console.log("Started Body Tracking");
 		}
 	} //End of startKinect()
 
@@ -193,7 +188,7 @@ export class Kinect {
 		}
 
 		console.log(
-			"[Kinect Class setDisplayCanvas()] - ERROR: Passed element is NOT a canvas!"
+			"[kinect.js:setDisplayCanvas()] - ERROR: Passed element is NOT a canvas!"
 		);
 		return false;
 	}
@@ -246,25 +241,59 @@ export class Kinect {
 	 * the Kinect; saving time and resources.
 	 *
 	 */
-
+	/*
 	async stopListeningAndCameras() {
 		if (this.#isKinectListening) {
 			let kinectStoppedlistening = await this.#kinectDevice.stopListening();
+			console.log("stopped: " + kinectStoppedlistening);
 			this.#isKinectListening = false;
 			this.#isKinectStreaming = false;
 			this.#kinectDevice.stopCameras();
 			this.#isKinectCamerasStarted = false;
-			console.log("Cameras Stopped and Listening Stopped");
 
 			if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
 				//this.#jointWriter.closeWrittenFile();
 				this.#kinectDevice.destroyTracker();
-				console.log("Body Tracker Destroyed");
 			}
+
+			console.log(
+				"[kinect.js:stopListeningAndCameras()] - MAYBE RACE CONDITION??"
+			);
 
 			return kinectStoppedlistening;
 		}
-		console.log("Cameras and Listening ALREADY off");
+		console.log(
+			"[kinect.js:stopListeningAndCameras()] - ERROR: Cameras and Listening ALREADY off"
+		);
+	}
+	*/
+	stopListeningAndCameras() {
+		if (this.#isKinectListening) {
+			this.#kinectDevice.stopListening().then(() => {
+				console.log("stoppedListening");
+				this.#isKinectListening = false;
+				this.#isKinectStreaming = false;
+				this.#kinectDevice.stopCameras();
+				console.log("stoppedCameras");
+				this.#isKinectCamerasStarted = false;
+
+				if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
+					//this.#jointWriter.closeWrittenFile();
+					this.#kinectDevice.destroyTracker();
+				}
+
+				console.log(
+					"[kinect.js:stopListeningAndCameras()] - END HIT -> check for race condition"
+				);
+
+				return true;
+			});
+		} else {
+			console.log(
+				"[kinect.js:stopListeningAndCameras()] - ERROR: Cameras and Listening ALREADY off"
+			);
+			return false;
+		}
 	}
 
 	/* The color (RGB) video feed of the Azure Kinect is output to a display
@@ -498,83 +527,54 @@ export class Kinect {
 	}
 
 	/* Takes in the video and depth data to show image with overlayed joints */
-	/*
 	bodyTrackingFeed() {
-		//console.log("Reached the start of BodyTrackingFeed()");
 		//First check if the Kinect is already running and don't start if it is:
-		//if(this.#isKinectOn) {
-		this.#isKinectListening = true;
-		this.#kinectDevice.startListening((data) => {
-			//Debugging
-			//console.log("Listening for Body Data");
-			var outputImageData2 = null;
-			var outputImageData3 = null;
-			if (!outputImageData2 && data.colorImageFrame.width > 0) {
-				this.#displayCanvas2.width = data.colorImageFrame.width;
-				this.#displayCanvas2.height = data.colorImageFrame.height;
-				outputImageData2 = this.#outputCtx2.createImageData(
-					this.#displayCanvas2.width,
-					this.#displayCanvas2.height
-				);
-			}
+		if (!this.#isKinectListening) {
+			this.#isKinectListening = true;
+			this.#kinectDevice.startListening((data) => {
+				this.#isKinectStreaming = true;
+				var outputImageData2 = null;
+				if (!outputImageData2 && data.colorImageFrame.width > 0) {
+					this.#displayCanvas.width = data.colorImageFrame.width;
+					this.#displayCanvas.height = data.colorImageFrame.height;
+					outputImageData2 = this.#outputCtx.createImageData(
+						this.#displayCanvas.width,
+						this.#displayCanvas.height
+					);
+				}
 
-			if (!outputImageData3 && data.depthImageFrame.width > 0) {
-				this.#displayCanvas3.width = data.depthImageFrame.width;
-				this.#displayCanvas3.height = data.depthImageFrame.height;
-				outputImageData3 = this.#outputCtx3.createImageData(
-					this.#displayCanvas3.width,
-					this.#displayCanvas3.height
-				);
-			}
+				if (outputImageData2) {
+					this.renderBGRA32ColorFrame(
+						this.#outputCtx,
+						outputImageData2,
+						data.colorImageFrame
+					);
+				}
 
-			if (outputImageData2) {
-				this.renderBGRA32ColorFrame(
-					this.#outputCtx2,
-					outputImageData2,
-					data.colorImageFrame
-				);
-			}
-			if (outputImageData3) {
-				this.renderDepthFrameAsGreyScale(
-					this.#outputCtx3,
-					outputImageData3,
-					data.depthImageFrame
-				);
-			}
-			if (data.bodyFrame.bodies) {
-				// render the skeleton joints on top of the color feed
-				this.#outputCtx2.save();
-				this.#outputCtx3.save();
-				this.#outputCtx2.fillStyle = "red";
-				this.#outputCtx3.fillStyle = "red";
-				data.bodyFrame.bodies.forEach((body) => {
-					//TEST: For each body, write joint data to CSV
-					//console.log('BEFORE writing to file');
-					// * Commented out while developing other features
-					/* this.#jointWriter.writeToFile(body.skeleton); 
-					//console.log('AFTER writing to file');
-					body.skeleton.joints.forEach((joint) => {
-						this.#outputCtx2.fillRect(
-							joint.colorX,
-							joint.colorY,
-							10,
-							10
-						);
-						this.#outputCtx3.fillRect(
-							joint.depthX,
-							joint.depthY,
-							4,
-							4
-						);
+				if (data.bodyFrame.bodies) {
+					// render the skeleton joints on top of the color feed
+					this.#outputCtx.save();
+					this.#outputCtx.fillStyle = "red";
+					data.bodyFrame.bodies.forEach((body) => {
+						//TEST: For each body, write joint data to CSV
+						//console.log('BEFORE writing to file');
+						// * Commented out while developing other features
+						//this.#jointWriter.writeToFile(body.skeleton);
+						//console.log('AFTER writing to file');
+						body.skeleton.joints.forEach((joint) => {
+							this.#outputCtx.fillRect(
+								joint.colorX,
+								joint.colorY,
+								10,
+								10
+							);
+						});
 					});
-				});
-				this.#outputCtx2.restore();
-				this.#outputCtx3.restore();
-			}
-		});
-		//}
+					this.#outputCtx.restore();
+				}
+			});
+		}
 	}
-	*/
 
 	/* Render the DepthFrame image as grey scale on canvas */
 	renderDepthFrameAsGreyScale(ctx, canvasImageData, imageFrame) {

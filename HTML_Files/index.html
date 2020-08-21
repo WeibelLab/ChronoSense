@@ -47,8 +47,18 @@
 						<!-- Dynamically Add Devices -->
 					</select>
 				</p>
-				<video id="camera-video" autoplay></video>
-				<canvas id="video_canvas2" img-fluid></canvas>
+				<video
+					id="camera-video"
+					width="1920"
+					height="1080"
+					autoplay
+				></video>
+				<canvas
+					id="video_canvas2"
+					width="1920"
+					height="1080"
+					img-fluid
+				></canvas>
 
 				<canvas img-fluid id="camera-video-canvas"></canvas>
 
@@ -253,12 +263,6 @@
 				ctx3.style.width =
 					(16 * (window.innerHeight * window.innerWidth)) / 33000;
 				ctx3.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 33000;
-
-				var camerafeed = document.getElementById("camera-video");
-				camerafeed.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 33000;
-				camerafeed.style.height =
 					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 			}
 

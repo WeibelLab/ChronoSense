@@ -5,9 +5,11 @@ export class Camera {
 	#label = null;
 	#videoElement = null;
 	#canvasElement = null;
+	#canvasContext = null;
+	#isOn = false;
 
-	#videoResolutionWidth = 1280; //Default to 4k
-	#videoResolutionHeight = 720; //Default to 4k
+	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
+	#videoResolutionHeight = 720; //Default to 720 - for best FOV
 
 	/**
 	 *
@@ -113,7 +115,7 @@ export class Camera {
 	// // ! 1. Set quality, bitrate, etc. - finished: set resolution,
 	// // ! 2. Set output canvas/video
 	// ! 3. Get bool values for ifStreaming, ifOpen, ifValuesSet, etc.
-	// ! 4. Start streaming to set canvas
+	// // ! 4. Start streaming to set canvas
 
 	/**
 	 * Function used for setting the <Video> element that will interpret the video content
@@ -133,6 +135,7 @@ export class Camera {
 		//Set output Canvas HTML element
 		if (canvas instanceof HTMLCanvasElement && canvas !== null) {
 			this.#canvasElement = canvas;
+			this.#canvasContext = canvas.getContext("2d");
 		} else {
 			console.log(
 				"[camera.js:setInputAndOutput()] - ERROR: Canvas element argument passed is INVALID"
@@ -173,23 +176,20 @@ export class Camera {
 			},
 		};
 
-		var canvasContext = this.#canvasElement.getContext("2d");
-		var canvasWidth = this.#canvasElement.width;
-		var canvasHeight = this.#canvasElement.height;
 		var stream = null;
 
 		/* Try to open cameras and start the stream */
 		try {
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
-			console.log(`type of stream: ${typeof stream}`);
 			this.#videoElement.srcObject = stream;
+			this.#isOn = true;
 
 			requestAnimationFrame(() => {
 				this.drawToCanvas(
 					this.#videoElement,
-					canvasContext,
-					canvasWidth,
-					canvasHeight
+					this.#canvasContext,
+					this.#canvasElement.width,
+					this.#canvasElement.height
 				);
 			});
 		} catch (err) {
@@ -213,13 +213,28 @@ export class Camera {
 	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
 		canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
 		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
-		requestAnimationFrame(() => {
-			this.drawToCanvas(
-				this.#videoElement,
-				canvasContext,
-				canvasWidth,
-				canvasHeight
-			);
+		var frameId = requestAnimationFrame(() => {
+			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
 		});
+		if (!this.#isOn) {
+			cancelAnimationFrame(frameId);
+		}
+	}
+
+	/**
+	 * Stop the camera feed.
+	 *
+	 */
+	stopCameraStream() {
+		this.#isOn = false;
+		if (
+			this.#videoElement !== null &&
+			this.#videoElement.srcObject !== null
+		) {
+			this.#videoElement.srcObject.getTracks().forEach((track) => {
+				track.stop();
+			});
+		}
+		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
 } //End of Camera Class
