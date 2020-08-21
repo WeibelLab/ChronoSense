@@ -159,6 +159,8 @@ async function handleWindowControls() {
 
 	/* Add event everytime the CAMERA drop down menu is selected */
 	dropdown.addEventListener("change", (evt) => {
+		//Hide dropdown while computation happens in background
+		dropdown.hide();
 		var option = dropdown.options[dropdown.selectedIndex];
 		onCameraDropdownChange(option);
 	});
@@ -317,12 +319,12 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices);
-
-			// ! TEMP Hard Coded - For example and testing; change later!
-			kinectDevices[0].setDisplayCanvas(displayCanvas);
-			kinectDevices[0].start();
-			kinectDevices[0].colorVideoFeed();
+			stopAllKinectStream(kinectDevices).then(() => {
+				// ! TEMP Hard Coded - For example and testing; change later!
+				kinectDevices[0].setDisplayCanvas(displayCanvas);
+				kinectDevices[0].start();
+				kinectDevices[0].colorVideoFeed();
+			});
 
 			/*
 			await kinect.stopListeningAndCameras();
@@ -355,32 +357,33 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			console.log(
 				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before stopping streams"
 			);
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices);
 
-			// ! TEMP Hard Coded - For example and testing; change later!
-			console.log(
-				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before setting display canvas"
-			);
-			kinectDevices[0].setDisplayCanvas(displayCanvas3);
-			console.log(
-				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before changing parameters"
-			);
-			kinectDevices[0].changeParameters(
-				"fps30",
-				"BGRA32",
-				"res1080",
-				"wfov2x2binned",
-				"nosync"
-			);
-			console.log(
-				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting streams"
-			);
-			kinectDevices[0].start();
-			console.log(
-				"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting bodytracking"
-			);
-			kinectDevices[0].bodyTrackingFeed();
+			stopAllCameraStream(cameraDevices);
+			stopAllKinectStream(kinectDevices).then(() => {
+				// ! TEMP Hard Coded - For example and testing; change later!
+				console.log(
+					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before setting display canvas"
+				);
+				kinectDevices[0].setDisplayCanvas(displayCanvas3);
+				console.log(
+					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before changing parameters"
+				);
+				kinectDevices[0].changeParameters(
+					"fps30",
+					"BGRA32",
+					"res1080",
+					"wfov2x2binned",
+					"nosync"
+				);
+				console.log(
+					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting streams"
+				);
+				kinectDevices[0].start();
+				console.log(
+					"[chronosense.js:checkClosingWindowAndChangeContent()] - Right before starting bodytracking"
+				);
+				kinectDevices[0].bodyTrackingFeed();
+			});
 
 			/*
 			await kinect.stopListeningAndCameras();
@@ -502,6 +505,7 @@ async function getUniqueInputDevices() {
 			}
 		}
 		console.log(uniqueInputDevices);
+
 		return new Promise((resolve, reject) => {
 			resolve(uniqueInputDevices);
 		});
@@ -558,45 +562,50 @@ async function getUniqueVideoInputDevices() {
 function onCameraDropdownChange(option) {
 	//Stop cameras and Kinect
 	stopAllCameraStream(cameraDevices);
-	stopAllKinectStream(kinectDevices);
+	stopAllKinectStream(kinectDevices).then(() => {
+		//Check if Kinect or generic camera/webcam
+		if (option.text.includes("kinect") || option.text.includes("Kinect")) {
+			//Kinect
+			var serialNumber = option.value; //serial number
+			var kinect = null; //Kinect device object
 
-	//Check if Kinect or generic camera/webcam
-	if (option.text.includes("kinect") || option.text.includes("Kinect")) {
-		//Kinect
-		var serialNumber = option.value; //serial number
-		var kinect = null; //Kinect device object
+			//Look through Kinects to find specified device
+			for (var i = 0; i < kinectDevices.length; i++) {
+				if (
+					kinectDevices[i].getSerial().localeCompare(serialNumber) ==
+					0
+				) {
+					kinect = kinectDevices[i];
+					break;
+				}
+			}
 
-		//Look through Kinects to find specified device
-		for (var i = 0; i < kinectDevices.length; i++) {
-			if (kinectDevices[i].getSerial().localeCompare(serialNumber) == 0) {
-				kinect = kinectDevices[i];
-				break;
+			if (kinect != null) {
+				kinect.setDisplayCanvas(displayCanvas2);
+				kinect.start();
+				kinect.colorVideoFeed();
+			}
+		} else {
+			//NOT a Kinect
+			var deviceId = option.value;
+			var camera = null;
+
+			//Look through cameras for specified device
+			for (var j = 0; j < cameraDevices.length; j++) {
+				if (
+					cameraDevices[j].getDeviceId().localeCompare(deviceId) == 0
+				) {
+					camera = cameraDevices[j];
+					break;
+				}
+			}
+
+			if (camera != null) {
+				camera.setInputAndOutput(camVideo, displayCanvas2);
+				camera.startCameraStream();
 			}
 		}
-
-		if (kinect != null) {
-			kinect.setDisplayCanvas(displayCanvas2);
-			kinect.start();
-			kinect.colorVideoFeed();
-		}
-	} else {
-		//NOT a Kinect
-		var deviceId = option.value;
-		var camera = null;
-
-		//Look through cameras for specified device
-		for (var j = 0; j < cameraDevices.length; j++) {
-			if (cameraDevices[j].getDeviceId().localeCompare(deviceId) == 0) {
-				camera = cameraDevices[j];
-				break;
-			}
-		}
-
-		if (camera != null) {
-			camera.setInputAndOutput(camVideo, displayCanvas2);
-			camera.startCameraStream();
-		}
-	}
+	});
 }
 
 /**
@@ -798,8 +807,12 @@ function stopAllCameraStream(deviceArr) {
  * @param {Kinect} device - Kinect object to stop/close
  */
 function stopKinectStream(device) {
-	device.stopListeningAndCameras();
-	device.close();
+	return device.stopListeningAndCameras().then((resolve, reject) => {
+		device.close();
+		return new Promise((resolve, reject) => {
+			resolve(true);
+		});
+	});
 }
 
 /**
@@ -807,17 +820,19 @@ function stopKinectStream(device) {
  *
  * @param {array} deviceArr - Array of Kinect devices to stop/close
  */
-function stopAllKinectStream(deviceArr) {
+async function stopAllKinectStream(deviceArr) {
 	console.log(
 		"[chronosense.js:stopAllKinectStream()] - BEGIN Stopping Kinect streams"
 	);
 	for (var i = 0; i < deviceArr.length; i++) {
-		deviceArr[i].stopListeningAndCameras();
-		deviceArr[i].close();
+		await stopKinectStream(deviceArr[i]);
 	}
 	console.log(
 		"[chronosense.js:stopAllKinectStream()] - DONE Stopping Kinect streams"
 	);
+	return new Promise((resolve, reject) => {
+		resolve(true);
+	});
 }
 
 /**

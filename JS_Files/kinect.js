@@ -47,7 +47,7 @@ export class Kinect {
 			}
 		}
 
-		//this.#jointWriter = new JointWriter();
+		this.#jointWriter = new JointWriter();
 	}
 
 	/**
@@ -269,7 +269,7 @@ export class Kinect {
 	*/
 	stopListeningAndCameras() {
 		if (this.#isKinectListening) {
-			this.#kinectDevice.stopListening().then(() => {
+			return this.#kinectDevice.stopListening().then(() => {
 				console.log("stoppedListening");
 				this.#isKinectListening = false;
 				this.#isKinectStreaming = false;
@@ -286,13 +286,17 @@ export class Kinect {
 					"[kinect.js:stopListeningAndCameras()] - END HIT -> check for race condition"
 				);
 
-				return true;
+				return new Promise((resolve, reject) => {
+					resolve(true);
+				});
 			});
 		} else {
 			console.log(
 				"[kinect.js:stopListeningAndCameras()] - ERROR: Cameras and Listening ALREADY off"
 			);
-			return false;
+			return new Promise((resolve, reject) => {
+				resolve(false);
+			});
 		}
 	}
 
@@ -559,7 +563,7 @@ export class Kinect {
 						//TEST: For each body, write joint data to CSV
 						//console.log('BEFORE writing to file');
 						// * Commented out while developing other features
-						//this.#jointWriter.writeToFile(body.skeleton);
+						this.#jointWriter.writeToFile(body.skeleton);
 						//console.log('AFTER writing to file');
 						body.skeleton.joints.forEach((joint) => {
 							this.#outputCtx.fillRect(
