@@ -234,7 +234,7 @@ export class Kinect {
 	*/
 
 	/**
-	 * CURRENTLY WORKING
+	 *
 	 *
 	 * Function will be used to transition between capturing different data streams
 	 * from the kinect (e.g. RGB -> body tracking) without to completely shut off
