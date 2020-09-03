@@ -51,7 +51,6 @@ let currentlyOpenPage = false;
 // When document has loaded, initialize
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
-		draw();
 		handleWindowControls();
 		setupDevices();
 	}
@@ -169,6 +168,13 @@ async function handleWindowControls() {
 		.addEventListener("click", (evt) => {
 			refreshKinectDevices();
 		});
+
+	/* Add event to open and close Kinect drop down menus seamlessly */
+	document.addEventListener("click", (evt) => {
+		if (currentlyOpenPage === KINECT_PAGE_NUM) {
+			openCloseKinectDropMenus(evt);
+		}
+	}); //End of dropdown opener listener
 } //End of handleWindowControls()
 
 /**
@@ -305,7 +311,17 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices);
 
-			populateCameraList(cameraDropdown);
+			// ! Commenting out populateCameraList to test out CSS of dropdown
+			//populateCameraList(cameraDropdown);
+			/* First clear the list - To help in testing design for multi-selectable dropdown options */
+			clearDropdown(dropdown);
+			let selectionMessage = document.createElement("option");
+			selectionMessage.value = "";
+			selectionMessage.disabled = true;
+			selectionMessage.selected = true;
+			selectionMessage.hidden = true;
+			selectionMessage.textContent = "Select Device";
+			document.getElementById("dropdown").appendChild(selectionMessage);
 
 			/*
 			await kinect.stopListeningAndCameras(); 
@@ -804,6 +820,320 @@ async function stopAllKinectStream(deviceArr) {
 		resolve(true);
 	});
 }
+
+/**
+ * Opens or closes dropdown menus to account for clicking outside options to close & open seamlessly.
+ * ! Maybe simplify if possible with HTML IDs
+ *
+ * @param {MouseEvent} evt - Mouse click event on DOM
+ */
+function openCloseKinectDropMenus(evt) {
+	var isKinectOpen = false;
+	var isFpsOpen = false;
+	var isResOpen = false;
+	var isFormatOpen = false;
+	var isDepthOpen = false;
+	var isSyncOpen = false;
+
+	const kinectList = document.getElementById("kinect-dropdown");
+	const kinectOptionFPS = document.getElementById(
+		"kinect-option-dropdown-fps"
+	);
+	const kinectOptionRes = document.getElementById(
+		"kinect-option-dropdown-res"
+	);
+	const kinectOptionFormat = document.getElementById(
+		"kinect-option-dropdown-format"
+	);
+	const kinectOptionDepth = document.getElementById(
+		"kinect-option-dropdown-depth"
+	);
+	const kinectOptionSync = document.getElementById(
+		"kinect-option-dropdown-sync"
+	);
+	let clickedElement = evt.target;
+
+	do {
+		if (kinectList == clickedElement) {
+			document.getElementById(
+				"kinect-option-dropdown-content-fps"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-res"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-format"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-depth"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-sync"
+			).style.display = "none";
+
+			isFpsOpen = false;
+			isResOpen = false;
+			isFormatOpen = false;
+			isDepthOpen = false;
+			isSyncOpen = false;
+
+			if (!isKinectOpen) {
+				isKinectOpen = true;
+				document.getElementById(
+					"kinect-dropdown-content"
+				).style.display = "block";
+				return;
+			} else {
+				isKinectOpen = false;
+				document.getElementById(
+					"kinect-dropdown-content"
+				).style.display = "none";
+				return;
+			}
+		}
+		if (kinectOptionFPS == clickedElement) {
+			document.getElementById("kinect-dropdown-content").style.display =
+				"none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-res"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-format"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-depth"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-sync"
+			).style.display = "none";
+
+			isKinectOpen = false;
+			isResOpen = false;
+			isFormatOpen = false;
+			isDepthOpen = false;
+			isSyncOpen = false;
+
+			if (!isFpsOpen) {
+				isFpsOpen = true;
+				document.getElementById(
+					"kinect-option-dropdown-content-fps"
+				).style.display = "block";
+				return;
+			} else {
+				isFpsOpen = false;
+				document.getElementById(
+					"kinect-option-dropdown-content-fps"
+				).style.display = "none";
+				return;
+			}
+		}
+		if (kinectOptionRes == clickedElement) {
+			document.getElementById("kinect-dropdown-content").style.display =
+				"none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-fps"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-format"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-depth"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-sync"
+			).style.display = "none";
+
+			isKinectOpen = false;
+			isFpsOpen = false;
+			isFormatOpen = false;
+			isDepthOpen = false;
+			isSyncOpen = false;
+
+			if (!isResOpen) {
+				isResOpen = true;
+				document.getElementById(
+					"kinect-option-dropdown-content-res"
+				).style.display = "block";
+				return;
+			} else {
+				isResOpen = false;
+				document.getElementById(
+					"kinect-option-dropdown-content-res"
+				).style.display = "none";
+				return;
+			}
+		}
+		if (kinectOptionFormat == clickedElement) {
+			document.getElementById("kinect-dropdown-content").style.display =
+				"none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-fps"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-res"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-depth"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-sync"
+			).style.display = "none";
+
+			isKinectOpen = false;
+			isFpsOpen = false;
+			isResOpen = false;
+			isDepthOpen = false;
+			isSyncOpen = false;
+
+			if (!isFormatOpen) {
+				isFormatOpen = true;
+				document.getElementById(
+					"kinect-option-dropdown-content-format"
+				).style.display = "block";
+				return;
+			} else {
+				isFormatOpen = false;
+				document.getElementById(
+					"kinect-option-dropdown-content-format"
+				).style.display = "none";
+				return;
+			}
+		}
+		if (kinectOptionDepth == clickedElement) {
+			document.getElementById("kinect-dropdown-content").style.display =
+				"none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-fps"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-res"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-format"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-sync"
+			).style.display = "none";
+
+			isKinectOpen = false;
+			isFpsOpen = false;
+			isResOpen = false;
+			isFormatOpen = false;
+			isSyncOpen = false;
+
+			if (!isDepthOpen) {
+				isDepthOpen = true;
+				document.getElementById(
+					"kinect-option-dropdown-content-depth"
+				).style.display = "block";
+				return;
+			} else {
+				isDepthOpen = false;
+				document.getElementById(
+					"kinect-option-dropdown-content-depth"
+				).style.display = "none";
+				return;
+			}
+		}
+		if (kinectOptionSync == clickedElement) {
+			document.getElementById("kinect-dropdown-content").style.display =
+				"none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-fps"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-res"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-format"
+			).style.display = "none";
+
+			document.getElementById(
+				"kinect-option-dropdown-content-depth"
+			).style.display = "none";
+
+			isKinectOpen = false;
+			isFpsOpen = false;
+			isResOpen = false;
+			isFormatOpen = false;
+			isDepthOpen = false;
+
+			if (!isSyncOpen) {
+				isSyncOpen = true;
+				document.getElementById(
+					"kinect-option-dropdown-content-sync"
+				).style.display = "block";
+				return;
+			} else {
+				isSyncOpen = false;
+				document.getElementById(
+					"kinect-option-dropdown-content-sync"
+				).style.display = "none";
+				return;
+			}
+		}
+		// Go up the DOM
+		clickedElement = clickedElement.parentNode;
+	} while (clickedElement);
+	//Clicked outside of Kinect devices list
+	document.getElementById("kinect-dropdown-content").style.display = "none";
+
+	document.getElementById(
+		"kinect-option-dropdown-content-fps"
+	).style.display = "none";
+
+	document.getElementById(
+		"kinect-option-dropdown-content-res"
+	).style.display = "none";
+
+	document.getElementById(
+		"kinect-option-dropdown-content-format"
+	).style.display = "none";
+
+	document.getElementById(
+		"kinect-option-dropdown-content-depth"
+	).style.display = "none";
+
+	document.getElementById(
+		"kinect-option-dropdown-content-sync"
+	).style.display = "none";
+
+	isKinectOpen = false;
+	isFpsOpen = false;
+	isResOpen = false;
+	isFormatOpen = false;
+	isDepthOpen = false;
+	isSyncOpen = false;
+}
+
+/**
+ * Add custom dropdown menu option to specified menu.
+ *
+ */
+function addDropdownMenuOption() {}
 
 /**
  * Function that is called to make sure all devices are properly shut down
