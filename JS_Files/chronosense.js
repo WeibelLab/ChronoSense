@@ -25,7 +25,6 @@ const displayCanvas3 = document.getElementById("video_canvas3"); //For Kinect Bo
 //Used in camera methods
 const recordingButton = document.getElementById("record");
 const camVideo = document.getElementById("camera-video");
-const cameraDropdown = document.getElementById("dropdown");
 
 //Arrays for all devices
 var kinectDevices = []; //All from class Kinect
@@ -157,10 +156,13 @@ async function handleWindowControls() {
 	}
 
 	/* Add event everytime the CAMERA drop down menu is selected */
+	// ! FIX FOR NEW CUSTOM DROPDOWN MENUS
+	/*
 	dropdown.addEventListener("change", (evt) => {
 		var option = dropdown.options[dropdown.selectedIndex];
 		onCameraDropdownChange(option);
 	});
+	*/
 
 	/* Add event to refresh Kinect Devices on push - WORKS*/
 	document
@@ -173,6 +175,8 @@ async function handleWindowControls() {
 	document.addEventListener("click", (evt) => {
 		if (currentlyOpenPage === KINECT_PAGE_NUM) {
 			openCloseKinectDropMenus(evt);
+		} else if (currentlyOpenPage === CAMERA_PAGE_NUM) {
+			openCloseCameraDropMenus(evt);
 		}
 	}); //End of dropdown opener listener
 } //End of handleWindowControls()
@@ -199,12 +203,12 @@ function setupDevices() {
 		//Create the object, then add to the device array
 		createKinect(i, kinectDevices);
 
-		let newDeviceElem = document.createElement("a");
-		newDeviceElem.title = kinectDevices[i].getSerial(); //serial
-		newDeviceElem.text = "Kinect (" + kinectDevices[i].getSerial() + ")";
-		document
-			.getElementById("kinect-dropdown-content")
-			.appendChild(newDeviceElem);
+		let deviceID = kinectDevices[i].getSerial(); //serial
+		let deviceName = "Kinect (" + kinectDevices[i].getSerial() + ")";
+		let dropdownContentElement = document.getElementById(
+			"kinect-dropdown-content"
+		);
+		addDropdownMenuOption(dropdownContentElement, deviceID, deviceName);
 	}
 
 	/*
@@ -311,17 +315,9 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices);
 
-			// ! Commenting out populateCameraList to test out CSS of dropdown
-			//populateCameraList(cameraDropdown);
-			/* First clear the list - To help in testing design for multi-selectable dropdown options */
-			clearDropdown(dropdown);
-			let selectionMessage = document.createElement("option");
-			selectionMessage.value = "";
-			selectionMessage.disabled = true;
-			selectionMessage.selected = true;
-			selectionMessage.hidden = true;
-			selectionMessage.textContent = "Select Device";
-			document.getElementById("dropdown").appendChild(selectionMessage);
+			populateCameraList(
+				document.getElementById("camera-dropdown-content")
+			);
 
 			/*
 			await kinect.stopListeningAndCameras(); 
@@ -598,46 +594,36 @@ function onCameraDropdownChange(option) {
  * Function used to populate the camera dropdown menu with all unique input
  * devices
  *
- * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
+ * @param {HTML Element} dropdown - Custom dropdown content div element to store options
  */
 function populateCameraList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
-	let selectionMessage = document.createElement("option");
-	selectionMessage.value = "";
-	selectionMessage.disabled = true;
-	selectionMessage.selected = true;
-	selectionMessage.hidden = true;
-	selectionMessage.textContent = "Select Device";
-	document.getElementById("dropdown").appendChild(selectionMessage);
 
 	//Use Kinect device list and Camera device list to populate dropdown
 	//Kinect Devices
 	for (var i = 0; i < kinectDevices.length; i++) {
-		let option = document.createElement("option");
-		option.text = `Azure Kinect (${kinectDevices[i].getSerial()})`;
-		option.value = kinectDevices[i].getSerial();
-		dropdown.add(option);
+		let deviceID = kinectDevices[i].getSerial(); //serial
+		let deviceName = `Azure Kinect (${kinectDevices[i].getSerial()})`;
+
+		addDropdownMenuOption(dropdown, deviceID, deviceName);
 	}
 	//Camera Devices
 	for (var j = 0; j < cameraDevices.length; j++) {
-		let option = document.createElement("option");
-		option.text = cameraDevices[j].getLabel();
-		option.value = cameraDevices[j].getDeviceId();
-		dropdown.add(option);
+		let camName = cameraDevices[j].getLabel();
+		let camID = cameraDevices[j].getDeviceId();
+		addDropdownMenuOption(dropdown, camID, camName);
 	}
 }
 
 /**
  * Function that clears all of the options in a dropdown menu
  *
- * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
+ * @param {HTML Element} dropdown - Custom dropdown div element menu on HTML page
  */
 function clearDropdown(dropdown) {
-	var i,
-		length = dropdown.options.length;
-	for (i = length - 1; i >= 0; i--) {
-		dropdown.remove(i);
+	while (dropdown.lastElementChild) {
+		dropdown.removeChild(dropdown.lastElementChild);
 	}
 }
 
@@ -1130,10 +1116,90 @@ function openCloseKinectDropMenus(evt) {
 }
 
 /**
+ * Opens or closes Camera dropdown menus to account for clicking outside options to close & open seamlessly.
+ * ! Maybe simplify if possible with HTML IDs
+ *
+ * @param {MouseEvent} evt - Mouse click event on DOM
+ */
+function openCloseCameraDropMenus(evt) {
+	var isCameraOpen = false;
+
+	const cameraList = document.getElementById("camera-dropdown");
+
+	let clickedElement = evt.target;
+
+	do {
+		if (cameraList == clickedElement) {
+			if (!isCameraOpen) {
+				isCameraOpen = true;
+				document.getElementById(
+					"camera-dropdown-content"
+				).style.display = "block";
+				return;
+			} else {
+				isCameraOpen = false;
+				document.getElementById(
+					"camera-dropdown-content"
+				).style.display = "none";
+				return;
+			}
+		}
+		// Go up the DOM
+		clickedElement = clickedElement.parentNode;
+	} while (clickedElement);
+	//Clicked outside of Camera devices list
+	document.getElementById("camera-dropdown-content").style.display = "none";
+
+	isCameraOpen = false;
+} //End of camera switch
+
+/**
  * Add custom dropdown menu option to specified menu.
  *
+ * @param {HTML Element} dropdownElement - dropdown content div for either camera or kinect or etc.
+ * @param {String} dropdownID - Name for dropdown option/element that is added, in order to have ID for later calls.
+ * @param {String} dropdownName - Literal name that will be displayed in the dropdown menu.
  */
-function addDropdownMenuOption() {}
+function addDropdownMenuOption(dropdownElement, dropdownID, dropdownName) {
+	//Create necessary elements with outer div wrapper and inner content
+	var parentDiv = document.createElement("div");
+	var childDiv = document.createElement("div");
+	var checkImg = document.createElement("img");
+
+	parentDiv.id = dropdownID;
+	childDiv.innerText = dropdownName;
+	checkImg.src = "../images/checkmark.png";
+	checkImg.style.visibility = "hidden";
+
+	parentDiv.appendChild(childDiv);
+	parentDiv.appendChild(checkImg);
+	parentDiv.addEventListener("click", (evt) => {
+		onDeviceSelection(evt.currentTarget);
+	});
+	dropdownElement.appendChild(parentDiv);
+}
+
+/**
+ * Create HTML elements necessary to start streaming feed to UI on selection from custom dropdown menu.
+ *
+ * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
+ */
+function onDeviceSelection(targetElement) {
+	//If visible, make invisible. If invisible, make visible
+	if (
+		targetElement.childNodes[1].style.visibility.localeCompare("hidden") ===
+		0
+	) {
+		//First create the necessary elements
+		// ! video, canvas, buttons, video option menus, etc.
+		//Finally, make check mark visible indicating the device is "live"
+		targetElement.childNodes[1].style.visibility = "visible";
+	} else {
+		//First delete the necessary elements (for performance)
+		//Finally, make check mark visible indicating the device is NOT "live"
+		targetElement.childNodes[1].style.visibility = "hidden";
+	}
+}
 
 /**
  * Function that is called to make sure all devices are properly shut down

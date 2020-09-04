@@ -42,8 +42,6 @@
 		<!-- Central Window Page Attributes  -->
 		<div id="main">
 			<div id="camera-page">
-				<!--Keep select dropdown for working javascript. Change in the near future-->
-				<select id="dropdown"></select>
 				<div class="chrono-dropdown" id="camera-dropdown">
 					<a
 						href="#"
@@ -63,18 +61,20 @@
 						</div>
 					</div>
 				</div>
-				<video
-					id="camera-video"
-					width="1920"
-					height="1080"
-					autoplay
-				></video>
-				<canvas
-					id="video_canvas2"
-					width="1920"
-					height="1080"
-					img-fluid
-				></canvas>
+				<div id="camera-video-feed-container">
+					<video
+						id="camera-video"
+						width="1920"
+						height="1080"
+						autoplay
+					></video>
+					<canvas
+						id="video_canvas2"
+						width="1920"
+						height="1080"
+						img-fluid
+					></canvas>
+				</div>
 				<div class="white-background">
 					<input
 						type="checkbox"
@@ -108,15 +108,16 @@
 						id="kinect-dropdown-content"
 					>
 						<!-- Dynamically fill when Kinect devices are connected -->
-						<!-- TODO: create checkbox structure in menu -->
-						<div>
+						<!-- TODO: create checkbox structure in menu <div>
 							<div>Cam 1</div>
 							<img src="../images/checkmark.png" />
-						</div>
+						</div> -->
 					</div>
 				</div>
 				<button id="kinect-refresh-btn">Refresh Kinect Devices</button>
-				<canvas id="video_canvas" img-fluid></canvas>
+				<div id="kinect-video-feed-container">
+					<canvas id="video_canvas" img-fluid></canvas>
+				</div>
 				<div class="kinect-option-button-container">
 					<div
 						class="kinect-option-dropdown"

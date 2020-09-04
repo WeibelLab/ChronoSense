@@ -29,6 +29,7 @@
 .chrono-dropdown {
 	position: relative;
 	width: 8em;
+	user-select: none;
 }
 
 .chrono-dropdown-btn {
@@ -57,6 +58,7 @@
 	position: absolute;
 	background-color: #f1f1f1;
 	min-width: 8em;
+	width: auto;
 	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
 	z-index: 1;
 }
@@ -79,7 +81,11 @@
 	background-color: #cccccc;
 }
 
-.chrono-dropdown-content div img {
+.chrono-dropdown-content > div div {
+	margin-right: 1em;
+}
+
+.chrono-dropdown-content > div img {
 	position: relative;
 	width: 1em;
 	height: auto;
