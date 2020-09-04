@@ -1,18 +1,23 @@
 {
-  "name": "chronosense",
-  "version": "1.0.0",
-  "description": "Chronosense Electron Application",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron --no-sandbox --use-gl=swiftshader .",
-    "postinstall": "node ./node_modules/kinect-azure/scripts/install.js"
-  },
-  "author": "Alexander Schonken",
-  "license": "ISC",
-  "dependencies": {
-    "csv-write-stream": "^2.0.0",
-    "electron": "^8.0.3",
-    "kinect-azure": "0.0.19",
-    "timer-stopwatch": "0.2.0"
-  }
+	"name": "chronosense",
+	"version": "1.0.0",
+	"description": "Chronosense Electron Application",
+	"main": "main.js",
+	"scripts": {
+		"start": "electron --no-sandbox --use-gl=swiftshader .",
+		"postinstall": "node ./kinect-azure/scripts/install.js"
+	},
+	"author": "Alexander Schonken",
+	"license": "ISC",
+	"dependencies": {
+		"csv-write-stream": "^2.0.0",
+		"electron": "^8.0.3",
+		"timer-stopwatch": "0.2.0",
+		"usb": "^1.6.3",
+		"naudiodon": "^2.2.1",
+		"wav-headers": "^1.0.1"
+	},
+	"devDependencies": {
+		"electron-rebuild": "^1.11.0"
+	}
 }
