@@ -71,6 +71,8 @@ h1 {
 	padding-bottom: 15px;
 	margin: 0px;
 	text-decoration: none;
+
+	cursor: pointer;
 }
 
 #navigation-bar li a:hover {

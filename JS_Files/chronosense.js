@@ -1173,6 +1173,7 @@ function addDropdownMenuOption(dropdownElement, dropdownID, dropdownName) {
 
 	parentDiv.appendChild(childDiv);
 	parentDiv.appendChild(checkImg);
+	// Add listener for option selection
 	parentDiv.addEventListener("click", (evt) => {
 		onDeviceSelection(evt.currentTarget);
 	});
@@ -1185,7 +1186,8 @@ function addDropdownMenuOption(dropdownElement, dropdownID, dropdownName) {
  * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
  */
 function onDeviceSelection(targetElement) {
-	//If visible, make invisible. If invisible, make visible
+	//If VISIBLE, make check invisible, clear out HTML elements, close feed.
+	//If INVISIBLE, make visible, create HTML elements, start feed.
 	if (
 		targetElement.childNodes[1].style.visibility.localeCompare("hidden") ===
 		0
