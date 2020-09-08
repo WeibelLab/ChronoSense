@@ -16,6 +16,10 @@
 	top: 2px;
 	right: 2px;
 	display: inline;
+
+	border-style: solid;
+	border-color: blue;
+	border-width: 2px;
 }
 
 .mirrorlabel {
@@ -24,6 +28,9 @@
 	display: inline;
 	color: var(--primaryLightContrastColor);
 	font-weight: 400;
+	border-style: solid;
+	border-color: blue;
+	border-width: 2px;
 }
 
 .chrono-dropdown {
@@ -101,22 +108,44 @@
 	display: block;
 }
 
-#camera-video {
+#camera-video-feed-container {
+	/* ! Up for change */
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 100%;
+	height: 90%;
+
+	border-style: solid;
+	border-color: red;
+	border-width: 2px;
+}
+
+.video-inner-container {
+	margin: 1em;
+}
+
+.camera-video {
 	/* Do not display. This is only used to interpret video files and send to canvas */
 	display: none;
 	width: 1920px;
 	height: 1080px;
 }
 
-#video_canvas2 {
-	display: block;
-	width: 1920px;
-	height: 1080px;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 0;
-	padding-right: 0;
+.camera-canvas {
+	width: 640px;
+	height: 360px;
 	background: #05386b;
+
+	border-style: solid;
+	border-color: pink;
+	border-width: 2px;
+}
+
+.camera-buttons-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 }
 
 #mirrorcheck2 {
@@ -127,8 +156,11 @@
 	display: inline;
 }
 
-#record {
+.camera-record-btn {
 	display: block;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
 }
 
 /* * Styling for the Kinect Page */

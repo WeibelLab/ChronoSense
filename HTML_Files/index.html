@@ -57,37 +57,8 @@
 					</div>
 				</div>
 				<div id="camera-video-feed-container">
-					<video
-						id="camera-video"
-						width="1920"
-						height="1080"
-						autoplay
-					></video>
-					<canvas
-						id="video_canvas2"
-						width="1920"
-						height="1080"
-						img-fluid
-					></canvas>
+					<!-- Dynamically fill when camera devices are selected -->
 				</div>
-				<div class="white-background">
-					<input
-						type="checkbox"
-						class="mirrorcheck"
-						id="mirrorcheck2"
-						name="mirrorcheck2"
-						value="Mirror"
-						onclick="mirrorDisplayFunc('mirrorcheck2')"
-					/>
-					<label
-						for="mirrorcheck2"
-						class="mirrorlabel"
-						id="mirrorlabel2"
-					>
-						Mirror Video</label
-					>
-				</div>
-				<button id="record">Start Recording</button>
 			</div>
 
 			<div id="kinect-page">
@@ -263,12 +234,6 @@
 				ctx.style.height =
 					(9 * (window.innerHeight * window.innerWidth)) / 33000;
 
-				var ctx2 = document.getElementById("video_canvas2");
-				ctx2.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 33000;
-				ctx2.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 33000;
-
 				var ctx3 = document.getElementById("video_canvas3");
 				ctx3.style.width =
 					(16 * (window.innerHeight * window.innerWidth)) / 33000;
@@ -282,20 +247,12 @@
 
 				if (isMirrored) {
 					//If true, mirror
-					document.getElementById("camera-video").style.transform =
-						"scaleX(-1)";
 					document.getElementById("video_canvas").style.transform =
-						"scaleX(-1)";
-					document.getElementById("video_canvas2").style.transform =
 						"scaleX(-1)";
 					document.getElementById("video_canvas3").style.transform =
 						"scaleX(-1)";
 				} else {
-					document.getElementById("camera-video").style.transform =
-						"scaleX(1)";
 					document.getElementById("video_canvas").style.transform =
-						"scaleX(1)";
-					document.getElementById("video_canvas2").style.transform =
 						"scaleX(1)";
 					document.getElementById("video_canvas3").style.transform =
 						"scaleX(1)";

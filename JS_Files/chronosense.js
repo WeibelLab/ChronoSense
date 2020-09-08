@@ -606,13 +606,13 @@ function populateCameraList(dropdown) {
 		let deviceID = kinectDevices[i].getSerial(); //serial
 		let deviceName = `Azure Kinect (${kinectDevices[i].getSerial()})`;
 
-		addDropdownMenuOption(dropdown, deviceID, deviceName);
+		addDropdownMenuOption(dropdown, deviceID, deviceName, kinectDevices[i]);
 	}
 	//Camera Devices
 	for (var j = 0; j < cameraDevices.length; j++) {
 		let camName = cameraDevices[j].getLabel();
 		let camID = cameraDevices[j].getDeviceId();
-		addDropdownMenuOption(dropdown, camID, camName);
+		addDropdownMenuOption(dropdown, camID, camName, cameraDevices[j]);
 	}
 }
 
@@ -1159,8 +1159,14 @@ function openCloseCameraDropMenus(evt) {
  * @param {HTML Element} dropdownElement - dropdown content div for either camera or kinect or etc.
  * @param {String} dropdownID - Name for dropdown option/element that is added, in order to have ID for later calls.
  * @param {String} dropdownName - Literal name that will be displayed in the dropdown menu.
+ * @param {Video Object} device - Camera/Kinect Class object used to attach canvas/video for output and control.
  */
-function addDropdownMenuOption(dropdownElement, dropdownID, dropdownName) {
+async function addDropdownMenuOption(
+	dropdownElement,
+	dropdownID,
+	dropdownName,
+	device
+) {
 	//Create necessary elements with outer div wrapper and inner content
 	var parentDiv = document.createElement("div");
 	var childDiv = document.createElement("div");
@@ -1173,19 +1179,163 @@ function addDropdownMenuOption(dropdownElement, dropdownID, dropdownName) {
 
 	parentDiv.appendChild(childDiv);
 	parentDiv.appendChild(checkImg);
-	// Add listener for option selection
-	parentDiv.addEventListener("click", (evt) => {
-		onDeviceSelection(evt.currentTarget);
-	});
+	// ! Add listener for option selection
+	// ! If Kinect, one set of elements
+	// ! If Camera, different set of elements
+	if (dropdownElement.id.includes("kinect")) {
+		// * Kinect Dropdown Option
+		parentDiv.addEventListener("click", (evt) => {
+			onKinectSelection(evt.currentTarget);
+		});
+	} else {
+		// * Camera Dropdown Option
+		parentDiv.addEventListener("click", (evt) => {
+			onCameraSelection(evt.currentTarget, device);
+		});
+	}
+	// Add elements to
 	dropdownElement.appendChild(parentDiv);
 }
 
 /**
- * Create HTML elements necessary to start streaming feed to UI on selection from custom dropdown menu.
+ * Create Camera Page HTML elements necessary to start streaming feed to UI on selection from custom dropdown menu.
+ *
+ * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
+ * @param {Video Object} device - Camera Class object used to attach canvas/video for output and control.
+ */
+async function onCameraSelection(targetElement, device) {
+	//If VISIBLE, make check invisible, clear out HTML elements, close feed.
+	//If INVISIBLE, make visible, create HTML elements, start feed.
+	if (
+		targetElement.childNodes[1].style.visibility.localeCompare("hidden") ===
+		0
+	) {
+		//Make check mark visible indicating the device is "live"
+		targetElement.childNodes[1].style.visibility = "visible";
+
+		//First create the necessary elements
+		// * video, canvas, buttons, video option menus, etc.
+		let videoContainer = document.createElement("div");
+		let videoButtonsContainer = document.createElement("div");
+		let mirrorButtonDiv = document.createElement("div");
+		let videoElement = document.createElement("video");
+		let canvasElement = document.createElement("canvas");
+		let mirrorInputElement = document.createElement("input");
+		let mirrorLabelElement = document.createElement("label");
+		let recordElement = document.createElement("button");
+
+		//Set correct properties
+		videoElement.width = "1920";
+		videoElement.height = "1080";
+		videoElement.autoplay = true;
+		videoElement.classList.add("camera-video");
+
+		canvasElement.width = "1920";
+		canvasElement.height = "1080";
+		canvasElement.classList.add("camera-canvas");
+
+		mirrorInputElement.classList.add("mirrorcheck");
+		mirrorInputElement.type = "checkbox";
+		mirrorInputElement.addEventListener("click", () => {
+			mirrorCanvas(canvasElement);
+		});
+
+		mirrorLabelElement.innerText = "Mirror Video";
+		mirrorLabelElement.classList.add("mirrorlabel");
+
+		recordElement.innerText = "Start Recording";
+		recordElement.classList.add("camera-record-btn");
+
+		mirrorButtonDiv.appendChild(mirrorInputElement);
+		mirrorButtonDiv.appendChild(mirrorLabelElement);
+
+		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.appendChild(mirrorButtonDiv);
+		videoButtonsContainer.appendChild(recordElement);
+
+		// Attach all to div in the correct order and add to the page
+		videoContainer.classList.add("video-inner-container");
+		if (device instanceof Kinect) {
+			//Kinect specific identifier
+			videoContainer.id = `cameraContainer${device.getSerial()}`;
+		} else {
+			//Camera specific identifier
+			videoContainer.id = `cameraContainer${device.getDeviceId()}`;
+		}
+
+		videoContainer.appendChild(videoElement);
+		videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoButtonsContainer);
+
+		let cameraVideoFeedOuterContainer = document.getElementById(
+			"camera-video-feed-container"
+		);
+		cameraVideoFeedOuterContainer.appendChild(videoContainer);
+
+		// Connect new elements to start feed in Class
+		//Stop cameras and Kinect
+		if (device instanceof Kinect) {
+			//Kinect Specific
+			stopKinectStream(device).then(() => {
+				if (device != null) {
+					device.setDisplayCanvas(canvasElement);
+					device.start();
+					device.colorVideoFeed();
+				}
+			});
+		} else {
+			//Camera specific
+			stopCameraStream(device);
+
+			if (device != null) {
+				device.setInputAndOutput(videoElement, canvasElement);
+				device.startCameraStream();
+			}
+		}
+	} else {
+		//Make check mark visible indicating the device is NOT "live"
+		targetElement.childNodes[1].style.visibility = "hidden";
+
+		if (device instanceof Kinect) {
+			//Kinect specific
+			//First delete the necessary elements (for performance):
+			let outermostDiv = document.getElementById(
+				`cameraContainer${device.getSerial()}`
+			);
+
+			while (outermostDiv.lastElementChild) {
+				outermostDiv.removeChild(outermostDiv.lastElementChild);
+			}
+
+			outermostDiv.remove();
+
+			//Second, turn off camera feed in the object
+			stopKinectStream(device);
+		} else {
+			//Camera specific
+			//First delete the necessary elements (for performance):
+			let outermostDiv = document.getElementById(
+				`cameraContainer${device.getDeviceId()}`
+			);
+
+			while (outermostDiv.lastElementChild) {
+				outermostDiv.removeChild(outermostDiv.lastElementChild);
+			}
+
+			outermostDiv.remove();
+
+			//Second, turn off camera feed in the object
+			stopCameraStream(device);
+		}
+	}
+}
+
+/**
+ * Create Kinect Page HTML elements necessary to start streaming feed to UI on selection from custom dropdown menu.
  *
  * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
  */
-function onDeviceSelection(targetElement) {
+function onKinectSelection(targetElement) {
 	//If VISIBLE, make check invisible, clear out HTML elements, close feed.
 	//If INVISIBLE, make visible, create HTML elements, start feed.
 	if (
@@ -1200,6 +1350,19 @@ function onDeviceSelection(targetElement) {
 		//First delete the necessary elements (for performance)
 		//Finally, make check mark visible indicating the device is NOT "live"
 		targetElement.childNodes[1].style.visibility = "hidden";
+	}
+}
+
+/**
+ * Mirror the specified canvas element about the y-axis (x=1 -> x=-1).
+ */
+function mirrorCanvas(canvas) {
+	if (canvas.style.transform.localeCompare("scaleX(-1)") === 0) {
+		// Change back to "normal" scaling
+		canvas.style.transform = "scaleX(1)";
+	} else {
+		// Mirror canvas
+		canvas.style.transform = "scaleX(-1)";
 	}
 }
 
