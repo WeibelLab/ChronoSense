@@ -1220,34 +1220,51 @@ async function onCameraSelection(targetElement, device) {
 		let mirrorButtonDiv = document.createElement("div");
 		let videoElement = document.createElement("video");
 		let canvasElement = document.createElement("canvas");
-		let mirrorInputElement = document.createElement("input");
+		let mirrorCheckElement = document.createElement("img");
 		let mirrorLabelElement = document.createElement("label");
 		let recordElement = document.createElement("button");
 
 		//Set correct properties
+		//Video element is NOT inserted into DOM since it is used as translation to canvas
 		videoElement.width = "1920";
 		videoElement.height = "1080";
 		videoElement.autoplay = true;
-		videoElement.classList.add("camera-video");
 
 		canvasElement.width = "1920";
 		canvasElement.height = "1080";
 		canvasElement.classList.add("camera-canvas");
 
-		mirrorInputElement.classList.add("mirrorcheck");
-		mirrorInputElement.type = "checkbox";
-		mirrorInputElement.addEventListener("click", () => {
-			mirrorCanvas(canvasElement);
-		});
+		mirrorCheckElement.src = "../images/checkmarkWhite.png";
+		mirrorCheckElement.style.visibility = "hidden";
+		mirrorCheckElement.style.width = "16%";
+		mirrorCheckElement.style.marginRight = "6%";
 
 		mirrorLabelElement.innerText = "Mirror Video";
 		mirrorLabelElement.classList.add("mirrorlabel");
 
+		mirrorButtonDiv.style.backgroundColor = "#11366b";
+		mirrorButtonDiv.style.height = "3em";
+		mirrorButtonDiv.style.display = "flex";
+		mirrorButtonDiv.style.justifyContent = "space-between";
+		mirrorButtonDiv.style.alignItems = "center";
+		mirrorButtonDiv.style.borderRadius = "5px";
+		mirrorButtonDiv.style.cursor = "pointer";
+		mirrorButtonDiv.appendChild(mirrorLabelElement);
+		mirrorButtonDiv.appendChild(mirrorCheckElement);
+		mirrorButtonDiv.addEventListener("click", () => {
+			mirrorCanvas(canvasElement);
+			if (
+				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
+				0
+			) {
+				mirrorCheckElement.style.visibility = "visible";
+			} else {
+				mirrorCheckElement.style.visibility = "hidden";
+			}
+		});
+
 		recordElement.innerText = "Start Recording";
 		recordElement.classList.add("camera-record-btn");
-
-		mirrorButtonDiv.appendChild(mirrorInputElement);
-		mirrorButtonDiv.appendChild(mirrorLabelElement);
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
 		videoButtonsContainer.appendChild(mirrorButtonDiv);
@@ -1263,7 +1280,6 @@ async function onCameraSelection(targetElement, device) {
 			videoContainer.id = `cameraContainer${device.getDeviceId()}`;
 		}
 
-		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(canvasElement);
 		videoContainer.appendChild(videoButtonsContainer);
 

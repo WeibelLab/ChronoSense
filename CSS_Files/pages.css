@@ -24,13 +24,12 @@
 
 .mirrorlabel {
 	position: relative;
-	left: 4px;
-	display: inline;
 	color: var(--primaryLightContrastColor);
+	font-size: 1.3em;
 	font-weight: 400;
-	border-style: solid;
-	border-color: blue;
-	border-width: 2px;
+	margin-left: 3%;
+	user-select: none;
+	cursor: pointer;
 }
 
 .chrono-dropdown {
