@@ -2,10 +2,7 @@
 
 ## Branch Focus & Changes:
 
-generalized_cameras branch is used to make all camera devices that are plugged in (or already plugged in at launch) update on the application central, universal list of devices that are then available for the application to use in any manner. They will be automatically connected to the necessary SDKs/APIs to optimize their performance.
-
--   Merged dev/audio_recorder into this branch and deleted it from Github repo
--   Changed Webcam Class -> Camera Class to generalize video input
+Universal_recorder is a branch that is off of dynamic_ui (master -> dynamic_ui -> universal_recorder) and focuses on creating a single recording infastructure for video, audio, and body tracking data through the use of ffmpeg or some other technology.
 
 ## Installation / run with Docker
 
