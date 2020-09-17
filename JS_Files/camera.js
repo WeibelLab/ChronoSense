@@ -1,3 +1,6 @@
+var Readable = require("stream").Readable;
+const { spawn } = require("child_process");
+
 export class Camera {
 	#deviceId = null;
 	#groupId = null;
@@ -10,6 +13,9 @@ export class Camera {
 
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
+
+	#isRecording = false;
+	#recorder;
 
 	/**
 	 *
@@ -191,6 +197,7 @@ export class Camera {
 					this.#canvasElement.width,
 					this.#canvasElement.height
 				);
+				this.startRecording();
 			});
 		} catch (err) {
 			console.log(
@@ -211,14 +218,57 @@ export class Camera {
 	 *
 	 */
 	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
-		canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+		//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
+		if (video.readyState === video.HAVE_ENOUGH_DATA) {
+			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+			this.#isRecording = true;
+			this.writeToFile();
+		}
 		var frameId = requestAnimationFrame(() => {
 			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
 		});
 		if (!this.#isOn) {
 			cancelAnimationFrame(frameId);
+			this.closeFile();
 		}
+	}
+
+	/**
+	 * Call to add new canvas frame data to video file
+	 *
+	 */
+	writeToFile() {
+		let originalData = this.#canvasContext.getImageData(
+			0,
+			0,
+			this.#canvasElement.width,
+			this.#canvasElement.height
+		).data;
+		/*
+
+		let rgb32 = new Uint8Array((originalData.length / 4) * 4);
+		let i = 0;
+		let j = 0;
+		while (i < originalData.length) {
+			rgb32[j++] = originalData[i++]; //R
+			rgb32[j++] = originalData[i++]; //G
+			rgb32[j++] = originalData[i++]; //B
+			rgb32[j++] = originalData[i++]; //a
+		}
+		
+		this.#recorder.push(rgb32);
+		*/
+
+		let rgb32 = new Uint8Array(originalData.buffer);
+		this.#recorder.push(rgb32);
+	}
+
+	/**
+	 * Close and save recording file
+	 */
+	closeFile() {
+		this.#recorder.push(null);
+		this.#recorder.destroy();
 	}
 
 	/**
@@ -227,6 +277,7 @@ export class Camera {
 	 */
 	stopCameraStream() {
 		this.#isOn = false;
+		this.#isRecording = false;
 		if (
 			this.#videoElement !== null &&
 			this.#videoElement.srcObject !== null
@@ -236,5 +287,54 @@ export class Camera {
 			});
 		}
 		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
+	}
+
+	/**
+	 * Start recording via spawning a child process and piping in image data
+	 * to FFMPEG.
+	 */
+	startRecording() {
+		// ! Potential FFMPEG command to pipe in jpeg frames to mkv video
+		// ! $ffmpeg -i - -c:v png -f image2pipe testCameraVideo.mkv
+		// ! Leaving "-i -", the hyphen means input piped from stdin
+		let img2Video = spawn("ffmpeg", [
+			"-f",
+			"rawvideo",
+			"-pix_fmt",
+			"rgba",
+			"-video_size",
+			"1920x1080",
+			"-framerate",
+			"30",
+			"-i",
+			"-",
+			"testCameraVideo.mkv",
+		]);
+
+		this.#recorder = Readable();
+
+		/*
+		img2Video.stderr.on("data", (data) => {
+			console.log(`Child Process Err: ${data}`);
+		});
+
+		img2Video.on("close", (code) => {
+			console.log(`child process exited with code ${code}`);
+		});
+		*/
+
+		this.#recorder._read = () => {
+			// * Use write to read stream above ^^
+			let originalData = this.#canvasContext.getImageData(
+				0,
+				0,
+				this.#canvasElement.width,
+				this.#canvasElement.height
+			).data;
+			let rgb32 = new Uint8Array(originalData.buffer);
+			this.#recorder.push(rgb32);
+		};
+
+		this.#recorder.pipe(img2Video.stdin);
 	}
 } //End of Camera Class

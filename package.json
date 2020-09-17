@@ -12,9 +12,9 @@
 	"dependencies": {
 		"csv-write-stream": "^2.0.0",
 		"electron": "^8.0.3",
+		"naudiodon": "^2.2.1",
 		"timer-stopwatch": "0.2.0",
 		"usb": "^1.6.3",
-		"naudiodon": "^2.2.1",
 		"wav-headers": "^1.0.1"
 	},
 	"devDependencies": {

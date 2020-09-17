@@ -337,7 +337,7 @@ export class Kinect {
 		//console.log("Start of renderBGRA32ColorFrame() reached");
 		const newPixelData = Buffer.from(imageFrame.imageData);
 		const pixelArray = canvasImageData.data;
-		console.log(pixelArray);
+		//console.log(pixelArray);
 		for (let i = 0; i < canvasImageData.data.length; i += 4) {
 			pixelArray[i] = newPixelData[i + 2];
 			pixelArray[i + 1] = newPixelData[i + 1];
