@@ -197,7 +197,6 @@ export class Camera {
 					this.#canvasElement.width,
 					this.#canvasElement.height
 				);
-				this.startRecording();
 			});
 		} catch (err) {
 			console.log(
@@ -221,6 +220,9 @@ export class Camera {
 		//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
 		if (video.readyState === video.HAVE_ENOUGH_DATA) {
 			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+			if (!this.#isRecording) {
+				this.startRecording();
+			}
 			this.#isRecording = true;
 			this.writeToFile();
 		}
@@ -229,6 +231,7 @@ export class Camera {
 		});
 		if (!this.#isOn) {
 			cancelAnimationFrame(frameId);
+			this.#isRecording = false;
 			this.closeFile();
 		}
 	}
@@ -238,37 +241,23 @@ export class Camera {
 	 *
 	 */
 	writeToFile() {
-		let originalData = this.#canvasContext.getImageData(
-			0,
-			0,
-			this.#canvasElement.width,
-			this.#canvasElement.height
-		).data;
-		/*
-
-		let rgb32 = new Uint8Array((originalData.length / 4) * 4);
-		let i = 0;
-		let j = 0;
-		while (i < originalData.length) {
-			rgb32[j++] = originalData[i++]; //R
-			rgb32[j++] = originalData[i++]; //G
-			rgb32[j++] = originalData[i++]; //B
-			rgb32[j++] = originalData[i++]; //a
-		}
-		
-		this.#recorder.push(rgb32);
-		*/
-
-		let rgb32 = new Uint8Array(originalData.buffer);
-		this.#recorder.push(rgb32);
+		this.#recorder.stdin.write(
+			new Uint8Array(
+				this.#canvasContext.getImageData(
+					0,
+					0,
+					this.#canvasElement.width,
+					this.#canvasElement.height
+				).data.buffer
+			)
+		);
 	}
 
 	/**
 	 * Close and save recording file
 	 */
 	closeFile() {
-		this.#recorder.push(null);
-		this.#recorder.destroy();
+		this.#recorder.stdin.end();
 	}
 
 	/**
@@ -294,10 +283,9 @@ export class Camera {
 	 * to FFMPEG.
 	 */
 	startRecording() {
-		// ! Potential FFMPEG command to pipe in jpeg frames to mkv video
-		// ! $ffmpeg -i - -c:v png -f image2pipe testCameraVideo.mkv
 		// ! Leaving "-i -", the hyphen means input piped from stdin
-		let img2Video = spawn("ffmpeg", [
+		this.#recorder = spawn("ffmpeg", [
+			"-hide_banner",
 			"-f",
 			"rawvideo",
 			"-pix_fmt",
@@ -308,33 +296,11 @@ export class Camera {
 			"30",
 			"-i",
 			"-",
+			"-c:v",
+			"libx264",
+			"-preset",
+			"faster",
 			"testCameraVideo.mkv",
 		]);
-
-		this.#recorder = Readable();
-
-		/*
-		img2Video.stderr.on("data", (data) => {
-			console.log(`Child Process Err: ${data}`);
-		});
-
-		img2Video.on("close", (code) => {
-			console.log(`child process exited with code ${code}`);
-		});
-		*/
-
-		this.#recorder._read = () => {
-			// * Use write to read stream above ^^
-			let originalData = this.#canvasContext.getImageData(
-				0,
-				0,
-				this.#canvasElement.width,
-				this.#canvasElement.height
-			).data;
-			let rgb32 = new Uint8Array(originalData.buffer);
-			this.#recorder.push(rgb32);
-		};
-
-		this.#recorder.pipe(img2Video.stdin);
 	}
 } //End of Camera Class
