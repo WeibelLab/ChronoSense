@@ -1,5 +1,6 @@
 var Readable = require("stream").Readable;
 const { spawn } = require("child_process");
+import { AVRecorder } from "./avRecorder.js";
 
 export class Camera {
 	#deviceId = null;
@@ -189,6 +190,11 @@ export class Camera {
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
 			this.#videoElement.srcObject = stream;
 			this.#isOn = true;
+			// ! TESTING: Create AVRecorder object for recording to MKV
+			this.#recorder = new AVRecorder(
+				this.#canvasElement,
+				this.#canvasContext
+			);
 
 			requestAnimationFrame(() => {
 				this.drawToCanvas(
@@ -221,10 +227,10 @@ export class Camera {
 		if (video.readyState === video.HAVE_ENOUGH_DATA) {
 			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
 			if (!this.#isRecording) {
-				this.startRecording();
+				this.#recorder.recorderSetup(0);
 			}
 			this.#isRecording = true;
-			this.writeToFile();
+			this.#recorder.writeToFile();
 		}
 		var frameId = requestAnimationFrame(() => {
 			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
@@ -232,32 +238,8 @@ export class Camera {
 		if (!this.#isOn) {
 			cancelAnimationFrame(frameId);
 			this.#isRecording = false;
-			this.closeFile();
+			this.#recorder.closeFile();
 		}
-	}
-
-	/**
-	 * Call to add new canvas frame data to video file
-	 *
-	 */
-	writeToFile() {
-		this.#recorder.stdin.write(
-			new Uint8Array(
-				this.#canvasContext.getImageData(
-					0,
-					0,
-					this.#canvasElement.width,
-					this.#canvasElement.height
-				).data.buffer
-			)
-		);
-	}
-
-	/**
-	 * Close and save recording file
-	 */
-	closeFile() {
-		this.#recorder.stdin.end();
 	}
 
 	/**
@@ -276,31 +258,5 @@ export class Camera {
 			});
 		}
 		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
-	}
-
-	/**
-	 * Start recording via spawning a child process and piping in image data
-	 * to FFMPEG.
-	 */
-	startRecording() {
-		// ! Leaving "-i -", the hyphen means input piped from stdin
-		this.#recorder = spawn("ffmpeg", [
-			"-hide_banner",
-			"-f",
-			"rawvideo",
-			"-pix_fmt",
-			"rgba",
-			"-video_size",
-			"1920x1080",
-			"-framerate",
-			"30",
-			"-i",
-			"-",
-			"-c:v",
-			"libx264",
-			"-preset",
-			"faster",
-			"testCameraVideo.mkv",
-		]);
 	}
 } //End of Camera Class
