@@ -169,7 +169,16 @@ async function handleWindowControls() {
 		} else if (currentlyOpenPage === CAMERA_PAGE_NUM) {
 			openCloseCameraDropMenus(evt);
 		}
-	}); //End of dropdown opener listener
+	}); //End of dropdown open listener
+
+	// * Attach refresh cameras for testing * CHANGE LATER - TEMP *
+	/*
+	document
+		.getElementById("refresh-cameras-btn")
+		.addEventListener("click", () => {
+			refreshCameraDevices();
+		});
+	*/
 } //End of handleWindowControls()
 
 /**
@@ -223,51 +232,6 @@ async function setupDevices() {
 			}
 		} //All camera devices added to the correct array
 	});
-
-	/*
-	 * Add events for plugging and unplugging USB devices (kinect, camera, etc.)
-	 */
-	// ! TODO: Set up handling of plugging in devices
-	usb.on("attach", function (device) {
-		//The below correctly gets the serial number of the device
-		try {
-			//Check for Kinect and then update the device in the dropdown menu.
-			//Depth camera on Kinect is the only one with Serial number attached
-			if (
-				device.deviceDescriptor.idVendor === 0x045e &&
-				device.deviceDescriptor.idProduct === 0x097c
-			) {
-				console.log("CONNECTED A KINECT");
-				//Don't do anything immediately. Wait for user to select refresh button.
-			} else {
-				// ! TODO: All other device actions
-			}
-		} catch (error) {
-			//Device is unknown by installed drivers
-			/*
-			console.log(
-				"Serial number of device NOT read due to lack of installed drivers"
-            );
-            */
-		}
-	}); //End of USB attach event
-
-	// ! TODO: Set up handling of unplugging devices
-	usb.on("detach", function (device) {
-		//Remove disconnected device by their device identifier (through usb)
-		try {
-			//Check for Kinect and then delete from list of devices
-			if (
-				device.deviceDescriptor.idVendor === 0x045e &&
-				device.deviceDescriptor.idProduct === 0x097c
-			) {
-				console.log("DISCONNECTED A KINECT");
-				//Don't do anything immediately. Wait for user to select refresh button.
-			} else {
-				// ! TODO: All other device actions
-			}
-		} catch (error) {}
-	}); //End of USB detach event
 }
 
 /**
@@ -605,6 +569,18 @@ function populateCameraList(dropdown) {
 		let camID = cameraDevices[j].getDeviceId();
 		addDropdownMenuOption(dropdown, camID, camName, cameraDevices[j]);
 	}
+}
+
+/**
+ * Refresh the Camera list and connected devices on the "Camera Page"
+ */
+function refreshCameraDevices() {
+	// First close and  clear current devices
+	destroyAllCameras(cameraDevices);
+	destroyAllKinects(kinectDevices);
+	// Clear out the Camera list of devices
+	clearDropdown(document.getElementById("camera-dropdown"));
+	setupDevices(); // Finds, creates, and adds all devices to dropdown
 }
 
 /**

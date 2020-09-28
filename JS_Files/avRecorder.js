@@ -68,14 +68,16 @@ export class AVRecorder {
 					"rgba",
 					"-video_size",
 					"1920x1080",
-					"-framerate",
-					"30",
+					"-use_wallclock_as_timestamps",
+					"1",
 					"-i",
 					"-",
 					"-c:v",
 					"libx264",
 					"-preset",
 					"faster",
+					"-r",
+					"30",
 					`${this.#fileName}.mkv`,
 				]);
 		}
