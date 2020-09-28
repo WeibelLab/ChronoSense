@@ -155,15 +155,6 @@ async function handleWindowControls() {
 		});
 	}
 
-	/* Add event everytime the CAMERA drop down menu is selected */
-	// ! FIX FOR NEW CUSTOM DROPDOWN MENUS
-	/*
-	dropdown.addEventListener("change", (evt) => {
-		var option = dropdown.options[dropdown.selectedIndex];
-		onCameraDropdownChange(option);
-	});
-	*/
-
 	/* Add event to refresh Kinect Devices on push - WORKS*/
 	document
 		.getElementById("kinect-refresh-btn")
@@ -186,7 +177,7 @@ async function handleWindowControls() {
  * Also, it adds events for plugging and unplugging USB devices.
  *
  */
-function setupDevices() {
+async function setupDevices() {
 	/*
 	 * Complete an initial scan for Kinect devices already plugged in and
 	 * populate the Kinect Devices list in the UI.
@@ -1264,6 +1255,9 @@ async function onCameraSelection(targetElement, device) {
 		});
 
 		recordElement.innerText = "Start Recording";
+		recordElement.onclick = () => {
+			device.startRecording();
+		}; //assign function
 		recordElement.classList.add("camera-record-btn");
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
