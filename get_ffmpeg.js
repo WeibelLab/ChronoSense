@@ -17,6 +17,13 @@ const init = async (callback) => {
     if (!(await fs.pathExists(FFMPEG_DIR))) {
         console.log('extracting ffmpeg into:' + FFMPEG_DIR);
         await extractFile(FFMPEG_ZIP, FFMPEG_DIR);
+        ext_file_list = recFindByExt(FFMPEG_DIR,'exe');
+        ext_file_list.forEach(
+            function (file) {
+                console.log('copying ' + path.basename(file) + ' to ' + FFMPEG_DIR);
+                fs.copySync(file, path.resolve(FFMPEG_DIR, path.basename(file)));
+            }
+        )
     }
 };
 
@@ -30,5 +37,29 @@ const extractFile = (zipPath, dir) => {
         });
     });
 };
+
+function recFindByExt(base,ext,files,result) 
+{
+    files = files || fs.readdirSync(base) 
+    result = result || [] 
+
+    files.forEach( 
+        function (file) {
+            var newbase = path.join(base,file)
+            if ( fs.statSync(newbase).isDirectory() )
+            {
+                result = recFindByExt(newbase,ext,fs.readdirSync(newbase),result)
+            }
+            else
+            {
+                if ( file.substr(-1*(ext.length+1)) == '.' + ext )
+                {
+                    result.push(newbase)
+                } 
+            }
+        }
+    )
+    return result
+}
 
 init();
