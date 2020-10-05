@@ -23,7 +23,6 @@ const displayCanvas2 = document.getElementById("video_canvas2"); //For Camera pa
 const displayCanvas3 = document.getElementById("video_canvas3"); //For Kinect Body page
 
 //Used in camera methods
-const recordingButton = document.getElementById("record");
 const camVideo = document.getElementById("camera-video");
 
 //Arrays for all devices
@@ -172,13 +171,12 @@ async function handleWindowControls() {
 	}); //End of dropdown open listener
 
 	// * Attach refresh cameras for testing * CHANGE LATER - TEMP *
-	/*
+
 	document
 		.getElementById("refresh-cameras-btn")
 		.addEventListener("click", () => {
 			refreshCameraDevices();
 		});
-	*/
 } //End of handleWindowControls()
 
 /**
@@ -231,6 +229,7 @@ async function setupDevices() {
 				createCamera(cameraDevices, currentDevices[k]);
 			}
 		} //All camera devices added to the correct array
+		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
 }
 
@@ -257,9 +256,15 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 		case HOME_PAGE_NUM:
 			currentlyOpenPage = HOME_PAGE_NUM;
 			changeWindowFeatures();
-			/*
-			await kinect.stopListeningAndCameras();
-			*/
+			//Stop cameras and Kinect
+			stopAllCameraStream(cameraDevices);
+			stopAllKinectStream(kinectDevices).then(() => {
+				// Clear Camera page in order to not have duplicate canvases
+				clearPageContent(
+					document.getElementById("camera-video-feed-container")
+				);
+			});
+
 			break;
 
 		case CAMERA_PAGE_NUM:
@@ -274,9 +279,6 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 				document.getElementById("camera-dropdown-content")
 			);
 
-			/*
-			await kinect.stopListeningAndCameras(); 
-			*/
 			break;
 
 		case KINECT_PAGE_NUM:
@@ -286,6 +288,11 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices).then(() => {
+				// First, clear Camera page in order to not have duplicate canvases
+				clearPageContent(
+					document.getElementById("camera-video-feed-container")
+				);
+				// Second, start Kinect (if found) !!for now!!
 				// ! TEMP Hard Coded - For example and testing; change later!
 				kinectDevices[0].setDisplayCanvas(displayCanvas);
 				kinectDevices[0].start();
@@ -322,6 +329,10 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices).then(() => {
+				// First, clear Camera page in order to not have duplicate canvases
+				clearPageContent(
+					document.getElementById("camera-video-feed-container")
+				);
 				// ! TEMP Hard Coded - For example and testing; change later!
 				kinectDevices[0].setDisplayCanvas(displayCanvas3);
 				kinectDevices[0].changeParameters(
@@ -339,9 +350,15 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			/*
-			await kinect.stopListeningAndCameras();
-			*/
+			//Stop cameras and Kinect
+			stopAllCameraStream(cameraDevices);
+			stopAllKinectStream(kinectDevices).then(() => {
+				// Clear Camera page in order to not have duplicate canvases
+				clearPageContent(
+					document.getElementById("camera-video-feed-container")
+				);
+			});
+
 			break;
 	} //End of NEW page switch
 }
@@ -579,8 +596,17 @@ function refreshCameraDevices() {
 	destroyAllCameras(cameraDevices);
 	destroyAllKinects(kinectDevices);
 	// Clear out the Camera list of devices
-	clearDropdown(document.getElementById("camera-dropdown"));
+	clearPageContent(document.getElementById("camera-video-feed-container"));
+	clearDropdown(document.getElementById("camera-dropdown-content"));
 	setupDevices(); // Finds, creates, and adds all devices to dropdown
+}
+
+/**
+ * Clears all of the HTML elements in the page used for video feeds.
+ */
+function clearPageContent(contentContainer) {
+	// ! To stop devices or have this be a very focused function?
+	clearContainer(contentContainer);
 }
 
 /**
@@ -589,8 +615,16 @@ function refreshCameraDevices() {
  * @param {HTML Element} dropdown - Custom dropdown div element menu on HTML page
  */
 function clearDropdown(dropdown) {
-	while (dropdown.lastElementChild) {
-		dropdown.removeChild(dropdown.lastElementChild);
+	clearContainer(dropdown);
+}
+
+/**
+ * Genralized function to clear any HTML "container" with multiple items within it.
+ * ALL higher level functions call this to clear containers of items.
+ */
+function clearContainer(container) {
+	while (container.lastElementChild) {
+		container.removeChild(container.lastElementChild);
 	}
 }
 
@@ -666,7 +700,6 @@ function destroyAllKinects(deviceArr) {
 	let i,
 		length = deviceArr.length;
 	stopAllKinectStream(deviceArr);
-
 	deviceArr.length = 0;
 }
 
