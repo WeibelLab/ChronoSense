@@ -1,3 +1,5 @@
+import { AVRecorder } from "./avRecorder.js";
+
 export class Camera {
 	#deviceId = null;
 	#groupId = null;
@@ -10,6 +12,9 @@ export class Camera {
 
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
+
+	#isRecording = false;
+	#recorder;
 
 	/**
 	 *
@@ -211,8 +216,11 @@ export class Camera {
 	 *
 	 */
 	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
-		canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+		//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
+		if (video.readyState === video.HAVE_ENOUGH_DATA) {
+			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+			this.recordFrame(); // Checks for recording status in function
+		}
 		var frameId = requestAnimationFrame(() => {
 			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
 		});
@@ -231,10 +239,52 @@ export class Camera {
 			this.#videoElement !== null &&
 			this.#videoElement.srcObject !== null
 		) {
+			this.stopRecording();
 			this.#videoElement.srcObject.getTracks().forEach((track) => {
 				track.stop();
 			});
 		}
 		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
+	}
+
+	/**
+	 * Start recording current camera canvas feed
+	 *
+	 * ! Note: Assumes connection of canvas elements prior to call.
+	 *
+	 */
+	startRecording() {
+		if (!this.#isRecording) {
+			// * Slightly inefficient use of memory management (i.e. GC) but good enough for time being
+			this.#recorder = new AVRecorder(
+				this.#canvasElement,
+				this.#canvasContext,
+				null,
+				"cameraVideo"
+			);
+			this.#recorder.recorderSetup(0); //0 for video only
+			this.#isRecording = true;
+		} else {
+			this.stopRecording();
+		}
+	}
+
+	/**
+	 * Call to record the current frame to video file *Temp workflow*
+	 */
+	recordFrame() {
+		if (this.#isRecording) {
+			this.#recorder.writeToFile();
+		}
+	}
+
+	/**
+	 * Stop recording current camera canvas feed
+	 */
+	stopRecording() {
+		if (this.#isRecording) {
+			this.#recorder.closeFile();
+			this.#isRecording = false;
+		}
 	}
 } //End of Camera Class

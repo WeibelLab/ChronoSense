@@ -4,6 +4,7 @@
  *
  */
 import { JointWriter } from "./jointwriter.js";
+import { AVRecorder } from "./avRecorder.js";
 const KinectAzure = require("../kinect-azure");
 
 export class Kinect {
@@ -16,8 +17,10 @@ export class Kinect {
 	#isKinectCamerasStarted = false;
 	#isKinectListening = false;
 	#isKinectStreaming = false;
+	#isRecording = false;
 	#depthModeRange;
 	#jointWriter;
+	#recorder; //Used for recording video/audio to file
 
 	//List of all changeable parameters for Kinect sensor feed:
 	#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
@@ -327,6 +330,8 @@ export class Kinect {
 						outputImageData,
 						data.colorImageFrame
 					);
+					//Call recording render frame (checks state in func)
+					this.recordFrame();
 				}
 			});
 		}
@@ -337,7 +342,7 @@ export class Kinect {
 		//console.log("Start of renderBGRA32ColorFrame() reached");
 		const newPixelData = Buffer.from(imageFrame.imageData);
 		const pixelArray = canvasImageData.data;
-		console.log(pixelArray);
+		//console.log(pixelArray);
 		for (let i = 0; i < canvasImageData.data.length; i += 4) {
 			pixelArray[i] = newPixelData[i + 2];
 			pixelArray[i + 1] = newPixelData[i + 1];
@@ -576,6 +581,8 @@ export class Kinect {
 						});
 					});
 					this.#outputCtx.restore();
+					//Call recording render frame (checks state in func)
+					this.recordFrame();
 				}
 			});
 		}
@@ -613,5 +620,46 @@ export class Kinect {
 				(inputMax - inputMin) +
 			outputMin
 		);
+	}
+
+	/**
+	 * Start recording current Kinect canvas feed
+	 *
+	 * ! Note: Assumes connection of canvas elements prior to call.
+	 *
+	 */
+	startRecording() {
+		if (!this.#isRecording) {
+			// * Slightly inefficient use of memory management (i.e. GC) but good enough for time being
+			this.#recorder = new AVRecorder(
+				this.#displayCanvas,
+				this.#outputCtx,
+				null,
+				"kinectVideo"
+			);
+			this.#recorder.recorderSetup(0); //0 for video only
+			this.#isRecording = true;
+		} else {
+			this.stopRecording();
+		}
+	}
+
+	/**
+	 * Call to record the current frame to video file *Temp workflow*
+	 */
+	recordFrame() {
+		if (this.#isRecording) {
+			this.#recorder.writeToFile();
+		}
+	}
+
+	/**
+	 * Stop recording current Kinect canvas feed
+	 */
+	stopRecording() {
+		if (this.#isRecording) {
+			this.#recorder.closeFile();
+			this.#isRecording = false;
+		}
 	}
 } //End of Kinect class
