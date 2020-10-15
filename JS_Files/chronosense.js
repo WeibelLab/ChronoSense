@@ -273,11 +273,11 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices);
-
-			populateCameraList(
-				document.getElementById("camera-dropdown-content")
-			);
+			stopAllKinectStream(kinectDevices).then(() => {
+				populateCameraList(
+					document.getElementById("camera-dropdown-content")
+				);
+			});
 
 			break;
 
