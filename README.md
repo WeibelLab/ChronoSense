@@ -2,7 +2,7 @@
 
 ## Branch Focus & Changes:
 
-Universal_recorder is a branch that is off of dynamic_ui (master -> dynamic_ui -> universal_recorder) and focuses on creating a single recording infastructure for video, audio, and body tracking data through the use of ffmpeg or some other technology.
+The dynamic_ui branch is focused on making the Chronosense application more flexible and visually dynamic (add/remove elements on the fly) for the user.
 
 ## Installation / run with Docker
 
@@ -59,7 +59,7 @@ Universal_recorder is a branch that is off of dynamic_ui (master -> dynamic_ui -
 
 10. Ready to Develop!
 
-## Change Notes (9/3/20):
+## Change Notes (Updated: 10/15/20):
 
 Summary: All camera devices that are plugged in (or already plugged in at launch) update on the application central, universal list of devices that are then available for the application to use in any manner. They will be automatically connected to the necessary SDKs/APIs to optimize their performance.
 
@@ -74,6 +74,8 @@ Summary: All camera devices that are plugged in (or already plugged in at launch
 -   In regards to generalizing devices, the main chronosense.js file now uses arrays/lists of device objects created through kinect.js & camera.js for easy updates to the UI to allow the user to know at all times which devices are available and in which page.
 -   After a lot of testing and troubleshooting, I found that the SDK/Azure Kinect hardware doesn't give us enough information regarding its current status. With that in mind, I changed from an "update on plug-in" model to a manual refresh button that is working perfectly with the inherent delay of the SDK.
 -   Multiple Kinects ARE working (simultaneous streaming limited by kinect-azure package at the moment) and detected when plugged in to a single system.
+-   The Camera page now dynamically fills its list with the connected devices and allows the user to click on them to add video preview elements to the UI. Multiple video streams are able to run at the same time.
+-   Swapping between pages properly disposes of active streams and UI elements to cease duplication and speed up the main process thread.
 
 ## Fixes
 
