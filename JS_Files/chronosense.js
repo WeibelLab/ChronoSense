@@ -244,7 +244,7 @@ async function setupDevices() {
  *                      		determine what should be displayed or hidden.
  */
 
-function checkClosingWindowAndChangeContent(newPageNum) {
+async function checkClosingWindowAndChangeContent(newPageNum) {
 	//Check which window is closing; if changing to same as before, don't
 	//refresh
 	if (currentlyOpenPage == newPageNum) {
@@ -293,7 +293,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 					document.getElementById("camera-video-feed-container")
 				);
 				// Second, start Kinect (if found) !!for now!!
-				// ! TEMP Hard Coded - For example and testing; change later!
+				// ! TEMP Hard Coded Device - For example and testing; change later!
 				kinectDevices[0].setDisplayCanvas(displayCanvas);
 				kinectDevices[0].changeParameters(
 					"fps30",
@@ -319,7 +319,7 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 				clearPageContent(
 					document.getElementById("camera-video-feed-container")
 				);
-				// ! TEMP Hard Coded - For example and testing; change later!
+				// ! TEMP Hard Coded Device - For example and testing; change later!
 				kinectDevices[0].setDisplayCanvas(displayCanvas3);
 				kinectDevices[0].changeParameters(
 					"fps30",
