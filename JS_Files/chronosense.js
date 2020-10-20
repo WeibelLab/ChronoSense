@@ -295,30 +295,16 @@ function checkClosingWindowAndChangeContent(newPageNum) {
 				// Second, start Kinect (if found) !!for now!!
 				// ! TEMP Hard Coded - For example and testing; change later!
 				kinectDevices[0].setDisplayCanvas(displayCanvas);
+				kinectDevices[0].changeParameters(
+					"fps30",
+					"BGRA32",
+					"res1080",
+					"off",
+					"nosync"
+				);
 				kinectDevices[0].start();
 				kinectDevices[0].colorVideoFeed();
 			});
-
-			/*
-			await kinect.stopListeningAndCameras();
-			kinect.changeParameters(
-				"fps30",
-				"BGRA32",
-				"res1080",
-				"off",
-				"nosync"
-			);
-			await kinect.start();
-			kinect.colorVideoFeed();
-			*/
-			/* Attempt some sort of check or cycle to restart
-            // until the port is open.
-            while(!kinect.getIsStreaming()){
-                await kinect.stopListeningAndCameras();
-                kinect.start();
-                kinect.colorVideoFeed();
-            }
-            */
 
 			break;
 

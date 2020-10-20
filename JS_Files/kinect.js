@@ -19,7 +19,7 @@ export class Kinect {
 	#isKinectStreaming = false;
 	#isRecording = false;
 	#depthModeRange;
-	#jointWriter;
+	#jointWriter = null;
 	#recorder; //Used for recording video/audio to file
 
 	//List of all changeable parameters for Kinect sensor feed:
@@ -50,6 +50,7 @@ export class Kinect {
 			}
 		}
 
+		// Try putting this in start function and only when body tracking added
 		//this.#jointWriter = new JointWriter();
 	}
 
@@ -164,6 +165,8 @@ export class Kinect {
 				this.#DepthMode
 			);
 			this.#kinectDevice.createTracker();
+			// Try creating joint writer only if body tracking enabled
+			this.#jointWriter = new JointWriter();
 		}
 	} //End of startKinect()
 
@@ -281,7 +284,9 @@ export class Kinect {
 				this.#isKinectCamerasStarted = false;
 
 				if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
-					//this.#jointWriter.closeWrittenFile();
+					if (this.#jointWriter != null) {
+						this.#jointWriter.closeWrittenFile();
+					}
 					this.#kinectDevice.destroyTracker();
 				}
 
@@ -569,8 +574,9 @@ export class Kinect {
 						//TEST: For each body, write joint data to CSV
 						//console.log('BEFORE writing to file');
 						// * Commented out while developing other features
-						//this.#jointWriter.writeToFile(body.skeleton);
-						//console.log('AFTER writing to file');
+						if (this.#jointWriter != null) {
+							this.#jointWriter.writeToFile(body.skeleton);
+						}
 						body.skeleton.joints.forEach((joint) => {
 							this.#outputCtx.fillRect(
 								joint.colorX,
