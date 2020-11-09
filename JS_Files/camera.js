@@ -287,4 +287,107 @@ export class Camera {
 			this.#isRecording = false;
 		}
 	}
+
+	// * Start Required Methods for a Chronosense Device Add-On
+	
+	/**
+	 * Function that creates all the UI elements needed for one Kinect device &
+	 * wraps them all into a single div returned for display.
+	 */
+	getUI() {
+		//First create the necessary elements
+		// * video, canvas, buttons, video option menus, etc.
+		let videoContainer = document.createElement("div");
+		let videoButtonsContainer = document.createElement("div");
+		let mirrorButtonDiv = document.createElement("div");
+		let videoElement = document.createElement("video");
+		let canvasElement = document.createElement("canvas");
+		let mirrorCheckElement = document.createElement("img");
+		let mirrorLabelElement = document.createElement("label");
+		let recordElement = document.createElement("button");
+		let onElement = document.createElement("button");
+		let offElement = document.createElement("button");
+
+		//Set correct properties
+		//Video element is NOT inserted into DOM since it is used as translation to canvas
+		videoElement.width = "1280";
+		videoElement.height = "720";
+		videoElement.autoplay = true;
+
+		canvasElement.width = "1280";
+		canvasElement.height = "720";
+		canvasElement.classList.add("camera-canvas");
+
+		mirrorCheckElement.src = "../images/checkmarkWhite.png";
+		mirrorCheckElement.style.visibility = "hidden";
+		mirrorCheckElement.style.width = "16%";
+		mirrorCheckElement.style.marginRight = "6%";
+
+		mirrorLabelElement.innerText = "Mirror Video";
+		mirrorLabelElement.classList.add("mirrorlabel");
+
+		mirrorButtonDiv.style.backgroundColor = "#11366b";
+		mirrorButtonDiv.style.height = "3em";
+		mirrorButtonDiv.style.display = "flex";
+		mirrorButtonDiv.style.justifyContent = "space-between";
+		mirrorButtonDiv.style.alignItems = "center";
+		mirrorButtonDiv.style.borderRadius = "5px";
+		mirrorButtonDiv.style.cursor = "pointer";
+		mirrorButtonDiv.appendChild(mirrorLabelElement);
+		mirrorButtonDiv.appendChild(mirrorCheckElement);
+		mirrorButtonDiv.addEventListener("click", () => {
+			if (canvasElement.style.transform.localeCompare("scaleX(-1)") === 0) {
+				// Change back to "normal" scaling
+				canvasElement.style.transform = "scaleX(1)";
+			} else {
+				// Mirror canvas
+				canvasElement.style.transform = "scaleX(-1)";
+			}
+			if (
+				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
+				0
+			) {
+				mirrorCheckElement.style.visibility = "visible";
+			} else {
+				mirrorCheckElement.style.visibility = "hidden";
+			}
+		});
+
+		recordElement.innerText = "Start Recording";
+		recordElement.onclick = () => {
+			this.startRecording();
+		}; //assign function
+		recordElement.classList.add("camera-record-btn");
+
+		this.setInputAndOutput(videoElement, canvasElement)
+
+		onElement.innerText = "ON";
+		onElement.onclick = () => {
+			this.startCameraStream();
+		};
+		onElement.classList.add("kinect_on");
+
+		offElement.innerText = "OFF";
+		offElement.onclick = () => {
+			this.stopCameraStream();
+		};
+		offElement.classList.add("kinect_off");
+
+		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.appendChild(mirrorButtonDiv);
+		videoButtonsContainer.appendChild(recordElement);
+		videoButtonsContainer.appendChild(onElement);
+		videoButtonsContainer.appendChild(offElement);
+
+		// Attach all to div in the correct order and add to the page
+		videoContainer.classList.add("video-inner-container");
+		//Camera specific identifier
+		videoContainer.id = `${this.getDeviceId()}`;
+
+		videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoButtonsContainer);
+
+		return videoContainer;
+	}
+
 } //End of Camera Class
