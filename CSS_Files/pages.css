@@ -160,6 +160,7 @@
 	border-style: solid;
 	border-color: black;
 	border-width: 2px;
+	cursor: pointer;
 }
 
 /* * Styling for the Kinect Page */
@@ -314,6 +315,7 @@
 	color: white;
 	font-weight: 400;
 	height: 2em;
+	cursor: pointer;
 }
 
 .kinect_off {
@@ -325,6 +327,7 @@
 	color: white;
 	font-weight: 400;
 	height: 2em;
+	cursor: pointer;
 }
 
 /* * Styling for the Kinect Body Page */

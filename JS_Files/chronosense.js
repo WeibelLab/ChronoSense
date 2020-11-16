@@ -13,8 +13,6 @@ const btnCamera = document.getElementById("cameraPage");
 const btnKinect = document.getElementById("kinectPage");
 const btnKinectBodyTracking = document.getElementById("kinectBodyPage");
 const btnAbout = document.getElementById("aboutPage");
-const btnsKinectOn = document.getElementsByClassName("kinect_on");
-const btnsKinectOff = document.getElementsByClassName("kinect_off");
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
@@ -28,6 +26,7 @@ const camVideo = document.getElementById("camera-video");
 //Arrays for all devices
 var kinectDevices = []; //All from class Kinect
 var cameraDevices = []; //All from class Camera
+var devices = [] // ! TEST Generic Device Model -> Move to this instead of kinect/cameraDevices
 
 //Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
@@ -127,33 +126,6 @@ async function handleWindowControls() {
 		checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
 	});
 
-	//! TODO: Remove buttons/functionality and attach later to specific devices
-	//! 	  when streaming from them.
-	/*
-	 * Add events below to buttons and items within "pages."
-	 */
-	//Add to each element in the kinect button class
-	for (let i = 0; i < btnsKinectOn.length; i++) {
-		btnsKinectOn[i].addEventListener("click", (event) => {
-			kinectDevices[0].setDisplayCanvas(displayCanvas);
-			kinectDevices[0].start();
-
-			if (currentlyOpenPage == KINECT_PAGE_NUM) {
-				kinectDevices[0].colorVideoFeed();
-			} else if (currentlyOpenPage == KINECT_BODY_PAGE_NUM) {
-				kinectDevices[0].bodyTrackingFeed();
-			}
-		});
-	}
-
-	//! TODO: Remove buttons/functionality and attach later to specific devices
-	//! 	  when streaming from them.
-	for (let i = 0; i < btnsKinectOff.length; i++) {
-		btnsKinectOff[i].addEventListener("click", (event) => {
-			kinectDevices[0].stopListeningAndCameras();
-		});
-	}
-
 	/* Add event to refresh Kinect Devices on push - WORKS*/
 	document
 		.getElementById("kinect-refresh-btn")
@@ -193,21 +165,8 @@ async function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
-	var kinectCount = tempKinect.getInstalledCount();
+	devices = devices.concat(Kinect.getDeviceObjects());
 
-	//i represents the Kinect indices
-	for (var i = 0; i < kinectCount; i++) {
-		//Create the object, then add to the device array
-		createKinect(i, kinectDevices);
-
-		let deviceID = kinectDevices[i].getSerial(); //serial
-		let deviceName = "Kinect (" + kinectDevices[i].getSerial() + ")";
-		let dropdownContentElement = document.getElementById(
-			"kinect-dropdown-content"
-		);
-		addDropdownMenuOption(dropdownContentElement, deviceID, deviceName);
-	}
 
 	/*
 	 * Complete an initial scan for Camera devices already plugged in and
@@ -217,20 +176,16 @@ async function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	getUniqueVideoInputDevices().then((currentDevices) => {
-		for (var k = 0; k < currentDevices.length; k++) {
-			if (
-				!(
-					currentDevices[k].label.includes("kinect") ||
-					currentDevices[k].label.includes("Kinect")
-				)
-			) {
-				//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-				createCamera(cameraDevices, currentDevices[k]);
-			}
-		} //All camera devices added to the correct array
+	Camera.getDeviceObjects().then((cameraDevices) => {
+		devices = devices.concat(cameraDevices);
+
+		console.log(devices);
+		// Once done getting all device objects, add to dropdown menu
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
+	
+
+	
 }
 
 /**
@@ -256,14 +211,15 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case HOME_PAGE_NUM:
 			currentlyOpenPage = HOME_PAGE_NUM;
 			changeWindowFeatures();
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// Clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-			});
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
 
 			break;
 
@@ -271,13 +227,14 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = CAMERA_PAGE_NUM;
 			changeWindowFeatures(CAMERA_PAGE_NUM);
 
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				populateCameraList(
-					document.getElementById("camera-dropdown-content")
-				);
-			});
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			populateCameraList(
+				document.getElementById("camera-dropdown-content")
+			);
 
 			break;
 
@@ -285,26 +242,16 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = KINECT_PAGE_NUM;
 			changeWindowFeatures(KINECT_PAGE_NUM);
 
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// First, clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-				// Second, start Kinect (if found) !!for now!!
-				// ! TEMP Hard Coded Device - For example and testing; change later!
-				kinectDevices[0].setDisplayCanvas(displayCanvas);
-				kinectDevices[0].changeParameters(
-					"fps30",
-					"BGRA32",
-					"res1080",
-					"off",
-					"nosync"
-				);
-				kinectDevices[0].start();
-				kinectDevices[0].colorVideoFeed();
-			});
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
+			
 
 			break;
 
@@ -312,38 +259,31 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
 			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// First, clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-				// ! TEMP Hard Coded Device - For example and testing; change later!
-				kinectDevices[0].setDisplayCanvas(displayCanvas3);
-				kinectDevices[0].changeParameters(
-					"fps30",
-					"BGRA32",
-					"res1080",
-					"wfov2x2binned",
-					"nosync"
-				);
-				kinectDevices[0].start();
-				kinectDevices[0].bodyTrackingFeed();
-			});
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
+
 			break;
 
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// Clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-			});
+			
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
 
 			break;
 	} //End of NEW page switch
@@ -461,6 +401,7 @@ async function getUniqueInputDevices() {
  */
 async function getUniqueVideoInputDevices() {
 	return navigator.mediaDevices.enumerateDevices().then((devices) => {
+		console.log(devices);
 		var uniqueInputDevices = [];
 		for (var i = 0; i < devices.length; i++) {
 			if (devices[i].kind.localeCompare("videoinput") == 0) {
@@ -558,19 +499,11 @@ function populateCameraList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
 
-	//Use Kinect device list and Camera device list to populate dropdown
-	//Kinect Devices
-	for (var i = 0; i < kinectDevices.length; i++) {
-		let deviceID = kinectDevices[i].getSerial(); //serial
-		let deviceName = `Azure Kinect (${kinectDevices[i].getSerial()})`;
+	for (var i = 0; i < devices.length; i++) {
+		let deviceName = devices[i].getLabel(); 
+		let deviceID = devices[i].getDeviceId();
 
-		addDropdownMenuOption(dropdown, deviceID, deviceName, kinectDevices[i]);
-	}
-	//Camera Devices
-	for (var j = 0; j < cameraDevices.length; j++) {
-		let camName = cameraDevices[j].getLabel();
-		let camID = cameraDevices[j].getDeviceId();
-		addDropdownMenuOption(dropdown, camID, camName, cameraDevices[j]);
+		addDropdownMenuOption(dropdown, deviceID, deviceName, devices[i]);
 	}
 }
 
@@ -591,7 +524,6 @@ function refreshCameraDevices() {
  * Clears all of the HTML elements in the page used for video feeds.
  */
 function clearPageContent(contentContainer) {
-	// ! To stop devices or have this be a very focused function?
 	clearContainer(contentContainer);
 }
 
@@ -1158,27 +1090,19 @@ async function addDropdownMenuOption(
 	var childDiv = document.createElement("div");
 	var checkImg = document.createElement("img");
 
-	parentDiv.id = dropdownID;
+	parentDiv.id = "Device" + dropdownID;
 	childDiv.innerText = dropdownName;
 	checkImg.src = "../images/checkmark.png";
 	checkImg.style.visibility = "hidden";
 
 	parentDiv.appendChild(childDiv);
 	parentDiv.appendChild(checkImg);
-	// ! Add listener for option selection
-	// ! If Kinect, one set of elements
-	// ! If Camera, different set of elements
-	if (dropdownElement.id.includes("kinect")) {
-		// * Kinect Dropdown Option
-		parentDiv.addEventListener("click", (evt) => {
-			onKinectSelection(evt.currentTarget);
-		});
-	} else {
-		// * Camera Dropdown Option
-		parentDiv.addEventListener("click", (evt) => {
-			onCameraSelection(evt.currentTarget, device);
-		});
-	}
+	// Currently the plan is to have a single "device" page. So only focus on camera page functions
+	// * Camera Dropdown Option
+	parentDiv.addEventListener("click", (evt) => {
+		onCameraSelection(evt.currentTarget, device);
+	});
+	
 	// Add elements to
 	dropdownElement.appendChild(parentDiv);
 }
@@ -1198,140 +1122,25 @@ async function onCameraSelection(targetElement, device) {
 	) {
 		//Make check mark visible indicating the device is "live"
 		targetElement.childNodes[1].style.visibility = "visible";
-
-		//First create the necessary elements
-		// * video, canvas, buttons, video option menus, etc.
-		let videoContainer = document.createElement("div");
-		let videoButtonsContainer = document.createElement("div");
-		let mirrorButtonDiv = document.createElement("div");
-		let videoElement = document.createElement("video");
-		let canvasElement = document.createElement("canvas");
-		let mirrorCheckElement = document.createElement("img");
-		let mirrorLabelElement = document.createElement("label");
-		let recordElement = document.createElement("button");
-
-		//Set correct properties
-		//Video element is NOT inserted into DOM since it is used as translation to canvas
-		videoElement.width = "1920";
-		videoElement.height = "1080";
-		videoElement.autoplay = true;
-
-		canvasElement.width = "1920";
-		canvasElement.height = "1080";
-		canvasElement.classList.add("camera-canvas");
-
-		mirrorCheckElement.src = "../images/checkmarkWhite.png";
-		mirrorCheckElement.style.visibility = "hidden";
-		mirrorCheckElement.style.width = "16%";
-		mirrorCheckElement.style.marginRight = "6%";
-
-		mirrorLabelElement.innerText = "Mirror Video";
-		mirrorLabelElement.classList.add("mirrorlabel");
-
-		mirrorButtonDiv.style.backgroundColor = "#11366b";
-		mirrorButtonDiv.style.height = "3em";
-		mirrorButtonDiv.style.display = "flex";
-		mirrorButtonDiv.style.justifyContent = "space-between";
-		mirrorButtonDiv.style.alignItems = "center";
-		mirrorButtonDiv.style.borderRadius = "5px";
-		mirrorButtonDiv.style.cursor = "pointer";
-		mirrorButtonDiv.appendChild(mirrorLabelElement);
-		mirrorButtonDiv.appendChild(mirrorCheckElement);
-		mirrorButtonDiv.addEventListener("click", () => {
-			mirrorCanvas(canvasElement);
-			if (
-				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
-				0
-			) {
-				mirrorCheckElement.style.visibility = "visible";
-			} else {
-				mirrorCheckElement.style.visibility = "hidden";
-			}
-		});
-
-		recordElement.innerText = "Start Recording";
-		recordElement.onclick = () => {
-			device.startRecording();
-		}; //assign function
-		recordElement.classList.add("camera-record-btn");
-
-		videoButtonsContainer.classList.add("camera-buttons-container");
-		videoButtonsContainer.appendChild(mirrorButtonDiv);
-		videoButtonsContainer.appendChild(recordElement);
-
-		// Attach all to div in the correct order and add to the page
-		videoContainer.classList.add("video-inner-container");
-		if (device instanceof Kinect) {
-			//Kinect specific identifier
-			videoContainer.id = `cameraContainer${device.getSerial()}`;
-		} else {
-			//Camera specific identifier
-			videoContainer.id = `cameraContainer${device.getDeviceId()}`;
-		}
-
-		videoContainer.appendChild(canvasElement);
-		videoContainer.appendChild(videoButtonsContainer);
-
+		//Get UI elements for device display
 		let cameraVideoFeedOuterContainer = document.getElementById(
 			"camera-video-feed-container"
 		);
-		cameraVideoFeedOuterContainer.appendChild(videoContainer);
+		cameraVideoFeedOuterContainer.appendChild(device.getUI());
+		
 
-		// Connect new elements to start feed in Class
-		//Stop cameras and Kinect
-		if (device instanceof Kinect) {
-			//Kinect Specific
-			stopKinectStream(device).then(() => {
-				if (device != null) {
-					device.setDisplayCanvas(canvasElement);
-					device.start();
-					device.colorVideoFeed();
-				}
-			});
-		} else {
-			//Camera specific
-			stopCameraStream(device);
-
-			if (device != null) {
-				device.setInputAndOutput(videoElement, canvasElement);
-				device.startCameraStream();
-			}
-		}
 	} else {
-		//Make check mark visible indicating the device is NOT "live"
+		//Make check mark invisible indicating the device is NOT "live"
 		targetElement.childNodes[1].style.visibility = "hidden";
 
-		if (device instanceof Kinect) {
-			//Kinect specific
-			//First delete the necessary elements (for performance):
-			let outermostDiv = document.getElementById(
-				`cameraContainer${device.getSerial()}`
-			);
+		let outermostDiv = document.getElementById(device.getDeviceId());
 
-			while (outermostDiv.lastElementChild) {
-				outermostDiv.removeChild(outermostDiv.lastElementChild);
-			}
-
-			outermostDiv.remove();
-
-			//Second, turn off camera feed in the object
-			stopKinectStream(device);
-		} else {
-			//Camera specific
-			//First delete the necessary elements (for performance):
-			let outermostDiv = document.getElementById(
-				`cameraContainer${device.getDeviceId()}`
-			);
-
-			while (outermostDiv.lastElementChild) {
-				outermostDiv.removeChild(outermostDiv.lastElementChild);
-			}
-
-			outermostDiv.remove();
-
-			//Second, turn off camera feed in the object
-			stopCameraStream(device);
+		while (outermostDiv.lastElementChild) {
+			outermostDiv.removeChild(outermostDiv.lastElementChild);
 		}
+		outermostDiv.remove();
+		
+		device.stop()
 	}
 }
 

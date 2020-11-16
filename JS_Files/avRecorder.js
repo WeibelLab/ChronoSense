@@ -1,5 +1,9 @@
 const { spawn } = require("child_process");
 const Stream = require("stream");
+const path = require('path');
+
+const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
+const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
 
 export class AVRecorder {
 	#recorder = null;
@@ -60,14 +64,14 @@ export class AVRecorder {
 				// ! TODO: Maybe change these params (like res) to match canvas attributes?
 				// ! For now, test to make sure class works as expected
 				// ! TODO: Make file name scheme more dynamic to not overwrite previous or break future calls.
-				this.#recorder = spawn("ffmpeg", [
+				this.#recorder = spawn(FFMPEG_DIR+"ffmpeg.exe", [
 					"-hide_banner",
 					"-f",
 					"rawvideo",
 					"-pix_fmt",
 					"rgba",
 					"-video_size",
-					"1920x1080",
+					"1280x720",
 					"-use_wallclock_as_timestamps",
 					"1",
 					"-i",
