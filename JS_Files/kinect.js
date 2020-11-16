@@ -600,6 +600,9 @@ export class Kinect {
 	/**
 	 * Function that creates all the UI elements needed for one Kinect device &
 	 * wraps them all into a single div returned for display.
+	 * 
+	 * @return {HTML Div Element} Single div element that contains all UI elements
+	 * 							  for display.
 	 */
 	getUI() {
 
@@ -695,7 +698,7 @@ export class Kinect {
 	/**
 	 * Getter function to retrieve the object's "label"
 	 *
-	 * @return {string} - Device's English name
+	 * @return {string} Device's English name
 	 */
 	getLabel() {
 		let name = `Azure Kinect (${this.getSerial()})`;
@@ -709,6 +712,38 @@ export class Kinect {
 	 */
 	getDeviceId() {
 		return this.getSerial();
+	}
+
+	/**
+	 * Function used to stop the device from transmitting data/running
+	 */
+	stop() {
+		return this.stopListeningAndCameras().then((resolve, reject) => {
+			this.close();
+			return new Promise((resolve, reject) => {
+				resolve(true);
+			});
+		});
+	}
+
+	/**
+	 * Creates and returns all the current device's objects that can be instantiated
+	 * from the connected devices.
+	 * 
+	 * @return {array} List of instantiated device objects 
+	 */
+	static getDeviceObjects() {
+		var kinectDevices = []
+		var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
+		var kinectCount = tempKinect.getInstalledCount();
+
+		for (var i = 0; i < kinectCount; i++) {
+			//Create the object, then add to the device array
+			let kinect = new Kinect(i);
+			kinectDevices.push(kinect);
+		}
+
+		return kinectDevices;
 	}
 
 } //End of Kinect class

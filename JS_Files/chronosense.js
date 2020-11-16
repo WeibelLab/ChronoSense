@@ -165,21 +165,8 @@ async function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
-	var kinectCount = tempKinect.getInstalledCount();
+	devices = devices.concat(Kinect.getDeviceObjects());
 
-	//i represents the Kinect indices
-	for (var i = 0; i < kinectCount; i++) {
-		//Create the object, then add to the device array
-		createKinect(i, devices);
-
-		let deviceID = devices[i].getSerial(); //serial
-		let deviceName = "Kinect (" + devices[i].getSerial() + ")";
-		let dropdownContentElement = document.getElementById(
-			"kinect-dropdown-content"
-		);
-		addDropdownMenuOption(dropdownContentElement, deviceID, deviceName);
-	}
 
 	/*
 	 * Complete an initial scan for Camera devices already plugged in and
@@ -189,21 +176,16 @@ async function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	getUniqueVideoInputDevices().then((currentDevices) => {
-		for (var k = 0; k < currentDevices.length; k++) {
-			if (
-				!(
-					currentDevices[k].label.includes("kinect") ||
-					currentDevices[k].label.includes("Kinect")
-				)
-			) {
-				//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-				createCamera(devices, currentDevices[k]);
-			}
-		} //All camera devices added to the correct array
+	Camera.getDeviceObjects().then((cameraDevices) => {
+		devices = devices.concat(cameraDevices);
+
+		console.log(devices);
+		// Once done getting all device objects, add to dropdown menu
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
+	
 
+	
 }
 
 /**
@@ -1133,20 +1115,12 @@ async function addDropdownMenuOption(
 
 	parentDiv.appendChild(childDiv);
 	parentDiv.appendChild(checkImg);
-	// ! Add listener for option selection
-	// ! If Kinect, one set of elements
-	// ! If Camera, different set of elements
-	if (dropdownElement.id.includes("kinect")) {
-		// * Kinect Dropdown Option
-		parentDiv.addEventListener("click", (evt) => {
-			onKinectSelection(evt.currentTarget);
-		});
-	} else {
-		// * Camera Dropdown Option
-		parentDiv.addEventListener("click", (evt) => {
-			onCameraSelection(evt.currentTarget, device);
-		});
-	}
+	// Currently the plan is to have a single "device" page. So only focus on camera page functions
+	// * Camera Dropdown Option
+	parentDiv.addEventListener("click", (evt) => {
+		onCameraSelection(evt.currentTarget, device);
+	});
+	
 	// Add elements to
 	dropdownElement.appendChild(parentDiv);
 }
@@ -1184,14 +1158,7 @@ async function onCameraSelection(targetElement, device) {
 		}
 		outermostDiv.remove();
 		
-		// Device Specific Operations on close
-		if (device instanceof Kinect) {
-			stopKinectStream(device);
-
-		} else {
-			//Camera specific
-			stopCameraStream(device);
-		}
+		device.stop()
 	}
 }
 

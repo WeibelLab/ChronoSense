@@ -31,15 +31,6 @@ export class Camera {
 	}
 
 	/**
-	 * Getter function to retrieve the object's Device ID
-	 *
-	 * @return {string} - Device identifier used in capturing image/sound
-	 */
-	getDeviceId() {
-		return this.#deviceId;
-	}
-
-	/**
 	 * Getter function to retrieve the object's Group ID
 	 *
 	 * @return {string} - Group identifier used to connect it to other similar devices
@@ -57,14 +48,6 @@ export class Camera {
 		return this.#kind;
 	}
 
-	/**
-	 * Getter function to retrieve the object's "label"
-	 *
-	 * @return {string} - Device's English name
-	 */
-	getLabel() {
-		return this.#label;
-	}
 
 	/**
 	 * Set width and height for the input of the camera feed.
@@ -293,6 +276,9 @@ export class Camera {
 	/**
 	 * Function that creates all the UI elements needed for one Kinect device &
 	 * wraps them all into a single div returned for display.
+	 * 
+	 * @return {HTML Div Element} - Single div element that contains all UI elements
+	 * 								for display.
 	 */
 	getUI() {
 		//First create the necessary elements
@@ -388,6 +374,99 @@ export class Camera {
 		videoContainer.appendChild(videoButtonsContainer);
 
 		return videoContainer;
+	}
+
+	/**
+	 * Getter function to retrieve the object's "label"
+	 *
+	 * @return {string} - Device's English name
+	 */
+	getLabel() {
+		return this.#label;
+	}
+
+	/**
+	 * Getter function to retrieve the object's Device ID
+	 *
+	 * @return {string} - Device identifier used in capturing image/sound
+	 */
+	getDeviceId() {
+		return this.#deviceId;
+	}
+
+	/**
+	 * Function used to stop the device from transmitting data/running
+	 */
+	stop() {
+		this.stopCameraStream();
+	}
+
+	/**
+	 * Creates and returns all the current device's objects that can be instantiated
+	 * from the connected devices.
+	 * 
+	 * @return {array} List of instantiated device objects 
+	 */
+	static getDeviceObjects() {
+		var cameraDevices = []
+		
+		return navigator.mediaDevices.enumerateDevices().then((devices) => {
+			console.log(devices);
+			var uniqueInputDevices = [];
+			for (var i = 0; i < devices.length; i++) {
+				if (devices[i].kind.localeCompare("videoinput") == 0) {
+					//Now search through added devices if it already exists
+					var matched = false;
+					for (var j = 0; j < uniqueInputDevices.length; j++) {
+						if (
+							uniqueInputDevices[j].groupId.localeCompare(
+								devices[i].groupId
+							) == 0
+						) {
+							matched = true;
+							break; //If match, break out and don't add to
+						}
+					}
+	
+					if (
+						!matched &&
+						devices[i].deviceId.localeCompare("default") != 0 &&
+						devices[i].deviceId.localeCompare("communications") != 0
+					) {
+						//Filter out "default" and "communications" so there is a alphanumeric
+						//identifier and no duplicates.
+						uniqueInputDevices.push(devices[i]);
+					}
+				}
+			}
+			return new Promise((resolve, reject) => {
+				resolve(uniqueInputDevices);
+			});
+		}).then((currentDevices) => {
+			console.log(currentDevices);
+			for (var k = 0; k < currentDevices.length; k++) {
+				if (
+					!(
+						currentDevices[k].label.includes("kinect") ||
+						currentDevices[k].label.includes("Kinect")
+					)
+				) {
+					//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
+					var camera = new Camera(
+						currentDevices[k].deviceId,
+						currentDevices[k].groupId,
+						currentDevices[k].kind,
+						currentDevices[k].label
+					);
+					cameraDevices.push(camera);
+				}
+			} 
+			console.log(cameraDevices);
+			return new Promise((resolve, reject) => {
+				resolve(cameraDevices);
+			});
+		});
+
 	}
 
 } //End of Camera Class
