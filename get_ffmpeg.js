@@ -9,12 +9,17 @@ const FFMPEG_URL = "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials
 const FFMPEG_ZIP = path.resolve(CHRONOSENSE_ROOT_DIR, 'ffmpeg-release-essentials.zip');
 
 const init = async (callback) => {
+    /* // Put it all under directory so script could clean up downloaded zips.
     if (!(await fs.pathExists(FFMPEG_ZIP))) {
         console.log('downloading ffmpeg to:' + CHRONOSENSE_ROOT_DIR);
         await fs.writeFile(FFMPEG_ZIP, await download(FFMPEG_URL));
     }
+    */
 
     if (!(await fs.pathExists(FFMPEG_DIR))) {
+        console.log('downloading ffmpeg to:' + CHRONOSENSE_ROOT_DIR);
+        await fs.writeFile(FFMPEG_ZIP, await download(FFMPEG_URL));
+
         console.log('extracting ffmpeg into:' + FFMPEG_DIR);
         await extractFile(FFMPEG_ZIP, FFMPEG_DIR);
         ext_file_list = recFindByExt(FFMPEG_DIR,'exe');
@@ -24,18 +29,32 @@ const init = async (callback) => {
                 fs.copySync(file, path.resolve(FFMPEG_DIR, path.basename(file)));
             }
         )
+        // When finished, delete unzipped and zipped folders
+        // Delete zip file
+        fs.unlink(FFMPEG_ZIP, (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+        });
+        // Delete unzipped dir (not needed once executables copied out)
+        let file = fs.readdirSync(FFMPEG_DIR).filter((filename) => {
+            return fs.statSync(FFMPEG_DIR + "/" + filename).isDirectory();
+        });
+        console.log(file[0]);
+        fs.rm(FFMPEG_DIR + "/" + file[0], {recursive: true, force: true}, (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+        });
+
     }
 };
 
-const extractFile = (zipPath, dir) => {
-    return new Promise((resolve, reject) => {
-        extract(zipPath, { dir: dir }, err => {
-            if (err) {
-            return reject(err);
-            }
-            resolve();
-        });
-    });
+async function extractFile(zipPath, dir) {
+    await extract(zipPath, { dir: dir });
+
 };
 
 function recFindByExt(base,ext,files,result) 
