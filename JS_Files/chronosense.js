@@ -211,14 +211,15 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case HOME_PAGE_NUM:
 			currentlyOpenPage = HOME_PAGE_NUM;
 			changeWindowFeatures();
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// Clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-			});
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
 
 			break;
 
@@ -226,15 +227,14 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = CAMERA_PAGE_NUM;
 			changeWindowFeatures(CAMERA_PAGE_NUM);
 
-			//Stop cameras and Kinect
-			/*
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				populateCameraList(
-					document.getElementById("camera-dropdown-content")
-				);
-			});
-			*/
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			populateCameraList(
+				document.getElementById("camera-dropdown-content")
+			);
 
 			break;
 
@@ -242,6 +242,16 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			currentlyOpenPage = KINECT_PAGE_NUM;
 			changeWindowFeatures(KINECT_PAGE_NUM);
 
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
+			/*
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices).then(() => {
@@ -262,13 +272,23 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 				kinectDevices[0].start();
 				kinectDevices[0].colorVideoFeed();
 			});
-
+			*/
 			break;
 
 		case KINECT_BODY_PAGE_NUM:
 			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
 			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
 
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
+			/*
 			//Stop cameras and Kinect
 			stopAllCameraStream(cameraDevices);
 			stopAllKinectStream(kinectDevices).then(() => {
@@ -288,19 +308,23 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 				kinectDevices[0].start();
 				kinectDevices[0].bodyTrackingFeed();
 			});
+			*/
+
 			break;
 
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// Clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-			});
+			
+			//Stop all incoming device data
+			for (let device of devices) {
+				device.stop()
+				
+			}
+			// Clear Camera page in order to not have duplicate canvases
+			clearPageContent(
+				document.getElementById("camera-video-feed-container")
+			);
 
 			break;
 	} //End of NEW page switch
@@ -541,7 +565,6 @@ function refreshCameraDevices() {
  * Clears all of the HTML elements in the page used for video feeds.
  */
 function clearPageContent(contentContainer) {
-	// ! To stop devices or have this be a very focused function?
 	clearContainer(contentContainer);
 }
 
@@ -1148,7 +1171,7 @@ async function onCameraSelection(targetElement, device) {
 		
 
 	} else {
-		//Make check mark visible indicating the device is NOT "live"
+		//Make check mark invisible indicating the device is NOT "live"
 		targetElement.childNodes[1].style.visibility = "hidden";
 
 		let outermostDiv = document.getElementById(device.getDeviceId());
