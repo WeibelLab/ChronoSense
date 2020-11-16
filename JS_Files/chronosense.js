@@ -251,28 +251,8 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			clearPageContent(
 				document.getElementById("camera-video-feed-container")
 			);
-			/*
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// First, clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-				// Second, start Kinect (if found) !!for now!!
-				// ! TEMP Hard Coded Device - For example and testing; change later!
-				kinectDevices[0].setDisplayCanvas(displayCanvas);
-				kinectDevices[0].changeParameters(
-					"fps30",
-					"BGRA32",
-					"res1080",
-					"off",
-					"nosync"
-				);
-				kinectDevices[0].start();
-				kinectDevices[0].colorVideoFeed();
-			});
-			*/
+			
+
 			break;
 
 		case KINECT_BODY_PAGE_NUM:
@@ -288,27 +268,6 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			clearPageContent(
 				document.getElementById("camera-video-feed-container")
 			);
-			/*
-			//Stop cameras and Kinect
-			stopAllCameraStream(cameraDevices);
-			stopAllKinectStream(kinectDevices).then(() => {
-				// First, clear Camera page in order to not have duplicate canvases
-				clearPageContent(
-					document.getElementById("camera-video-feed-container")
-				);
-				// ! TEMP Hard Coded Device - For example and testing; change later!
-				kinectDevices[0].setDisplayCanvas(displayCanvas3);
-				kinectDevices[0].changeParameters(
-					"fps30",
-					"BGRA32",
-					"res1080",
-					"wfov2x2binned",
-					"nosync"
-				);
-				kinectDevices[0].start();
-				kinectDevices[0].bodyTrackingFeed();
-			});
-			*/
 
 			break;
 
