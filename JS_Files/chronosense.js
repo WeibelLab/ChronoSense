@@ -6,6 +6,7 @@ const usb = require("usb");
 import { Kinect } from "./kinect.js";
 import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
+import {GenericDevice} from "./generic_device.js";
 
 //Variables of HTML elements for later manipulation
 const btnHome = document.getElementById("homePage");
@@ -50,6 +51,7 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
+		var generic = new GenericDevice();
 	}
 };
 
@@ -183,9 +185,9 @@ async function setupDevices() {
 		// Once done getting all device objects, add to dropdown menu
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
-	
 
-	
+
+
 }
 
 /**
@@ -214,7 +216,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop all incoming device data
 			for (let device of devices) {
 				device.stop()
-				
+
 			}
 			// Clear Camera page in order to not have duplicate canvases
 			clearPageContent(
@@ -230,7 +232,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop all incoming device data
 			for (let device of devices) {
 				device.stop()
-				
+
 			}
 			populateCameraList(
 				document.getElementById("camera-dropdown-content")
@@ -245,13 +247,12 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop all incoming device data
 			for (let device of devices) {
 				device.stop()
-				
+
 			}
 			// Clear Camera page in order to not have duplicate canvases
 			clearPageContent(
 				document.getElementById("camera-video-feed-container")
 			);
-			
 
 			break;
 
@@ -262,7 +263,7 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 			//Stop all incoming device data
 			for (let device of devices) {
 				device.stop()
-				
+
 			}
 			// Clear Camera page in order to not have duplicate canvases
 			clearPageContent(
@@ -274,11 +275,11 @@ async function checkClosingWindowAndChangeContent(newPageNum) {
 		case ABOUT_PAGE_NUM:
 			currentlyOpenPage = ABOUT_PAGE_NUM;
 			changeWindowFeatures();
-			
+
 			//Stop all incoming device data
 			for (let device of devices) {
 				device.stop()
-				
+
 			}
 			// Clear Camera page in order to not have duplicate canvases
 			clearPageContent(
@@ -500,7 +501,7 @@ function populateCameraList(dropdown) {
 	clearDropdown(dropdown);
 
 	for (var i = 0; i < devices.length; i++) {
-		let deviceName = devices[i].getLabel(); 
+		let deviceName = devices[i].getLabel();
 		let deviceID = devices[i].getDeviceId();
 
 		addDropdownMenuOption(dropdown, deviceID, deviceName, devices[i]);
@@ -512,8 +513,11 @@ function populateCameraList(dropdown) {
  */
 function refreshCameraDevices() {
 	// First close and  clear current devices
-	destroyAllCameras(cameraDevices);
-	destroyAllKinects(kinectDevices);
+	//Stop all incoming device data
+	for (let device of devices) {
+		device.stop()
+	}
+	devices = []
 	// Clear out the Camera list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("camera-dropdown-content"));
@@ -1102,7 +1106,7 @@ async function addDropdownMenuOption(
 	parentDiv.addEventListener("click", (evt) => {
 		onCameraSelection(evt.currentTarget, device);
 	});
-	
+
 	// Add elements to
 	dropdownElement.appendChild(parentDiv);
 }
@@ -1127,7 +1131,7 @@ async function onCameraSelection(targetElement, device) {
 			"camera-video-feed-container"
 		);
 		cameraVideoFeedOuterContainer.appendChild(device.getUI());
-		
+
 
 	} else {
 		//Make check mark invisible indicating the device is NOT "live"
@@ -1139,7 +1143,7 @@ async function onCameraSelection(targetElement, device) {
 			outermostDiv.removeChild(outermostDiv.lastElementChild);
 		}
 		outermostDiv.remove();
-		
+
 		device.stop()
 	}
 }
@@ -1187,6 +1191,7 @@ function mirrorCanvas(canvas) {
  */
 global.onbeforeunload = () => {
 	//Close all Kinects & cameras gracefully
-	stopAllCameraStream(cameraDevices);
-	stopAllKinectStream(kinectDevices);
+	for (let device of devices) {
+		device.stop()
+	}
 };

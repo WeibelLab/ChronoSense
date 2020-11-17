@@ -78,7 +78,7 @@ export class Kinect {
 	 *	Open the Kinect Device through the SDK (kinect-azure package)
 	 *
 	 * @param {number} index of the Kinect Device in the SDK
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	open(index) {
 		if (this.#kinectDevice.open(index)) {
@@ -95,7 +95,7 @@ export class Kinect {
 	 * Open the Kinect Device through the SDK via serial # saved in object
 	 * (from constructor)
 	 *
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	serialOpen() {
 		if (this.#kinectDevice.serialOpen(this.#serial)) {
@@ -111,7 +111,7 @@ export class Kinect {
 	/**
 	 * Close the Kinect Device through the SDK (kinect-azure package)
 	 *
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	close() {
 		if (this.#kinectDevice.close()) {
@@ -184,7 +184,7 @@ export class Kinect {
 	 * Set the canvas where the Kinect stream will display.
 	 *
 	 * @param {object} canvas for stream display (HTML element)
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	setDisplayCanvas(canvas) {
 		if (canvas instanceof HTMLCanvasElement) {
@@ -708,7 +708,7 @@ export class Kinect {
 	/**
 	 * Getter function to retrieve the object's Device ID
 	 *
-	 * @return {string} - Device identifier used in capturing image/sound
+	 * @return {string} Device identifier used in capturing image/sound
 	 */
 	getDeviceId() {
 		return this.getSerial();
