@@ -51,6 +51,64 @@ export class GenericDevice {
 	 * 							  for display.
 	 */
 	getUI() {
+		// ! TODO: List of things I might display in the UI:
+		// ! Port that the device is listening on
+		// ! A feed that updates with incoming data
+		// ! Some sort of indication that the connection is active
+
+		//First create the necessary elements
+		// * video, canvas, buttons, video option menus, etc.
+		let videoContainer = document.createElement("div");
+		let videoButtonsContainer = document.createElement("div");
+		let canvasElement = document.createElement("canvas");
+		let recordElement = document.createElement("button");
+		let onElement = document.createElement("button");
+		let offElement = document.createElement("button");
+
+
+		canvasElement.width = "1280";
+		canvasElement.height = "720";
+		canvasElement.classList.add("camera-canvas");
+		/*
+		recordElement.innerText = "Start Recording";
+		recordElement.onclick = () => {
+			this.startRecording();
+		}; //assign function
+		recordElement.classList.add("camera-record-btn");
+		*/
+
+		/*
+		onElement.innerText = "ON";
+		this.setDisplayCanvas(canvasElement);
+		onElement.onclick = () => {
+			this.start();
+			this.colorVideoFeed();
+		};
+		onElement.classList.add("kinect_on");
+
+		offElement.innerText = "OFF";
+		offElement.onclick = () => {
+			this.stopListeningAndCameras();
+		};
+		offElement.classList.add("kinect_off");
+
+		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.appendChild(mirrorButtonDiv);
+		videoButtonsContainer.appendChild(recordElement);
+		videoButtonsContainer.appendChild(onElement);
+		videoButtonsContainer.appendChild(offElement);
+		*/
+
+		// Attach all to div in the correct order and add to the page
+		videoContainer.classList.add("video-inner-container");
+		//Kinect specific identifier
+		videoContainer.id = this.getDeviceId();
+
+		videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoButtonsContainer);
+
+		return videoContainer;
+
 	}
 
 	/**
@@ -67,6 +125,8 @@ export class GenericDevice {
 	 * @return {string} Device identifier used in capturing image/sound
 	 */
 	getDeviceId() {
+		// ! TEMP
+		return "serialDeviceTester";
 	}
 
 	/**
@@ -82,6 +142,7 @@ export class GenericDevice {
 	 * @return {array} List of instantiated device objects 
 	 */
 	static getDeviceObjects() {
+		
 	}
 
 

@@ -17,9 +17,7 @@ const btnAbout = document.getElementById("aboutPage");
 
 //Used in Kinect Class for displaying content
 //Send through constructor to Kinect class object
-const displayCanvas = document.getElementById("video_canvas"); //For Kinect page
 const displayCanvas2 = document.getElementById("video_canvas2"); //For Camera page
-const displayCanvas3 = document.getElementById("video_canvas3"); //For Kinect Body page
 
 //Used in camera methods
 const camVideo = document.getElementById("camera-video");

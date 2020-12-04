@@ -2,7 +2,8 @@
 
 ## Branch Focus & Changes:
 
-The dynamic_ui branch is focused on making the Chronosense application more flexible and visually dynamic (add/remove elements on the fly) for the user.
+The dynamic_ui branch is focused on making the Chronosense application more flexible and visually dynamic (add/remove elements on the fly) for the user.  
+CURRENTLY THE LATEST BRANCH - ALL OTHERS ARE FEATURE EXPLORATIONS
 
 ## Installation / run with Docker
 
