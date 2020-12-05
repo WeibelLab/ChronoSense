@@ -6,7 +6,8 @@ const usb = require("usb");
 import { Kinect } from "./kinect.js";
 import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
-import {GenericDevice} from "./generic_device.js";
+import { GenericDevice } from "./generic_device.js";
+import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
 //Variables of HTML elements for later manipulation
 const btnHome = document.getElementById("homePage");
@@ -49,7 +50,7 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
-		var generic = new GenericDevice();
+		//var generic = new GenericDevice();
 	}
 };
 
@@ -166,6 +167,15 @@ async function setupDevices() {
 	 *
 	 */
 	devices = devices.concat(Kinect.getDeviceObjects());
+
+	/*
+	 * Complete an initial scan for Screen Capture Devices. Populate UI with 
+	 * options.
+	 * 
+	 * Note: Only one screen capture device is initially added to the list and
+	 * from inside the opened screen capture device, more may be spawned.
+	 */
+	devices = devices.concat(ScreenCaptureDevice.getDeviceObjects());
 
 
 	/*

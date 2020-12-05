@@ -2,7 +2,7 @@
 /*
  * Description: File is used to display the joint and body data from the 
  *              Azure Kinect. 
- * 
+ * DEPRECATED
  * CURRENTLY NOT IN USE BY THE PROGRAM. IT HAS BEEN INTEGRATED INTO KINECT.JS
  *
  */
