@@ -21,10 +21,10 @@ export class ScreenCaptureDevice {
         try {
             var stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: false,
-                video: { 
+                video: {
                     mandatory: {
                         chromeMediaSource: 'desktop',
-                        chromeMediaSourceId: this.#sources[1].id,
+                        chromeMediaSourceId: this.#sources[1].id, //Currently hard coded for second monitor during testing
                         minWidth: 1280,
                         maxWidth: 1280,
                         minHeight: 720,
