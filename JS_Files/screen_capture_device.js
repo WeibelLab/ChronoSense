@@ -15,9 +15,9 @@ export class ScreenCaptureDevice {
             this.#sources = sources;
             console.log(sources);
         });
-    }
+	}
 
-    async startCaptureStream(videoElement) {
+	async startCaptureStream(videoElement) {
         try {
             var stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: false,
@@ -39,9 +39,14 @@ export class ScreenCaptureDevice {
         } catch (error) {
             console.log(error);
         }
-    }
+	}
+	
+	
+	async stopCaptureStream(videoElement) {
 
 
+
+	}
 
     // TODO ALL BELOW
     // * Start Required Methods for a Chronosense Device Add-On
@@ -61,6 +66,7 @@ export class ScreenCaptureDevice {
 		let videoElement = document.createElement("video");
 		let canvasElement = document.createElement("canvas");
 		let recordElement = document.createElement("button");
+		let videoButtonsContainerOnOff = document.createElement("div");
 		let onElement = document.createElement("button");
 		let offElement = document.createElement("button");
 
@@ -69,7 +75,8 @@ export class ScreenCaptureDevice {
 		videoElement.width = "1280";
 		videoElement.height = "720";
         videoElement.autoplay = true;
-        
+		videoElement.classList.add("camera-canvas"); //! Change later OR allow user to manipulate sizing of containers
+		
 		//canvasElement.width = "1280";
 		//canvasElement.height = "720";
 		//canvasElement.classList.add("camera-canvas");
@@ -87,17 +94,20 @@ export class ScreenCaptureDevice {
 			this.startCaptureStream(videoElement);
 		};
 		onElement.classList.add("kinect_on");
+		onElement.style.marginRight = "4px";
 
 		offElement.innerText = "OFF";
 		offElement.onclick = () => {
-			this.stopCameraStream();
+			this.stopCaptureStream();
 		};
 		offElement.classList.add("kinect_off");
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
 		videoButtonsContainer.appendChild(recordElement);
-		videoButtonsContainer.appendChild(onElement);
-		videoButtonsContainer.appendChild(offElement);
+		videoButtonsContainerOnOff.classList.add("camera-buttons-container");
+		videoButtonsContainerOnOff.appendChild(onElement);
+		videoButtonsContainerOnOff.appendChild(offElement);
+		videoButtonsContainer.appendChild(videoButtonsContainerOnOff);
 
 		// Attach all to div in the correct order and add to the page
 		videoContainer.classList.add("video-inner-container");

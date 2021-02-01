@@ -122,18 +122,25 @@
 
 .video-inner-container {
 	margin: 1em;
+
+	border-style: solid;
+	border-color: teal;
+	border-width: 1px;
 }
 
 .camera-video {
 	/* Do not display. This is only used to interpret video files and send to canvas */
+	/* ! Check this later for performance/bandwidth issues */
 	display: none;
 	width: 1920px;
 	height: 1080px;
 }
 
 .camera-canvas {
-	width: 640px;
-	height: 360px;
+	width: 30vw;
+	height: auto;
+	min-width: 480px;
+	min-height: 270px;
 	background: #05386b;
 
 	border-style: solid;
@@ -145,6 +152,10 @@
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
+
+	border-style: solid;
+	border-color: green;
+	border-width: 1px;
 }
 
 #mirrorcheck2 {
@@ -316,6 +327,10 @@
 	font-weight: 400;
 	height: 2em;
 	cursor: pointer;
+
+	border-style: solid;
+	border-color: red;
+	border-width: 1px;
 }
 
 .kinect_off {
@@ -328,6 +343,10 @@
 	font-weight: 400;
 	height: 2em;
 	cursor: pointer;
+
+	border-style: solid;
+	border-color: yellow;
+	border-width: 1px;
 }
 
 /* * Styling for the Kinect Body Page */

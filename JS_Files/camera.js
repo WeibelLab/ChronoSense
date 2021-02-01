@@ -1,9 +1,10 @@
 import { AVRecorder } from "./avRecorder.js";
 
 // WORKERS START WHERE HTML IS
+/*
 console.log("I'm the boss!");
 var theWorker = new Worker("../JS_Files/worker_test.js");
-
+*/
 
 export class Camera {
 	#deviceId = null;
