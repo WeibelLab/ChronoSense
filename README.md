@@ -81,9 +81,11 @@ Summary: All camera devices that are plugged in (or already plugged in at launch
 ## Fixes
 
 -   Fix for "Uncaught Error: The module '//........'
-    ![alt text](./readme_images/electronRebuildError.PNG "Error Notification") 1. Rebuild the Electron package  
-     i. Run a fresh install: `npm install`  
-     ii. Run the command: `npm i -D electron-rebuild`  
-     iii. Run this from your application's base directory: `./node_modules/.bin/electron-rebuild.cmd` 2. Reset node_modules/  
-     i. Delete your current node_modules directory  
-     ii. Follow the steps in (1.) above
+    ![alt text](./readme_images/electronRebuildError.PNG "Error Notification")
+    1. Rebuild the Electron package  
+       i. Run a fresh install: `npm install`  
+       ii. Run the command: `npm i -D electron-rebuild`  
+       iii. Run this from your application's base directory: `./node_modules/.bin/electron-rebuild.cmd`
+    2. Reset node_modules/  
+       i. Delete your current node_modules directory  
+       ii. Follow the steps in (1.) above

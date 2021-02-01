@@ -625,19 +625,17 @@ export class Kinect {
 
 		mirrorCheckElement.src = "../images/checkmarkWhite.png";
 		mirrorCheckElement.style.visibility = "hidden";
-		mirrorCheckElement.style.width = "16%";
-		mirrorCheckElement.style.marginRight = "6%";
+		mirrorCheckElement.style.width = "10%";
 
 		mirrorLabelElement.innerText = "Mirror Video";
 		mirrorLabelElement.classList.add("mirrorlabel");
 
-		mirrorButtonDiv.style.backgroundColor = "#11366b";
-		mirrorButtonDiv.style.height = "3em";
+		mirrorButtonDiv.classList.add('kinect_on');
 		mirrorButtonDiv.style.display = "flex";
+		mirrorButtonDiv.style.width = "8em";
 		mirrorButtonDiv.style.justifyContent = "space-between";
 		mirrorButtonDiv.style.alignItems = "center";
-		mirrorButtonDiv.style.borderRadius = "5px";
-		mirrorButtonDiv.style.cursor = "pointer";
+		mirrorButtonDiv.style.padding = "0.5em";
 		mirrorButtonDiv.appendChild(mirrorLabelElement);
 		mirrorButtonDiv.appendChild(mirrorCheckElement);
 		mirrorButtonDiv.addEventListener("click", () => {
