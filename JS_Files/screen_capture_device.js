@@ -15,10 +15,14 @@ export class ScreenCaptureDevice {
     }
 
     getCaptureSources() {
-        desktopCapturer.getSources({ types: ['window', 'screen'] }).then(sources => {
-            this.#sources = sources;
-            console.log(sources);
-        });
+		return new Promise((resolve, reject) => {
+			desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: {width: 900, height: 900} }).then(sources => {
+			            this.#sources = sources;
+			            console.log(sources);
+						resolve(1);
+					});
+		});
+        
 	}
 
 	displaySourceOptions() {
@@ -26,60 +30,85 @@ export class ScreenCaptureDevice {
 		// User can click on one to select it and start streaming in video/audio.
 		
 		// Refresh sources
-		this.getCaptureSources();
-		// Display sources over video
-		this.#sources.forEach(source => {
-			// <div><img/><p>name_of_source</p></div>
-			let newDiv = document.createElement("div");
-			let newImage = document.createElement("img");
-			let newP = document.createElement("p");
+		this.getCaptureSources().then(() => {
+			// Display sources over video
+			this.#sources.forEach(source => {
+				// <div><img/><p>name_of_source</p></div>
+				let newDiv = document.createElement("div");
+				let newImage = document.createElement("img");
+				let newP = document.createElement("p");
 
-			newDiv.style.width = "30%";
-			newDiv.style.height = "auto";
-			newDiv.style.margin = "20px";
-			newDiv.style.borderWidth = "1px";
-			newDiv.style.borderColor = "rgba(255, 255, 255, 0)";
-			newDiv.style.borderRadius = "2px";
-			newDiv.style.cursor = "pointer";
-			newDiv.style.overflow = "hidden";
-
-			newDiv.onmouseover = () => {
-				newDiv.style.borderStyle = "solid";
-				newDiv.style.borderColor = "white";
-
-			};
-
-			newDiv.onmouseout = () => {
+				newDiv.style.width = "20vw";
+				newDiv.style.height = "auto";
+				newDiv.style.margin = "20px";
+				newDiv.style.borderWidth = "1px";
 				newDiv.style.borderColor = "rgba(255, 255, 255, 0)";
+				newDiv.style.borderRadius = "2px";
+				newDiv.style.cursor = "pointer";
+				newDiv.style.overflow = "hidden";
 
-			};
+				newDiv.onmouseover = () => {
+					newDiv.style.borderStyle = "solid";
+					newDiv.style.borderColor = "white";
 
-			newImage.src = source.thumbnail.toDataURL();
-			newImage.style.width = "100%";
-			newImage.style.height = "auto";
+				};
 
-			newP.appendChild(document.createTextNode(source.name));
-			newP.style.width = "100%";
+				newDiv.onmouseout = () => {
+					newDiv.style.borderColor = "rgba(255, 255, 255, 0)";
 
-			newDiv.appendChild(newImage);
-			newDiv.appendChild(newP);
+				};
 
-			this.#optionContainer.appendChild(newDiv);
+				newDiv.onclick = () => {
+					// Start streaming this particular source option
+					// ! Allow options later 
+					this.startCaptureStream(this.#videoElement, source);
+					this.hideSourceOptions();
+				};
 
+				newImage.src = source.thumbnail.toDataURL();
+				newImage.style.width = "100%";
+				newImage.style.height = "auto";
+
+				newP.appendChild(document.createTextNode(source.name));
+				newP.style.width = "100%";
+
+				newDiv.appendChild(newImage);
+				newDiv.appendChild(newP);
+
+				this.#optionContainer.appendChild(newDiv);
+
+			});
+
+			// Finally, reveal options
+			this.#optionContainer.style.display = "flex";
 		});
-
-		// Finally, reveal options
-		this.#optionContainer.style.display = "flex";
+		
 	}
 
-	async startCaptureStream(videoElement) {
+	hideSourceOptions() {
+		this.#optionContainer.style.display = "none";
+
+		// Also remove the elements in the list 
+		// Note: Maybe remove later if testing shows performance issue
+		this.deleteSourceOptions();
+
+
+	}
+
+	deleteSourceOptions() {
+		while (this.#optionContainer.firstChild) {
+			this.#optionContainer.removeChild(this.#optionContainer.firstChild);
+		}
+	}
+
+	async startCaptureStream(videoElement, source) {
         try {
             var stream = await navigator.mediaDevices.getUserMedia({ 
                 audio: false,
                 video: {
                     mandatory: {
                         chromeMediaSource: 'desktop',
-                        chromeMediaSourceId: this.#sources[1].id, //Currently hard coded for second monitor during testing
+                        chromeMediaSourceId: source.id, 
                         minWidth: 1280,
                         maxWidth: 1280,
                         minHeight: 720,
