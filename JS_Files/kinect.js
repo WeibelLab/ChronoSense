@@ -21,6 +21,7 @@ export class Kinect {
 	#depthModeRange;
 	#jointWriter = null;
 	#recorder; //Used for recording video/audio to file
+	#label;
 
 	//List of all changeable parameters for Kinect sensor feed:
 	#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
@@ -262,7 +263,7 @@ export class Kinect {
 						data.colorImageFrame
 					);
 					//Call recording render frame (checks state in func)
-					this.recordFrame();
+					//this.recordFrame();
 				}
 			});
 		}
@@ -514,7 +515,7 @@ export class Kinect {
 					});
 					this.#outputCtx.restore();
 					//Call recording render frame (checks state in func)
-					this.recordFrame();
+					t//his.recordFrame();
 				}
 			});
 		}
@@ -562,14 +563,11 @@ export class Kinect {
 	 */
 	startRecording() {
 		if (!this.#isRecording) {
-			// * Slightly inefficient use of memory management (i.e. GC) but good enough for time being
 			this.#recorder = new AVRecorder(
-				this.#displayCanvas,
-				this.#outputCtx,
-				null,
-				"kinectVideo"
+				this.#displayCanvas.captureStream(),
+				this.#label
 			);
-			this.#recorder.recorderSetup(0); //0 for video only
+			this.#recorder.startRecording();
 			this.#isRecording = true;
 		} else {
 			this.stopRecording();
@@ -590,7 +588,7 @@ export class Kinect {
 	 */
 	stopRecording() {
 		if (this.#isRecording) {
-			this.#recorder.closeFile();
+			this.#recorder.stopRecording();
 			this.#isRecording = false;
 		}
 	}
@@ -659,6 +657,11 @@ export class Kinect {
 		recordElement.innerText = "Start Recording";
 		recordElement.onclick = () => {
 			this.startRecording();
+			if (this.#isRecording) {
+				recordElement.innerText = "Stop Recording";
+			} else {
+				recordElement.innerText = "Start Recording";
+			}
 		}; //assign function
 		recordElement.classList.add("camera-record-btn");
 
@@ -700,6 +703,7 @@ export class Kinect {
 	 */
 	getLabel() {
 		let name = `Azure Kinect (${this.getSerial()})`;
+		this.#label = name;
 		return name;
 	}
 

@@ -177,7 +177,7 @@ export class Camera {
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
 			this.#videoElement.srcObject = stream;
 			this.#isOn = true;
-
+			/* Deprecated: Used to turn video stream into canvas data that was then piped into a child process FFMPEG to record.
 			requestAnimationFrame(() => {
 				this.drawToCanvas(
 					this.#videoElement,
@@ -185,7 +185,7 @@ export class Camera {
 					this.#canvasElement.width,
 					this.#canvasElement.height
 				);
-			});
+			}); */
 		} catch (err) {
 			console.log(
 				`camera.js:startCameraStream()] - ERROR: ${err.message}`
@@ -244,14 +244,12 @@ export class Camera {
 	 */
 	startRecording() {
 		if (!this.#isRecording) {
-			// * Slightly inefficient use of memory management (i.e. GC) but good enough for time being
 			this.#recorder = new AVRecorder(
-				this.#canvasElement,
-				this.#canvasContext,
-				null,
-				"cameraVideo"
+				this.#videoElement.captureStream(),
+				this.#label
 			);
-			this.#recorder.recorderSetup(0); //0 for video only
+			this.#recorder.startRecording();
+			//this.#recorder.recorderSetup(0); //0 for video only
 			this.#isRecording = true;
 		} else {
 			this.stopRecording();
@@ -272,7 +270,7 @@ export class Camera {
 	 */
 	stopRecording() {
 		if (this.#isRecording) {
-			this.#recorder.closeFile();
+			this.#recorder.stopRecording();
 			this.#isRecording = false;
 		}
 	}
@@ -305,10 +303,11 @@ export class Camera {
 		videoElement.width = "1280";
 		videoElement.height = "720";
 		videoElement.autoplay = true;
+		videoElement.classList.add("camera-canvas");
 
-		canvasElement.width = "1280";
-		canvasElement.height = "720";
-		canvasElement.classList.add("camera-canvas");
+		//canvasElement.width = "1280";
+		//canvasElement.height = "720";
+		//canvasElement.classList.add("camera-canvas");
 
 		mirrorCheckElement.src = "../images/checkmarkWhite.png";
 		mirrorCheckElement.style.visibility = "hidden";
@@ -326,12 +325,12 @@ export class Camera {
 		mirrorButtonDiv.appendChild(mirrorLabelElement);
 		mirrorButtonDiv.appendChild(mirrorCheckElement);
 		mirrorButtonDiv.addEventListener("click", () => {
-			if (canvasElement.style.transform.localeCompare("scaleX(-1)") === 0) {
+			if (videoElement.style.transform.localeCompare("scaleX(-1)") === 0) {
 				// Change back to "normal" scaling
-				canvasElement.style.transform = "scaleX(1)";
+				videoElement.style.transform = "scaleX(1)";
 			} else {
-				// Mirror canvas
-				canvasElement.style.transform = "scaleX(-1)";
+				// Mirror video
+				videoElement.style.transform = "scaleX(-1)";
 			}
 			if (
 				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
@@ -346,6 +345,11 @@ export class Camera {
 		recordElement.innerText = "Start Recording";
 		recordElement.onclick = () => {
 			this.startRecording();
+			if (this.#isRecording) {
+				recordElement.innerText = "Stop Recording";
+			} else {
+				recordElement.innerText = "Start Recording";
+			}
 		}; //assign function
 		recordElement.classList.add("camera-record-btn");
 
@@ -374,7 +378,8 @@ export class Camera {
 		//Camera specific identifier
 		videoContainer.id = `${this.getDeviceId()}`;
 
-		videoContainer.appendChild(canvasElement);
+		//videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(videoButtonsContainer);
 
 		return videoContainer;
