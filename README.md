@@ -1,9 +1,7 @@
 # ChronoSenseV3
 
-## Branch Focus & Changes:
+![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")
 
-The dynamic_ui branch is focused on making the Chronosense application more flexible and visually dynamic (add/remove elements on the fly) for the user.  
-CURRENTLY THE LATEST/CENTRAL BRANCH - ALL OTHERS ARE FEATURE EXPLORATIONS
 
 ## Installation / run with Docker
 
@@ -60,7 +58,7 @@ CURRENTLY THE LATEST/CENTRAL BRANCH - ALL OTHERS ARE FEATURE EXPLORATIONS
 
 10. Ready to Develop!
 
-## Change Notes (Updated: 10/15/20):
+## Change Notes (Updated: 3/4/21):
 
 Summary: All camera devices that are plugged in (or already plugged in at launch) update on the application central, universal list of devices that are then available for the application to use in any manner. They will be automatically connected to the necessary SDKs/APIs to optimize their performance.
 
@@ -74,13 +72,20 @@ Summary: All camera devices that are plugged in (or already plugged in at launch
 -   Change in procedure where I now list out the goal of the current branch at the top of the README and try to keep track of all large changes that will be added to "change notes" once it is merged into the master branch.
 -   In regards to generalizing devices, the main chronosense.js file now uses arrays/lists of device objects created through kinect.js & camera.js for easy updates to the UI to allow the user to know at all times which devices are available and in which page.
 -   After a lot of testing and troubleshooting, I found that the SDK/Azure Kinect hardware doesn't give us enough information regarding its current status. With that in mind, I changed from an "update on plug-in" model to a manual refresh button that is working perfectly with the inherent delay of the SDK.
--   Multiple Kinects ARE working (simultaneous streaming limited by kinect-azure package at the moment) and detected when plugged in to a single system.
+-   Multiple Kinects ARE working (simultaneous streaming limited by kinect-azure package at the moment) and detected when plugged in to a single system. (Update 3/4/21: All Kinects are treated as cameras until Kinect package allows for multiple Kinects simultaneously)
 -   The Camera page now dynamically fills its list with the connected devices and allows the user to click on them to add video preview elements to the UI. Multiple video streams are able to run at the same time.
--   Swapping between pages properly disposes of active streams and UI elements to cease duplication and speed up the main process thread.
+-   Swapping between pages properly disposes of active streams and UI elements to cease duplication and speed up the main process thread.  
+- Screen Recording is now available, allowing the user to select a screen or window they would like to preview/record in ChronoSense.  
+- Currently all cameras and video feeds are set to a resolution of 1280x720.
+- Multicamera previewing and recording is now working with minimal impact on performance (tested up to 4 inputs - Screen Capture, webcam, and 2 Kinects simultaneously).
+- On "Stop Recording," the user is now able to name the file and change the file extension. They can also select the save path.
+- UI has been cleaned up and scales correctly with window adjustments and different resolution monitors.
+- "Scaffolding" in the UI has been removed and now more accurately represents the final product.
+- Saved video files are now scrubbable and have the correct metadata of a normal video file. 
+ 
+## Fixes [Note: may not be needed in README anymore after bugfix committed]
 
-## Fixes
-
--   Fix for "Uncaught Error: The module '//........'
+-   Fix for "Uncaught Error: The module '//........'  
     ![alt text](./readme_images/electronRebuildError.PNG "Error Notification")
     1. Rebuild the Electron package  
        i. Run a fresh install: `npm install`  
