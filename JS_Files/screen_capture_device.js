@@ -1,4 +1,5 @@
 const { desktopCapturer } = require('electron');
+import { AVRecorder } from './avRecorder.js';
 
 export class ScreenCaptureDevice {
 
@@ -8,12 +9,24 @@ export class ScreenCaptureDevice {
 	#videoContainer = null;
 	#optionContainer = null;
 	#sources = []
-	
+	#recorder = null;
 
+	#isRecording = false;
+	#isStreaming = false;
+	
+	/**
+	 * Constructor for a ScreenCaptureDevice object that captures stream of video/audio from user screens & windows.
+	 *
+	 */
     constructor() {
         this.getCaptureSources();
     }
 
+	/**
+	 * Collects all of the possible screen and window sources into an array for later use.
+	 *
+	 * @return {Promise} Resolves to (1) when all sources have been added to sources []
+	 */
     getCaptureSources() {
 		return new Promise((resolve, reject) => {
 			desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: {width: 900, height: 900} }).then(sources => {
@@ -25,6 +38,10 @@ export class ScreenCaptureDevice {
         
 	}
 
+	/**
+	 * Displays previews for all capture options and allows the user to click them to start streaming.
+	 *
+	 */
 	displaySourceOptions() {
 		// Display source options on top of video element with thumbnail & name.
 		// User can click on one to select it and start streaming in video/audio.
@@ -85,6 +102,10 @@ export class ScreenCaptureDevice {
 		
 	}
 
+	/**
+	 * Hides visible source selection options and then deletes those elements from the DOM.
+	 *
+	 */
 	hideSourceOptions() {
 		this.#optionContainer.style.display = "none";
 
@@ -95,44 +116,94 @@ export class ScreenCaptureDevice {
 
 	}
 
+	/**
+	 * Removes the source option elements from the DOM.
+	 *
+	 */
 	deleteSourceOptions() {
 		while (this.#optionContainer.firstChild) {
 			this.#optionContainer.removeChild(this.#optionContainer.firstChild);
 		}
 	}
 
+	/**
+	 * Starts streaming video/audio from the selected (passed in) source.
+	 *
+	 * @param {Video Element} videoElement - HTML Video Element for the MediaStream to display.
+	 * @param {MediaStream} source - MediaStream object from a screen or window.
+	 */
 	async startCaptureStream(videoElement, source) {
-        try {
-            var stream = await navigator.mediaDevices.getUserMedia({ 
-                audio: false,
-                video: {
-                    mandatory: {
-                        chromeMediaSource: 'desktop',
-                        chromeMediaSourceId: source.id, 
-                        minWidth: 1280,
-                        maxWidth: 1280,
-                        minHeight: 720,
-                        maxHeight: 720
-
-
-                    }
-                }
-            })
-            videoElement.srcObject = stream;
-
-        } catch (error) {
-            console.log(error);
-        }
+        if (!this.#isStreaming) {
+			try {
+				var stream = await navigator.mediaDevices.getUserMedia({ 
+					audio: false,
+					video: {
+						mandatory: {
+							chromeMediaSource: 'desktop',
+							chromeMediaSourceId: source.id, 
+							minWidth: 1280,
+							maxWidth: 1280,
+							minHeight: 720,
+							maxHeight: 720
+						}
+					}
+				})
+				videoElement.srcObject = stream;
+				this.#isStreaming = true;
+	
+			} catch (error) {
+				console.log(error);
+			}
+		}
 	}
 	
-	
+	/**
+	 * Stops streaming video/audio from the currently streaming source.
+	 * Note: Also stops recording.
+	 *
+	 * @param {Video Element} videoElement - HTML Video Element to stop streaming data to.
+	 */
 	async stopCaptureStream(videoElement) {
+		if (
+			this.#videoElement !== null &&
+			this.#videoElement.srcObject !== null &&
+			this.#isStreaming
+		) {
+			this.stopRecording();
+			this.#videoElement.srcObject.getTracks().forEach((track) => {
+				track.stop();
+			});
+			this.#isStreaming = false;
+		}
+	}
 
-
+	/**
+	 * Starts recording video/audio from the currently streaming source.
+	 */
+	startRecording() {
+		if (!this.#isRecording && this.#isStreaming) {
+			this.#recorder = new AVRecorder(
+				this.#videoElement.captureStream(),
+				this.#label
+			);
+			this.#recorder.startRecording();
+			this.#isRecording = true;
+		} else {
+			this.stopRecording();
+		}
 
 	}
 
-    // TODO ALL BELOW
+	/**
+	 * Stops recording video/audio from the currently streaming source.
+	 */
+	stopRecording() {
+		if (this.#isRecording && this.#isStreaming) {
+			this.#recorder.stopRecording();
+			this.#isRecording = false;
+		}
+	}
+
     // * Start Required Methods for a Chronosense Device Add-On
 	
 	/**
@@ -151,7 +222,6 @@ export class ScreenCaptureDevice {
 		let videoButtonsContainer = document.createElement("div");
 		let videoElement = document.createElement("video");
 		this.#videoElement = videoElement;
-		let canvasElement = document.createElement("canvas");
 		let recordElement = document.createElement("button");
 		let videoButtonsContainerOnOff = document.createElement("div");
 		let onElement = document.createElement("button");
@@ -175,19 +245,17 @@ export class ScreenCaptureDevice {
 		videoElement.height = "720";
         videoElement.autoplay = true;
 		videoElement.classList.add("camera-canvas"); //! Change later OR allow user to manipulate sizing of containers (e.g. drag edges)
-		//videoContainerDiv.appendChild(videoElement);
-		
-		//canvasElement.width = "1280";
-		//canvasElement.height = "720";
-		//canvasElement.classList.add("camera-canvas");
 
 		recordElement.innerText = "Start Recording";
 		recordElement.onclick = () => {
 			this.startRecording();
+			if (this.#isRecording) {
+				recordElement.innerText = "Stop Recording";
+			} else {
+				recordElement.innerText = "Start Recording";
+			}
 		}; //assign function
 		recordElement.classList.add("camera-record-btn");
-
-		//this.setInputAndOutput(videoElement, canvasElement)
 
 		onElement.innerText = "ON";
 		onElement.onclick = () => {
@@ -203,6 +271,7 @@ export class ScreenCaptureDevice {
 		offElement.classList.add("kinect_off");
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
 		videoButtonsContainer.appendChild(recordElement);
 		videoButtonsContainerOnOff.classList.add("camera-buttons-container");
 		videoButtonsContainerOnOff.appendChild(onElement);
@@ -214,7 +283,6 @@ export class ScreenCaptureDevice {
 		//Camera specific identifier
 		videoContainer.id = `${this.getDeviceId()}`;
 
-		//videoContainer.appendChild(canvasElement);
 		videoContainer.appendChild(optionContainer);
         videoContainer.appendChild(videoElement);
         videoContainer.appendChild(videoButtonsContainer);
@@ -245,7 +313,6 @@ export class ScreenCaptureDevice {
 	 */
 	start() {
 		this.displaySourceOptions();
-		//this.startCaptureStream(this.#videoElement);
 
 	}
 
@@ -253,7 +320,7 @@ export class ScreenCaptureDevice {
 	 * Function used to stop the device from transmitting data/running
 	 */
 	stop() {
-		//this.stopCameraStream();
+		this.stopCaptureStream(this.#videoElement);
 	}
 
 	/**

@@ -289,6 +289,7 @@ export class Camera {
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
 		let videoButtonsContainer = document.createElement("div");
+		let videoButtonsContainerSub = document.createElement("div");
 		let mirrorButtonDiv = document.createElement("div");
 		let videoElement = document.createElement("video");
 		let canvasElement = document.createElement("canvas");
@@ -360,6 +361,7 @@ export class Camera {
 			this.startCameraStream();
 		};
 		onElement.classList.add("kinect_on");
+		onElement.style.marginRight = "4px";
 
 		offElement.innerText = "OFF";
 		offElement.onclick = () => {
@@ -368,10 +370,13 @@ export class Camera {
 		offElement.classList.add("kinect_off");
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
 		videoButtonsContainer.appendChild(mirrorButtonDiv);
 		videoButtonsContainer.appendChild(recordElement);
-		videoButtonsContainer.appendChild(onElement);
-		videoButtonsContainer.appendChild(offElement);
+		videoButtonsContainerSub.classList.add("camera-buttons-container");
+		videoButtonsContainerSub.appendChild(onElement);
+		videoButtonsContainerSub.appendChild(offElement);
+		videoButtonsContainer.appendChild(videoButtonsContainerSub);
 
 		// Attach all to div in the correct order and add to the page
 		videoContainer.classList.add("video-inner-container");
@@ -454,22 +459,22 @@ export class Camera {
 		}).then((currentDevices) => {
 			console.log(currentDevices);
 			for (var k = 0; k < currentDevices.length; k++) {
-				if (
-					!(
-						currentDevices[k].label.includes("kinect") ||
-						currentDevices[k].label.includes("Kinect")
-					)
-				) {
+				//if (
+				//	!(
+				//		currentDevices[k].label.includes("kinect") ||
+				//		currentDevices[k].label.includes("Kinect")
+				//	)
+				//) {
 					//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-					var camera = new Camera(
-						currentDevices[k].deviceId,
-						currentDevices[k].groupId,
-						currentDevices[k].kind,
-						currentDevices[k].label
-					);
-					cameraDevices.push(camera);
+				var camera = new Camera(
+					currentDevices[k].deviceId,
+					currentDevices[k].groupId,
+					currentDevices[k].kind,
+					currentDevices[k].label
+				);
+				cameraDevices.push(camera);
 				}
-			} 
+			//} 
 			console.log(cameraDevices);
 			return new Promise((resolve, reject) => {
 				resolve(cameraDevices);

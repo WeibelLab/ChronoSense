@@ -166,7 +166,10 @@ async function setupDevices() {
 	 * with it. (i.e. For Kinects, use kinect-azure NOT USB directly)
 	 *
 	 */
-	devices = devices.concat(Kinect.getDeviceObjects());
+	// ! For now, let all devices be generic camera
+	// ! To change back to Kinect and Camera as separate. Uncomment line below and go to
+	// ! camera.js and uncomment lines in getDeviceObjects() that filters out Kinect devices.
+	//devices = devices.concat(Kinect.getDeviceObjects());
 
 	/*
 	 * Complete an initial scan for Screen Capture Devices. Populate UI with 

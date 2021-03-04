@@ -5,6 +5,7 @@
  */
 import { JointWriter } from "./jointwriter.js";
 import { AVRecorder } from "./avRecorder.js";
+import { Camera } from "./camera.js";
 const KinectAzure = require("../kinect-azure");
 
 export class Kinect {
@@ -608,6 +609,7 @@ export class Kinect {
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
 		let videoButtonsContainer = document.createElement("div");
+		let videoButtonsContainerSub = document.createElement("div");
 		let mirrorButtonDiv = document.createElement("div");
 		let canvasElement = document.createElement("canvas");
 		let mirrorCheckElement = document.createElement("img");
@@ -672,6 +674,7 @@ export class Kinect {
 			this.colorVideoFeed();
 		};
 		onElement.classList.add("kinect_on");
+		onElement.style.marginRight = "4px";
 
 		offElement.innerText = "OFF";
 		offElement.onclick = () => {
@@ -680,10 +683,13 @@ export class Kinect {
 		offElement.classList.add("kinect_off");
 
 		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
 		videoButtonsContainer.appendChild(mirrorButtonDiv);
 		videoButtonsContainer.appendChild(recordElement);
-		videoButtonsContainer.appendChild(onElement);
-		videoButtonsContainer.appendChild(offElement);
+		videoButtonsContainerSub.classList.add("camera-buttons-container");
+		videoButtonsContainerSub.appendChild(onElement);
+		videoButtonsContainerSub.appendChild(offElement);
+		videoButtonsContainer.appendChild(videoButtonsContainerSub);
 
 		// Attach all to div in the correct order and add to the page
 		videoContainer.classList.add("video-inner-container");
@@ -741,8 +747,13 @@ export class Kinect {
 
 		for (var i = 0; i < kinectCount; i++) {
 			//Create the object, then add to the device array
-			let kinect = new Kinect(i);
-			kinectDevices.push(kinect);
+			if (i == 0) { // ! Currently only allow 1 Kinect to use Kinect Class due to kinect-azure package limitations
+				let kinect = new Kinect(i);
+				kinectDevices.push(kinect);
+			} else {
+				break;
+			}
+			
 		}
 
 		return kinectDevices;
