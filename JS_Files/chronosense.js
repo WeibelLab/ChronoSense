@@ -3,7 +3,7 @@
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
 const usb = require("usb");
-import { Kinect } from "./kinect.js";
+//import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
 import { GenericDevice } from "./generic_device.js";

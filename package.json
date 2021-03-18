@@ -4,8 +4,7 @@
 	"description": "Chronosense Electron Application",
 	"main": "main.js",
 	"scripts": {
-		"start": "electron --no-sandbox --use-gl=swiftshader .",
-		"postinstall": "node ./get_ffmpeg.js && node ./kinect-azure/scripts/install.js"
+		"start": "electron --no-sandbox --use-gl=swiftshader ."
 	},
 	"author": "Alexander Schonken",
 	"license": "ISC",
