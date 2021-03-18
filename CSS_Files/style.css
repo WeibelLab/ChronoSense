@@ -38,6 +38,7 @@ body {
 	color: var(--primaryLightContrastColor);
 	/* Below mins set to make rescaling look better */
 	min-height: 30px;
+	min-width: 560px;
 }
 
 h1 {
@@ -71,6 +72,8 @@ h1 {
 	padding-bottom: 15px;
 	margin: 0px;
 	text-decoration: none;
+
+	cursor: pointer;
 }
 
 #navigation-bar li a:hover {

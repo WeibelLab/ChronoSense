@@ -16,14 +16,88 @@
 	top: 2px;
 	right: 2px;
 	display: inline;
+
+	/*
+	border-style: solid;
+	border-color: blue;
+	border-width: 2px;
+	*/
 }
 
 .mirrorlabel {
 	position: relative;
-	left: 4px;
-	display: inline;
 	color: var(--primaryLightContrastColor);
+	font-size: 1em;
 	font-weight: 400;
+	margin-left: 3%;
+	user-select: none;
+	cursor: pointer;
+}
+
+.chrono-dropdown {
+	position: relative;
+	width: 8em;
+	user-select: none;
+}
+
+.chrono-dropdown-btn {
+	text-decoration: none;
+	display: block;
+	text-align: center;
+	width: 8em;
+	color: var(--primaryDarkContrastColor);
+	background-color: #f1f1f1;
+	font-weight: 700;
+	padding: 8px;
+	border-style: solid;
+	border-width: thin;
+	border-color: var(--primaryDarkContrastColor);
+	border-radius: 1px;
+	cursor: pointer;
+}
+
+/* Small animation as if pressing a button */
+.chrono-dropdown-btn:active {
+	transform: scale(0.99);
+}
+
+.chrono-dropdown-content {
+	display: none; /* Change to block when button clicked */
+	position: absolute;
+	background-color: #f1f1f1;
+	min-width: 8em;
+	width: auto;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+	z-index: 1;
+}
+
+.chrono-dropdown-content > div {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+	color: var(--primaryDarkContrastColor);
+	cursor: pointer;
+	padding: 0.5em;
+
+	font-size: 1em;
+}
+
+.chrono-dropdown-content div:hover {
+	background-color: #cccccc;
+}
+
+.chrono-dropdown-content > div div {
+	margin-right: 1em;
+}
+
+.chrono-dropdown-content > div img {
+	position: relative;
+	width: 1em;
+	height: auto;
+	user-select: none;
 }
 
 /* * Styling for the Camera Page */
@@ -32,28 +106,70 @@
 }
 
 #dropdown {
-	display: inline;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 0;
-	padding-right: 0;
+	display: block;
 }
 
-#camera-video {
+#camera-video-feed-container {
+	/* ! Up for change */
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	width: 100%;
+	height: 90%;
+
+	/*
+	border-style: solid;
+	border-color: red;
+	border-width: 2px;
+	*/
+}
+
+.video-inner-container {
+	margin: 1em;
+
+	/*
+	border-style: solid;
+	border-color: teal;
+	border-width: 1px;
+	*/
+}
+
+.camera-video {
 	/* Do not display. This is only used to interpret video files and send to canvas */
+	/* ! Check this later for performance/bandwidth issues */
 	display: none;
 	width: 1920px;
 	height: 1080px;
 }
 
-#video_canvas2 {
-	width: 1920px;
-	height: 1080px;
-	margin-left: auto;
-	margin-right: auto;
-	padding-left: 0;
-	padding-right: 0;
+.camera-canvas {
+	width: 30vw;
+	height: auto;
+	min-width: 480px;
+	min-height: 270px;
 	background: #05386b;
+
+	/*
+	border-style: solid;
+	border-color: pink;
+	border-width: 2px;
+	*/
+}
+
+.camera-buttons-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+
+	/*
+	border-style: solid;
+	border-color: green;
+	border-width: 1px;
+	*/
+}
+
+.camera-buttons-container-spacing {
+	margin-top: 4px;
 }
 
 #mirrorcheck2 {
@@ -64,8 +180,21 @@
 	display: inline;
 }
 
-#record {
+.camera-record-btn {
 	display: block;
+	border-style: solid;
+	border-color: black;
+	border-width: 2px;
+	cursor: pointer;
+}
+
+#refresh-cameras-btn {
+	width: 9.5em;
+	height: 2em;
+
+	margin-top: 4px;
+	text-align: center;
+
 }
 
 /* * Styling for the Kinect Page */
@@ -100,54 +229,6 @@
 #kinect-refresh-btn {
 	display: block;
 	margin: 0 auto;
-}
-
-#kinect-dropdown-button {
-	text-decoration: none;
-	display: block;
-	text-align: center;
-	width: 8em;
-	color: var(--primaryDarkContrastColor);
-	background-color: #f1f1f1;
-	font-weight: 700;
-	padding: 8px;
-	border-style: solid;
-	border-width: thin;
-	border-color: var(--primaryDarkContrastColor);
-	border-radius: 1px;
-	cursor: pointer;
-}
-
-/* Small animation as if pressing a button */
-#kinect-dropdown-button:active {
-	transform: scale(0.99);
-}
-
-#kinect-dropdown {
-	position: relative;
-	width: 8em;
-}
-
-#kinect-dropdown-content {
-	display: none; /* Change to block when button clicked */
-	position: absolute;
-	background-color: #f1f1f1;
-	min-width: 8em;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
-}
-
-#kinect-dropdown-content a {
-	position: relative;
-	color: var(--primaryDarkContrastColor);
-	display: block;
-	padding: 0.5em 1em;
-	text-decoration: none;
-	cursor: pointer;
-}
-
-#kinect-dropdown-content a:hover {
-	background-color: #cccccc;
 }
 
 /* ! TODO: create checkbox structure in menu 
@@ -268,6 +349,13 @@
 	color: white;
 	font-weight: 400;
 	height: 2em;
+	cursor: pointer;
+
+	/*
+	border-style: solid;
+	border-color: red;
+	border-width: 1px;
+	*/
 }
 
 .kinect_off {
@@ -279,6 +367,13 @@
 	color: white;
 	font-weight: 400;
 	height: 2em;
+	cursor: pointer;
+
+	/*
+	border-style: solid;
+	border-color: yellow;
+	border-width: 1px;
+	*/
 }
 
 /* * Styling for the Kinect Body Page */

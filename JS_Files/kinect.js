@@ -4,6 +4,8 @@
  *
  */
 import { JointWriter } from "./jointwriter.js";
+import { AVRecorder } from "./avRecorder.js";
+import { Camera } from "./camera.js";
 const KinectAzure = require("../kinect-azure");
 
 export class Kinect {
@@ -16,12 +18,15 @@ export class Kinect {
 	#isKinectCamerasStarted = false;
 	#isKinectListening = false;
 	#isKinectStreaming = false;
+	#isRecording = false;
 	#depthModeRange;
-	#jointWriter;
+	#jointWriter = null;
+	#recorder; //Used for recording video/audio to file
+	#label;
 
 	//List of all changeable parameters for Kinect sensor feed:
 	#CameraFPS = KinectAzure.K4A_FRAMES_PER_SECOND_30;
-	#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_1080P;
+	#ColorResolution = KinectAzure.K4A_COLOR_RESOLUTION_720P;
 	#ColorFormat = KinectAzure.K4A_IMAGE_FORMAT_COLOR_BGRA32;
 	#DepthMode = KinectAzure.K4A_DEPTH_MODE_OFF;
 	#SyncMode = false;
@@ -47,6 +52,7 @@ export class Kinect {
 			}
 		}
 
+		// Try putting this in start function and only when body tracking added
 		//this.#jointWriter = new JointWriter();
 	}
 
@@ -74,7 +80,7 @@ export class Kinect {
 	 *	Open the Kinect Device through the SDK (kinect-azure package)
 	 *
 	 * @param {number} index of the Kinect Device in the SDK
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	open(index) {
 		if (this.#kinectDevice.open(index)) {
@@ -91,7 +97,7 @@ export class Kinect {
 	 * Open the Kinect Device through the SDK via serial # saved in object
 	 * (from constructor)
 	 *
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	serialOpen() {
 		if (this.#kinectDevice.serialOpen(this.#serial)) {
@@ -107,7 +113,7 @@ export class Kinect {
 	/**
 	 * Close the Kinect Device through the SDK (kinect-azure package)
 	 *
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	close() {
 		if (this.#kinectDevice.close()) {
@@ -161,6 +167,8 @@ export class Kinect {
 				this.#DepthMode
 			);
 			this.#kinectDevice.createTracker();
+			// Try creating joint writer only if body tracking enabled
+			this.#jointWriter = new JointWriter();
 		}
 	} //End of startKinect()
 
@@ -178,7 +186,7 @@ export class Kinect {
 	 * Set the canvas where the Kinect stream will display.
 	 *
 	 * @param {object} canvas for stream display (HTML element)
-	 * @return {bool} - true if success, false if fail
+	 * @return {bool} true if success, false if fail
 	 */
 	setDisplayCanvas(canvas) {
 		if (canvas instanceof HTMLCanvasElement) {
@@ -193,80 +201,6 @@ export class Kinect {
 		return false;
 	}
 
-	/**
-	 * Turns off the Kinect fully if it is currently on. This is a much easier way
-	 * to change the type of data you are collecting BUT it sacrifices time and
-	 * efficiency for ease of use.
-	 *
-	 * NOTE: Look into creating additional function to stop listening and allow
-	 *       quick setting change or transition to capture a different data stream.
-	 */
-	/*
-	async shutOff() {
-		//First check if the Kinect is on before allowing it to be shut off.
-		//if(this.#isKinectOn) {
-		let stoppedListening;
-		console.log("Inside shutOff beginning");
-		if (this.#isKinectListening) {
-			stoppedListening = await this.#kinectDevice.stopListening();
-			this.#isKinectListening = false;
-
-			if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
-				this.#jointWriter.closeWrittenFile();
-				this.#kinectDevice.destroyTracker();
-				console.log("Body Tracker Destroyed");
-			}
-		}
-
-		if (this.#isKinectCamerasStarted) {
-			await this.#kinectDevice.stopCameras();
-			this.#isKinectCamerasStarted = false;
-		}
-
-		if (this.#isKinectOpen) {
-			await this.#kinectDevice.close();
-			this.#isKinectOpen = false;
-		}
-
-		return stoppedListening;
-		//}
-	}
-	*/
-
-	/**
-	 *
-	 *
-	 * Function will be used to transition between capturing different data streams
-	 * from the kinect (e.g. RGB -> body tracking) without to completely shut off
-	 * the Kinect; saving time and resources.
-	 *
-	 */
-	/*
-	async stopListeningAndCameras() {
-		if (this.#isKinectListening) {
-			let kinectStoppedlistening = await this.#kinectDevice.stopListening();
-			console.log("stopped: " + kinectStoppedlistening);
-			this.#isKinectListening = false;
-			this.#isKinectStreaming = false;
-			this.#kinectDevice.stopCameras();
-			this.#isKinectCamerasStarted = false;
-
-			if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
-				//this.#jointWriter.closeWrittenFile();
-				this.#kinectDevice.destroyTracker();
-			}
-
-			console.log(
-				"[kinect.js:stopListeningAndCameras()] - MAYBE RACE CONDITION??"
-			);
-
-			return kinectStoppedlistening;
-		}
-		console.log(
-			"[kinect.js:stopListeningAndCameras()] - ERROR: Cameras and Listening ALREADY off"
-		);
-	}
-	*/
 	stopListeningAndCameras() {
 		if (this.#isKinectListening) {
 			return this.#kinectDevice.stopListening().then(() => {
@@ -278,7 +212,9 @@ export class Kinect {
 				this.#isKinectCamerasStarted = false;
 
 				if (this.#DepthMode != KinectAzure.K4A_DEPTH_MODE_OFF) {
-					//this.#jointWriter.closeWrittenFile();
+					if (this.#jointWriter != null) {
+						this.#jointWriter.closeWrittenFile();
+					}
 					this.#kinectDevice.destroyTracker();
 				}
 
@@ -327,6 +263,8 @@ export class Kinect {
 						outputImageData,
 						data.colorImageFrame
 					);
+					//Call recording render frame (checks state in func)
+					//this.recordFrame();
 				}
 			});
 		}
@@ -337,6 +275,7 @@ export class Kinect {
 		//console.log("Start of renderBGRA32ColorFrame() reached");
 		const newPixelData = Buffer.from(imageFrame.imageData);
 		const pixelArray = canvasImageData.data;
+		//console.log(pixelArray);
 		for (let i = 0; i < canvasImageData.data.length; i += 4) {
 			pixelArray[i] = newPixelData[i + 2];
 			pixelArray[i + 1] = newPixelData[i + 1];
@@ -563,8 +502,9 @@ export class Kinect {
 						//TEST: For each body, write joint data to CSV
 						//console.log('BEFORE writing to file');
 						// * Commented out while developing other features
-						//this.#jointWriter.writeToFile(body.skeleton);
-						//console.log('AFTER writing to file');
+						if (this.#jointWriter != null) {
+							this.#jointWriter.writeToFile(body.skeleton);
+						}
 						body.skeleton.joints.forEach((joint) => {
 							this.#outputCtx.fillRect(
 								joint.colorX,
@@ -575,6 +515,8 @@ export class Kinect {
 						});
 					});
 					this.#outputCtx.restore();
+					//Call recording render frame (checks state in func)
+					t//his.recordFrame();
 				}
 			});
 		}
@@ -613,4 +555,208 @@ export class Kinect {
 			outputMin
 		);
 	}
+
+	/**
+	 * Start recording current Kinect canvas feed
+	 *
+	 * ! Note: Assumes connection of canvas elements prior to call.
+	 *
+	 */
+	startRecording() {
+		if (!this.#isRecording) {
+			this.#recorder = new AVRecorder(
+				this.#displayCanvas.captureStream(),
+				this.#label
+			);
+			this.#recorder.startRecording();
+			this.#isRecording = true;
+		} else {
+			this.stopRecording();
+		}
+	}
+
+	/**
+	 * Call to record the current frame to video file *Temp workflow*
+	 */
+	recordFrame() {
+		if (this.#isRecording) {
+			this.#recorder.writeToFile();
+		}
+	}
+
+	/**
+	 * Stop recording current Kinect canvas feed
+	 */
+	stopRecording() {
+		if (this.#isRecording) {
+			this.#recorder.stopRecording();
+			this.#isRecording = false;
+		}
+	}
+
+	// * Start Required Methods for a Chronosense Device Add-On
+	
+	/**
+	 * Function that creates all the UI elements needed for one Kinect device &
+	 * wraps them all into a single div returned for display.
+	 * 
+	 * @return {HTML Div Element} Single div element that contains all UI elements
+	 * 							  for display.
+	 */
+	getUI() {
+
+		//First create the necessary elements
+		// * video, canvas, buttons, video option menus, etc.
+		let videoContainer = document.createElement("div");
+		let videoButtonsContainer = document.createElement("div");
+		let videoButtonsContainerSub = document.createElement("div");
+		let mirrorButtonDiv = document.createElement("div");
+		let canvasElement = document.createElement("canvas");
+		let mirrorCheckElement = document.createElement("img");
+		let mirrorLabelElement = document.createElement("label");
+		let recordElement = document.createElement("button");
+		let onElement = document.createElement("button");
+		let offElement = document.createElement("button");
+
+
+		canvasElement.width = "1280";
+		canvasElement.height = "720";
+		canvasElement.classList.add("camera-canvas");
+
+		mirrorCheckElement.src = "../images/checkmarkWhite.png";
+		mirrorCheckElement.style.visibility = "hidden";
+		mirrorCheckElement.style.width = "10%";
+
+		mirrorLabelElement.innerText = "Mirror Video";
+		mirrorLabelElement.classList.add("mirrorlabel");
+
+		mirrorButtonDiv.classList.add('kinect_on');
+		mirrorButtonDiv.style.display = "flex";
+		mirrorButtonDiv.style.width = "8em";
+		mirrorButtonDiv.style.justifyContent = "space-between";
+		mirrorButtonDiv.style.alignItems = "center";
+		mirrorButtonDiv.style.padding = "0.5em";
+		mirrorButtonDiv.appendChild(mirrorLabelElement);
+		mirrorButtonDiv.appendChild(mirrorCheckElement);
+		mirrorButtonDiv.addEventListener("click", () => {
+			if (canvasElement.style.transform.localeCompare("scaleX(-1)") === 0) {
+				// Change back to "normal" scaling
+				canvasElement.style.transform = "scaleX(1)";
+			} else {
+				// Mirror canvas
+				canvasElement.style.transform = "scaleX(-1)";
+			}
+			if (
+				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
+				0
+			) {
+				mirrorCheckElement.style.visibility = "visible";
+			} else {
+				mirrorCheckElement.style.visibility = "hidden";
+			}
+		});
+
+		recordElement.innerText = "Start Recording";
+		recordElement.onclick = () => {
+			this.startRecording();
+			if (this.#isRecording) {
+				recordElement.innerText = "Stop Recording";
+			} else {
+				recordElement.innerText = "Start Recording";
+			}
+		}; //assign function
+		recordElement.classList.add("camera-record-btn");
+
+		onElement.innerText = "ON";
+		this.setDisplayCanvas(canvasElement);
+		onElement.onclick = () => {
+			this.start();
+			this.colorVideoFeed();
+		};
+		onElement.classList.add("kinect_on");
+		onElement.style.marginRight = "4px";
+
+		offElement.innerText = "OFF";
+		offElement.onclick = () => {
+			this.stopListeningAndCameras();
+		};
+		offElement.classList.add("kinect_off");
+
+		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
+		videoButtonsContainer.appendChild(mirrorButtonDiv);
+		videoButtonsContainer.appendChild(recordElement);
+		videoButtonsContainerSub.classList.add("camera-buttons-container");
+		videoButtonsContainerSub.appendChild(onElement);
+		videoButtonsContainerSub.appendChild(offElement);
+		videoButtonsContainer.appendChild(videoButtonsContainerSub);
+
+		// Attach all to div in the correct order and add to the page
+		videoContainer.classList.add("video-inner-container");
+		//Kinect specific identifier
+		videoContainer.id = this.getDeviceId();
+
+		videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoButtonsContainer);
+
+		return videoContainer;
+	}
+
+	/**
+	 * Getter function to retrieve the object's "label"
+	 *
+	 * @return {string} Device's English name
+	 */
+	getLabel() {
+		let name = `Azure Kinect (${this.getSerial()})`;
+		this.#label = name;
+		return name;
+	}
+
+	/**
+	 * Getter function to retrieve the object's Device ID
+	 *
+	 * @return {string} Device identifier used in capturing image/sound
+	 */
+	getDeviceId() {
+		return this.getSerial();
+	}
+
+	/**
+	 * Function used to stop the device from transmitting data/running
+	 */
+	stop() {
+		return this.stopListeningAndCameras().then((resolve, reject) => {
+			this.close();
+			return new Promise((resolve, reject) => {
+				resolve(true);
+			});
+		});
+	}
+
+	/**
+	 * Creates and returns all the current device's objects that can be instantiated
+	 * from the connected devices.
+	 * 
+	 * @return {array} List of instantiated device objects 
+	 */
+	static getDeviceObjects() {
+		var kinectDevices = []
+		var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
+		var kinectCount = tempKinect.getInstalledCount();
+
+		for (var i = 0; i < kinectCount; i++) {
+			//Create the object, then add to the device array
+			if (i == 0) { // ! Currently only allow 1 Kinect to use Kinect Class due to kinect-azure package limitations
+				let kinect = new Kinect(i);
+				kinectDevices.push(kinect);
+			} else {
+				break;
+			}
+			
+		}
+
+		return kinectDevices;
+	}
+
 } //End of Kinect class

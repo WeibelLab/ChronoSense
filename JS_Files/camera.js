@@ -1,3 +1,11 @@
+import { AVRecorder } from "./avRecorder.js";
+
+// WORKERS START WHERE HTML IS
+/*
+console.log("I'm the boss!");
+var theWorker = new Worker("../JS_Files/worker_test.js");
+*/
+
 export class Camera {
 	#deviceId = null;
 	#groupId = null;
@@ -11,6 +19,9 @@ export class Camera {
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
 
+	#isRecording = false;
+	#recorder;
+
 	/**
 	 *
 	 * @param {string} deviceId - Identifier for the device used in input capture.
@@ -23,15 +34,6 @@ export class Camera {
 		this.#groupId = groupId;
 		this.#kind = kind;
 		this.#label = label;
-	}
-
-	/**
-	 * Getter function to retrieve the object's Device ID
-	 *
-	 * @return {string} - Device identifier used in capturing image/sound
-	 */
-	getDeviceId() {
-		return this.#deviceId;
 	}
 
 	/**
@@ -52,14 +54,6 @@ export class Camera {
 		return this.#kind;
 	}
 
-	/**
-	 * Getter function to retrieve the object's "label"
-	 *
-	 * @return {string} - Device's English name
-	 */
-	getLabel() {
-		return this.#label;
-	}
 
 	/**
 	 * Set width and height for the input of the camera feed.
@@ -183,7 +177,7 @@ export class Camera {
 			stream = await navigator.mediaDevices.getUserMedia(constraints);
 			this.#videoElement.srcObject = stream;
 			this.#isOn = true;
-
+			/* Deprecated: Used to turn video stream into canvas data that was then piped into a child process FFMPEG to record.
 			requestAnimationFrame(() => {
 				this.drawToCanvas(
 					this.#videoElement,
@@ -191,7 +185,7 @@ export class Camera {
 					this.#canvasElement.width,
 					this.#canvasElement.height
 				);
-			});
+			}); */
 		} catch (err) {
 			console.log(
 				`camera.js:startCameraStream()] - ERROR: ${err.message}`
@@ -211,8 +205,11 @@ export class Camera {
 	 *
 	 */
 	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
-		canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+		//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
+		if (video.readyState === video.HAVE_ENOUGH_DATA) {
+			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+			this.recordFrame(); // Checks for recording status in function
+		}
 		var frameId = requestAnimationFrame(() => {
 			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
 		});
@@ -231,10 +228,259 @@ export class Camera {
 			this.#videoElement !== null &&
 			this.#videoElement.srcObject !== null
 		) {
+			this.stopRecording();
 			this.#videoElement.srcObject.getTracks().forEach((track) => {
 				track.stop();
 			});
 		}
 		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
+
+	/**
+	 * Start recording current camera canvas feed
+	 *
+	 * ! Note: Assumes connection of canvas elements prior to call.
+	 *
+	 */
+	startRecording() {
+		if (!this.#isRecording) {
+			this.#recorder = new AVRecorder(
+				this.#videoElement.captureStream(),
+				this.#label
+			);
+			this.#recorder.startRecording();
+			//this.#recorder.recorderSetup(0); //0 for video only
+			this.#isRecording = true;
+		} else {
+			this.stopRecording();
+		}
+	}
+
+	/**
+	 * Call to record the current frame to video file *Temp workflow*
+	 */
+	recordFrame() {
+		if (this.#isRecording) {
+			this.#recorder.writeToFile();
+		}
+	}
+
+	/**
+	 * Stop recording current camera canvas feed
+	 */
+	stopRecording() {
+		if (this.#isRecording) {
+			this.#recorder.stopRecording();
+			this.#isRecording = false;
+		}
+	}
+
+	// * Start Required Methods for a Chronosense Device Add-On
+	
+	/**
+	 * Function that creates all the UI elements needed for one Kinect device &
+	 * wraps them all into a single div returned for display.
+	 * 
+	 * @return {HTML Div Element} - Single div element that contains all UI elements
+	 * 								for display.
+	 */
+	getUI() {
+		//First create the necessary elements
+		// * video, canvas, buttons, video option menus, etc.
+		let videoContainer = document.createElement("div");
+		let videoButtonsContainer = document.createElement("div");
+		let videoButtonsContainerSub = document.createElement("div");
+		let mirrorButtonDiv = document.createElement("div");
+		let videoElement = document.createElement("video");
+		let canvasElement = document.createElement("canvas");
+		let mirrorCheckElement = document.createElement("img");
+		let mirrorLabelElement = document.createElement("label");
+		let recordElement = document.createElement("button");
+		let onElement = document.createElement("button");
+		let offElement = document.createElement("button");
+
+		//Set correct properties
+		//Video element is NOT inserted into DOM since it is used as translation to canvas
+		videoElement.width = "1280";
+		videoElement.height = "720";
+		videoElement.autoplay = true;
+		videoElement.classList.add("camera-canvas");
+
+		//canvasElement.width = "1280";
+		//canvasElement.height = "720";
+		//canvasElement.classList.add("camera-canvas");
+
+		mirrorCheckElement.src = "../images/checkmarkWhite.png";
+		mirrorCheckElement.style.visibility = "hidden";
+		mirrorCheckElement.style.width = "10%";
+
+		mirrorLabelElement.innerText = "Mirror Video";
+		mirrorLabelElement.classList.add("mirrorlabel");
+
+		mirrorButtonDiv.classList.add('kinect_on');
+		mirrorButtonDiv.style.display = "flex";
+		mirrorButtonDiv.style.width = "8em";
+		mirrorButtonDiv.style.justifyContent = "space-between";
+		mirrorButtonDiv.style.alignItems = "center";
+		mirrorButtonDiv.style.padding = "0.5em";
+		mirrorButtonDiv.appendChild(mirrorLabelElement);
+		mirrorButtonDiv.appendChild(mirrorCheckElement);
+		mirrorButtonDiv.addEventListener("click", () => {
+			if (videoElement.style.transform.localeCompare("scaleX(-1)") === 0) {
+				// Change back to "normal" scaling
+				videoElement.style.transform = "scaleX(1)";
+			} else {
+				// Mirror video
+				videoElement.style.transform = "scaleX(-1)";
+			}
+			if (
+				mirrorCheckElement.style.visibility.localeCompare("hidden") ===
+				0
+			) {
+				mirrorCheckElement.style.visibility = "visible";
+			} else {
+				mirrorCheckElement.style.visibility = "hidden";
+			}
+		});
+
+		recordElement.innerText = "Start Recording";
+		recordElement.onclick = () => {
+			this.startRecording();
+			if (this.#isRecording) {
+				recordElement.innerText = "Stop Recording";
+			} else {
+				recordElement.innerText = "Start Recording";
+			}
+		}; //assign function
+		recordElement.classList.add("camera-record-btn");
+
+		this.setInputAndOutput(videoElement, canvasElement)
+
+		onElement.innerText = "ON";
+		onElement.onclick = () => {
+			this.startCameraStream();
+		};
+		onElement.classList.add("kinect_on");
+		onElement.style.marginRight = "4px";
+
+		offElement.innerText = "OFF";
+		offElement.onclick = () => {
+			this.stopCameraStream();
+		};
+		offElement.classList.add("kinect_off");
+
+		videoButtonsContainer.classList.add("camera-buttons-container");
+		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
+		videoButtonsContainer.appendChild(mirrorButtonDiv);
+		videoButtonsContainer.appendChild(recordElement);
+		videoButtonsContainerSub.classList.add("camera-buttons-container");
+		videoButtonsContainerSub.appendChild(onElement);
+		videoButtonsContainerSub.appendChild(offElement);
+		videoButtonsContainer.appendChild(videoButtonsContainerSub);
+
+		// Attach all to div in the correct order and add to the page
+		videoContainer.classList.add("video-inner-container");
+		//Camera specific identifier
+		videoContainer.id = `${this.getDeviceId()}`;
+
+		//videoContainer.appendChild(canvasElement);
+		videoContainer.appendChild(videoElement);
+		videoContainer.appendChild(videoButtonsContainer);
+
+		return videoContainer;
+	}
+
+	/**
+	 * Getter function to retrieve the object's "label"
+	 *
+	 * @return {string} - Device's English name
+	 */
+	getLabel() {
+		return this.#label;
+	}
+
+	/**
+	 * Getter function to retrieve the object's Device ID
+	 *
+	 * @return {string} - Device identifier used in capturing image/sound
+	 */
+	getDeviceId() {
+		return this.#deviceId;
+	}
+
+	/**
+	 * Function used to stop the device from transmitting data/running
+	 */
+	stop() {
+		this.stopCameraStream();
+	}
+
+	/**
+	 * Creates and returns all the current device's objects that can be instantiated
+	 * from the connected devices.
+	 * 
+	 * @return {array} List of instantiated device objects 
+	 */
+	static getDeviceObjects() {
+		var cameraDevices = []
+		
+		return navigator.mediaDevices.enumerateDevices().then((devices) => {
+			console.log(devices);
+			var uniqueInputDevices = [];
+			for (var i = 0; i < devices.length; i++) {
+				if (devices[i].kind.localeCompare("videoinput") == 0) {
+					//Now search through added devices if it already exists
+					var matched = false;
+					for (var j = 0; j < uniqueInputDevices.length; j++) {
+						if (
+							uniqueInputDevices[j].groupId.localeCompare(
+								devices[i].groupId
+							) == 0
+						) {
+							matched = true;
+							break; //If match, break out and don't add to
+						}
+					}
+	
+					if (
+						!matched &&
+						devices[i].deviceId.localeCompare("default") != 0 &&
+						devices[i].deviceId.localeCompare("communications") != 0
+					) {
+						//Filter out "default" and "communications" so there is a alphanumeric
+						//identifier and no duplicates.
+						uniqueInputDevices.push(devices[i]);
+					}
+				}
+			}
+			return new Promise((resolve, reject) => {
+				resolve(uniqueInputDevices);
+			});
+		}).then((currentDevices) => {
+			console.log(currentDevices);
+			for (var k = 0; k < currentDevices.length; k++) {
+				//if (
+				//	!(
+				//		currentDevices[k].label.includes("kinect") ||
+				//		currentDevices[k].label.includes("Kinect")
+				//	)
+				//) {
+					//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
+				var camera = new Camera(
+					currentDevices[k].deviceId,
+					currentDevices[k].groupId,
+					currentDevices[k].kind,
+					currentDevices[k].label
+				);
+				cameraDevices.push(camera);
+				}
+			//} 
+			console.log(cameraDevices);
+			return new Promise((resolve, reject) => {
+				resolve(cameraDevices);
+			});
+		});
+
+	}
+
 } //End of Camera Class

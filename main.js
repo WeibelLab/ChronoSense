@@ -16,8 +16,10 @@ function createWindow() {
         height: height, 
         frame: false,
         webPreferences: {
+          nodeIntegrationInWorker: true,
           nodeIntegration: true,
-          webviewTag: true
+          webviewTag: true,
+          enableRemoteModule: true
         },
         show: false
      });
@@ -56,3 +58,5 @@ app.on('activate', function () {
 
 //Set path for saved recording files
 app.setPath("userData", __dirname + "/saved_recordings");
+
+app.allowRendererProcessReuse = false
