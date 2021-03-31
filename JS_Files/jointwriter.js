@@ -3,7 +3,7 @@
  *
  */
 const fs = require('fs');
-const Stopwatch = require('timer-stopwatch');
+//const Stopwatch = require('timer-stopwatch'); // ! High security vulnerability; find other option 
 const csvWriter = require('csv-write-stream');
 //Check out: https://github.com/maxogden/csv-write-stream
 //for detailed instructions on how to use csvWriter
@@ -17,8 +17,7 @@ export class JointWriter {
 
     constructor() {
         this.startNewFile(); //On start new file, also start elapsed timer
-        this.#stopwatch = new Stopwatch();  //counts up from zero
-
+        
     }  //End of constructor
 
 
@@ -149,7 +148,7 @@ export class JointWriter {
     /* Timer function for starting timer */
     timerStart() {
         if (this.#created) {
-            this.#stopwatch.start();  //Start running state
+            //this.#stopwatch.start();  //Start running state
         } else {
             console.log("The CSV file has not yet been instantiated.");
         }
@@ -160,7 +159,7 @@ export class JointWriter {
     /* Timer function for stopping timer */
     timerStop() {
         if (this.#created) {
-            this.#stopwatch.stop();  //Stop running state
+            //this.#stopwatch.stop();  //Stop running state
         } else {
             console.log("The CSV file has not yet been instantiated.");
         }
@@ -170,7 +169,8 @@ export class JointWriter {
 
     /* Get the current time on the stopwatch */
     getElapsedTime() {
-        return this.#stopwatch.ms / 1000; //div by 1000 to make it seconds !ms
+        //return this.#stopwatch.ms / 1000; //div by 1000 to make it seconds !ms
+        return 0;
     }
 
 
