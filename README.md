@@ -56,7 +56,13 @@
 9.  Test to see if the application (as it is) can now run by going to the main ChronoSenseV3 folder and typing the following command to start the application:  
     `npm start`
 
-10. Ready to Develop!
+10. Ready to Develop!  
+
+## Create Executable Package  
+1. Clone the repository  
+2. Run `npm install` in the cloned repo directory  
+3. Run `npm run package`  
+4. Look for newly created directory inside of your current repo directory which will contain the created executable for ChronoSense
 
 ## Change Notes (Updated: 3/4/21):
 
