@@ -2,7 +2,6 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
-const usb = require("usb");
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
@@ -16,17 +15,8 @@ const btnKinect = document.getElementById("kinectPage");
 const btnKinectBodyTracking = document.getElementById("kinectBodyPage");
 const btnAbout = document.getElementById("aboutPage");
 
-//Used in Kinect Class for displaying content
-//Send through constructor to Kinect class object
-const displayCanvas2 = document.getElementById("video_canvas2"); //For Camera page
-
-//Used in camera methods
-const camVideo = document.getElementById("camera-video");
-
 //Arrays for all devices
-var kinectDevices = []; //All from class Kinect
-var cameraDevices = []; //All from class Camera
-var devices = [] // ! TEST Generic Device Model -> Move to this instead of kinect/cameraDevices
+var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
 
 //Constants for application to know which "page" is displayed.
 const HOME_PAGE_NUM = 0;
@@ -50,7 +40,6 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
-		//var generic = new GenericDevice();
 	}
 };
 
@@ -104,35 +93,28 @@ async function handleWindowControls() {
 	 * Buttons: homePage, cameraPage, kinectPage, kinectBodyPage, aboutPage
 	 */
 	btnHome.addEventListener("click", (event) => {
-		console.log("YOU ARE HOME");
+		//console.log("YOU ARE HOME");
 		checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
 	});
 	btnCamera.addEventListener("click", (event) => {
-		console.log("YOU ARE CAMERA");
+		//console.log("YOU ARE CAMERA");
 		checkClosingWindowAndChangeContent(CAMERA_PAGE_NUM);
 	});
 
 	btnKinect.addEventListener("click", (event) => {
-		console.log("YOU ARE KINECT CAM");
+		//console.log("YOU ARE KINECT CAM");
 		checkClosingWindowAndChangeContent(KINECT_PAGE_NUM);
 	});
 
 	btnKinectBodyTracking.addEventListener("click", (event) => {
-		console.log("YOU ARE BODY TRACKING");
+		//console.log("YOU ARE BODY TRACKING");
 		checkClosingWindowAndChangeContent(KINECT_BODY_PAGE_NUM);
 	});
 
 	btnAbout.addEventListener("click", (event) => {
-		console.log("YOU ARE ABOUT");
+		//console.log("YOU ARE ABOUT");
 		checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
 	});
-
-	/* Add event to refresh Kinect Devices on push - WORKS*/
-	document
-		.getElementById("kinect-refresh-btn")
-		.addEventListener("click", (evt) => {
-			refreshKinectDevices();
-		});
 
 	/* Add event to open and close Kinect drop down menus seamlessly */
 	document.addEventListener("click", (evt) => {
@@ -192,7 +174,7 @@ async function setupDevices() {
 	Camera.getDeviceObjects().then((cameraDevices) => {
 		devices = devices.concat(cameraDevices);
 
-		console.log(devices);
+		//console.log(devices);
 		// Once done getting all device objects, add to dropdown menu
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
@@ -312,20 +294,25 @@ function changeWindowFeatures(pageNum) {
 	switch (pageNum) {
 		case KINECT_PAGE_NUM:
 			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "block";
+			//document.getElementById("kinect-page").style.display = "block";
+			document.getElementById("kinect-page").style.display = "none";
+			document.getElementById("placeholder-page").style.display = "block"
 			document.getElementById("kinect-body-page").style.display = "none";
 			break;
 
 		case KINECT_BODY_PAGE_NUM:
 			document.getElementById("camera-page").style.display = "none";
 			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "block";
+			//document.getElementById("kinect-body-page").style.display = "block";
+			document.getElementById("kinect-body-page").style.display = "none";
+			document.getElementById("placeholder-page").style.display = "block"
 			break;
 
 		case CAMERA_PAGE_NUM:
 			document.getElementById("camera-page").style.display = "block";
 			document.getElementById("kinect-page").style.display = "none";
 			document.getElementById("kinect-body-page").style.display = "none";
+			document.getElementById("placeholder-page").style.display = "none"
 			break;
 
 		default:
@@ -333,6 +320,8 @@ function changeWindowFeatures(pageNum) {
 			document.getElementById("camera-page").style.display = "none";
 			document.getElementById("kinect-page").style.display = "none";
 			document.getElementById("kinect-body-page").style.display = "none";
+
+			document.getElementById("placeholder-page").style.display = "block"
 	}
 } //End of changeWindowFeatures
 
@@ -396,7 +385,7 @@ async function getUniqueInputDevices() {
 				}
 			}
 		}
-		console.log(uniqueInputDevices);
+		//console.log(uniqueInputDevices);
 
 		return new Promise((resolve, reject) => {
 			resolve(uniqueInputDevices);
@@ -413,7 +402,7 @@ async function getUniqueInputDevices() {
  */
 async function getUniqueVideoInputDevices() {
 	return navigator.mediaDevices.enumerateDevices().then((devices) => {
-		console.log(devices);
+		//console.log(devices);
 		var uniqueInputDevices = [];
 		for (var i = 0; i < devices.length; i++) {
 			if (devices[i].kind.localeCompare("videoinput") == 0) {
@@ -451,7 +440,10 @@ async function getUniqueVideoInputDevices() {
  * On Camera dropdown menu change, use selected option to start streaming video.
  *
  * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
+ * 
+ * ! DEPRECATED
  */
+/*
 function onCameraDropdownChange(option) {
 	//Stop cameras and Kinect
 	stopAllCameraStream(cameraDevices);
@@ -500,6 +492,7 @@ function onCameraDropdownChange(option) {
 		}
 	});
 }
+*/
 
 /**
  * Function used to populate the camera dropdown menu with all unique input
@@ -564,7 +557,10 @@ function clearContainer(container) {
 /**
  * Refreshes the entire list of Kinect Devices. Deleting missing devices and
  * adding new devices.
+ * 
+ * ! DEPRECATED
  */
+/*
 function refreshKinectDevices() {
 	destroyAllKinects(kinectDevices); //Close and clear all devices
 	//Remove all kinect list <a> elements
@@ -590,6 +586,7 @@ function refreshKinectDevices() {
 			.appendChild(newDeviceElem);
 	}
 }
+*/
 
 /**
  * Creats a Kinect object and adds it to the array of devices
@@ -726,15 +723,19 @@ function stopKinectStream(device) {
  * @param {array} deviceArr - Array of Kinect devices to stop/close
  */
 async function stopAllKinectStream(deviceArr) {
+	/*
 	console.log(
 		"[chronosense.js:stopAllKinectStream()] - BEGIN Stopping Kinect streams"
 	);
+	*/
 	for (var i = 0; i < deviceArr.length; i++) {
 		await stopKinectStream(deviceArr[i]);
 	}
+	/*
 	console.log(
 		"[chronosense.js:stopAllKinectStream()] - DONE Stopping Kinect streams"
 	);
+	*/
 	return new Promise((resolve, reject) => {
 		resolve(true);
 	});

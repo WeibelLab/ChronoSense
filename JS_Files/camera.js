@@ -77,9 +77,11 @@ export class Camera {
 	 */
 	setWidth(width) {
 		if (width === null || isNaN(width)) {
+			/*
 			console.log(
 				"[camera.js:setWidth()] - ERROR: Width value is invalid"
 			);
+			*/
 			return false;
 		}
 
@@ -95,9 +97,11 @@ export class Camera {
 	 */
 	setHeight(height) {
 		if (height === null || isNaN(height)) {
+			/*
 			console.log(
 				"[camera.js:setHeight()] - ERROR: Height value is invalid"
 			);
+			*/
 			return false;
 		}
 
@@ -121,9 +125,11 @@ export class Camera {
 		if (video instanceof HTMLVideoElement && video !== null) {
 			this.#videoElement = video;
 		} else {
+			/*
 			console.log(
 				"[camera.js:setInputAndOutput()] - ERROR: Video element argument passed is INVALID"
 			);
+			*/
 			return;
 		}
 		//Set output Canvas HTML element
@@ -131,9 +137,11 @@ export class Camera {
 			this.#canvasElement = canvas;
 			this.#canvasContext = canvas.getContext("2d");
 		} else {
+			/*
 			console.log(
 				"[camera.js:setInputAndOutput()] - ERROR: Canvas element argument passed is INVALID"
 			);
+			*/
 			return;
 		}
 	}
@@ -148,17 +156,21 @@ export class Camera {
 	async startCameraStream() {
 		/* First check that the canvas and video elements are valid */
 		if (this.#videoElement == null || this.#canvasElement == null) {
+			/*
 			console.log(
 				"[camera.js:startCameraStream()] - ERROR: Video and canvas elements not set"
 			);
+			*/
 			return false;
 		}
 
 		/* Second check that this object has a deviceId set */
 		if (this.#deviceId === null) {
+			/*
 			console.log(
 				"[camera.js:startCameraStream()] - ERROR: deviceId NOT set"
 			);
+			*/
 			return false;
 		}
 
@@ -187,9 +199,11 @@ export class Camera {
 				);
 			}); */
 		} catch (err) {
+			/*
 			console.log(
 				`camera.js:startCameraStream()] - ERROR: ${err.message}`
 			);
+			*/
 			return false;
 		}
 	}
@@ -233,7 +247,7 @@ export class Camera {
 				track.stop();
 			});
 		}
-		console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
+		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
 
 	/**
@@ -425,7 +439,7 @@ export class Camera {
 		var cameraDevices = []
 		
 		return navigator.mediaDevices.enumerateDevices().then((devices) => {
-			console.log(devices);
+			//console.log(devices);
 			var uniqueInputDevices = [];
 			for (var i = 0; i < devices.length; i++) {
 				if (devices[i].kind.localeCompare("videoinput") == 0) {
@@ -457,7 +471,7 @@ export class Camera {
 				resolve(uniqueInputDevices);
 			});
 		}).then((currentDevices) => {
-			console.log(currentDevices);
+			//console.log(currentDevices);
 			for (var k = 0; k < currentDevices.length; k++) {
 				//if (
 				//	!(
@@ -475,7 +489,7 @@ export class Camera {
 				cameraDevices.push(camera);
 				}
 			//} 
-			console.log(cameraDevices);
+			//console.log(cameraDevices);
 			return new Promise((resolve, reject) => {
 				resolve(cameraDevices);
 			});

@@ -31,7 +31,7 @@ export class ScreenCaptureDevice {
 		return new Promise((resolve, reject) => {
 			desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: {width: 900, height: 900} }).then(sources => {
 			            this.#sources = sources;
-			            console.log(sources);
+			            //console.log(sources);
 						resolve(1);
 					});
 		});
