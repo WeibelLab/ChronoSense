@@ -113,7 +113,6 @@ export class ScreenCaptureDevice {
 		// Note: Maybe remove later if testing shows performance issue
 		this.deleteSourceOptions();
 
-
 	}
 
 	/**
@@ -335,6 +334,5 @@ export class ScreenCaptureDevice {
         return captureDevices;
 
 	}
-
 
 }  // End of screenCaptureDevice Class

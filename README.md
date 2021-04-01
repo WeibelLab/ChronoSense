@@ -64,7 +64,7 @@
 3. Run `npm run package`  
 4. Look for newly created directory inside of your current repo directory which will contain the created executable for ChronoSense
 
-## Change Notes (Updated: 3/4/21):
+## Change Notes (Updated: 4/1/21):
 
 Summary: All camera devices that are plugged in (or already plugged in at launch) update on the application central, universal list of devices that are then available for the application to use in any manner. They will be automatically connected to the necessary SDKs/APIs to optimize their performance.
 
@@ -87,4 +87,5 @@ Summary: All camera devices that are plugged in (or already plugged in at launch
 - On "Stop Recording," the user is now able to name the file and change the file extension. They can also select the save path.
 - UI has been cleaned up and scales correctly with window adjustments and different resolution monitors.
 - "Scaffolding" in the UI has been removed and now more accurately represents the final product.
-- Saved video files are now scrubbable and have the correct metadata of a normal video file. 
+- Saved video files are now scrubbable and have the correct metadata of a normal video file.  
+- Removed extra packages (package.json & require() statements)and resolved npm security issues. 
