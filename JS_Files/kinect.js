@@ -623,7 +623,7 @@ export class Kinect {
 		canvasElement.height = "720";
 		canvasElement.classList.add("camera-canvas");
 
-		mirrorCheckElement.src = "../images/checkmarkWhite.png";
+		mirrorCheckElement.src = "../images/checkmarkWhite.webp";
 		mirrorCheckElement.style.visibility = "hidden";
 		mirrorCheckElement.style.width = "10%";
 

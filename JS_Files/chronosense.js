@@ -909,7 +909,7 @@ async function addDropdownMenuOption(
 
 	parentDiv.id = "Device" + dropdownID;
 	childDiv.innerText = dropdownName;
-	checkImg.src = "../images/checkmark.png";
+	checkImg.src = "../images/checkmark.webp";
 	checkImg.style.visibility = "hidden";
 
 	parentDiv.appendChild(childDiv);
