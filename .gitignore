@@ -121,8 +121,11 @@ dist
 # Build file created by GYP
 build/
 
-#JSON Package Lock file (created on install/run)
+# JSON Package Lock file (created on install/run)
 package-lock.json
 
-#Ignore built ffmpeg files
+# Ignore built ffmpeg files
 ffmpeg/*
+
+# Executable folder
+ChronoSense-win32-x64/

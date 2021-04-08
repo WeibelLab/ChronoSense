@@ -6,16 +6,6 @@
 
 	<body>
 		<!-- Window Properties: Close, expand, etc. -->
-		<ul id="navigation-bar">
-			<li class="nav-bar-item"><a id="homePage">Home</a></li>
-			<li class="nav-bar-item"><a id="cameraPage">Camera</a></li>
-			<li class="nav-bar-item"><a id="kinectPage">Kinect</a></li>
-			<li class="nav-bar-item">
-				<a id="kinectBodyPage">Kinect Body Tracking</a>
-			</li>
-			<li class="nav-bar-item"><a id="aboutPage">About</a></li>
-		</ul>
-
 		<header id="titlebar">
 			<div id="drag-region">
 				<div id="window-title">
@@ -41,229 +31,29 @@
 
 		<!-- Central Window Page Attributes  -->
 		<div id="main">
-			<div id="placeholder-page">
-				<h1>In Development</h1>
-			</div>
-
 			<div id="camera-page">
-				<div class="chrono-dropdown" id="camera-dropdown">
-					<a
-						href="#"
-						class="chrono-dropdown-btn"
-						id="camera-dropdown-btn"
-						>Video Devices</a
-					>
-					<div
-						class="chrono-dropdown-content"
-						id="camera-dropdown-content"
-					>
-						<!-- Dynamically fill when camera devices are connected -->
+				<div class="camera-btn-container">
+					<div class="chrono-dropdown" id="camera-dropdown">
+						<a
+							href="#"
+							class="chrono-dropdown-btn"
+							id="camera-dropdown-btn"
+							>Video Devices</a
+						>
+						<div
+							class="chrono-dropdown-content"
+							id="camera-dropdown-content"
+						>
+							<!-- Dynamically fill when camera devices are connected -->
+						</div>
 					</div>
+					<button class="kinect_on" id="refresh-cameras-btn">Refresh Cameras</button>
 				</div>
-				<button class="kinect_on" id="refresh-cameras-btn">Refresh Cameras</button>
 				<div id="camera-video-feed-container">
 					<!-- Dynamically fill when camera devices are selected -->
 				</div>
 			</div>
-
-			<div id="kinect-page">
-				<div class="chrono-dropdown" id="kinect-dropdown">
-					<a
-						href="#"
-						class="chrono-dropdown-btn"
-						id="kinect-dropdown-button"
-						>Kinect Devices</a
-					>
-					<div
-						class="chrono-dropdown-content"
-						id="kinect-dropdown-content"
-					>
-						<!-- Dynamically fill when Kinect devices are connected -->
-					</div>
-				</div>
-				<button id="kinect-refresh-btn">Refresh Kinect Devices</button>
-				<div id="kinect-video-feed-container">
-					<canvas id="video_canvas" img-fluid></canvas>
-				</div>
-				<div class="kinect-option-button-container">
-					<div
-						class="kinect-option-dropdown"
-						id="kinect-option-dropdown-fps"
-					>
-						<a href="#" class="kinect-option-dropdown-button"
-							>FPS</a
-						>
-						<div
-							class="kinect-option-dropdown-content"
-							id="kinect-option-dropdown-content-fps"
-						>
-							<a href="#fps5">5 FPS</a>
-							<a href="#fps15">15 FPS</a>
-							<a href="#fps30">30 FPS</a>
-						</div>
-					</div>
-					<div
-						class="kinect-option-dropdown"
-						id="kinect-option-dropdown-res"
-					>
-						<a href="#" class="kinect-option-dropdown-button"
-							>Resolution</a
-						>
-						<div
-							class="kinect-option-dropdown-content"
-							id="kinect-option-dropdown-content-res"
-						>
-							<a href="#720">1280x720</a>
-							<a href="#1080">1920x1080</a>
-							<a href="#1440">2560x1440</a>
-							<a href="#1536">2048x1536</a>
-							<a href="#2160">3840x2160</a>
-							<a href="#3072">4096x3072</a>
-						</div>
-					</div>
-					<div
-						class="kinect-option-dropdown"
-						id="kinect-option-dropdown-format"
-					>
-						<a href="#" class="kinect-option-dropdown-button"
-							>Color Format</a
-						>
-						<div
-							class="kinect-option-dropdown-content"
-							id="kinect-option-dropdown-content-format"
-						>
-							<a href="#MJPG">MJPG</a>
-							<a href="#NV12">NV12</a>
-							<a href="#YUY2">YUY2</a>
-							<a href="#BGRA32">BGRA32</a>
-						</div>
-					</div>
-					<div
-						class="kinect-option-dropdown"
-						id="kinect-option-dropdown-depth"
-					>
-						<a href="#" class="kinect-option-dropdown-button"
-							>Depth</a
-						>
-						<div
-							class="kinect-option-dropdown-content"
-							id="kinect-option-dropdown-content-depth"
-						>
-							<a href="#Off">Off</a>
-							<a href="#NFOV 2x2 Binned">NFOV 2x2 Binned</a>
-							<a href="#NFOV Unbinned">NFOV Unbinned</a>
-							<a href="#WFOV 2x2 Binned">WFOV 2x2 Binned</a>
-							<a href="#WFOV Unbinned">WFOV Unbinned</a>
-							<a href="#Passive IR">Passive IR</a>
-						</div>
-					</div>
-					<div
-						class="kinect-option-dropdown"
-						id="kinect-option-dropdown-sync"
-					>
-						<a href="#" class="kinect-option-dropdown-button"
-							>Sync</a
-						>
-						<div
-							class="kinect-option-dropdown-content"
-							id="kinect-option-dropdown-content-sync"
-						>
-							<a href="#">Temp</a>
-						</div>
-					</div>
-				</div>
-
-				<div class="kinect-video-control-container">
-					<div>
-						<button class="kinect_on">ON</button>
-						<button class="kinect_off">OFF</button>
-					</div>
-					<div class="white-background">
-						<input
-							type="checkbox"
-							class="mirrorcheck"
-							id="mirrorcheck1"
-							name="mirrorcheck1"
-							value="Mirror"
-							onclick="mirrorDisplayFunc('mirrorcheck1')"
-						/>
-						<label
-							for="mirrorcheck1"
-							class="mirrorlabel"
-							id="mirrorlabel1"
-						>
-							Mirror Feed</label
-						>
-					</div>
-				</div>
-			</div>
-
-			<div id="kinect-body-page">
-				<canvas id="video_canvas3" img-fluid></canvas>
-				<div>
-					<button class="kinect_on">ON</button>
-					<button class="kinect_off">OFF</button>
-				</div>
-				<div class="white-background">
-					<input
-						type="checkbox"
-						class="mirrorcheck"
-						id="mirrorcheck3"
-						name="mirrorcheck3"
-						value="Mirror"
-						onclick="mirrorDisplayFunc('mirrorcheck3')"
-					/>
-					<label
-						for="mirrorcheck3"
-						class="mirrorlabel"
-						id="mirrorlabel3"
-					>
-						Mirror Video</label
-					>
-				</div>
-			</div>
 		</div>
-
-		<script>
-			/* important! for alignment, you should make things
-			 * relative to the canvas' current width/height.
-			 */
-			/* First make sure draw is called on resize then declare func */
-			window.onresize = draw;
-
-			function draw() {
-				var ctx = document.getElementById("video_canvas");
-				//These specific calculations keep video at 16:9 aspect ratio
-				ctx.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 33000;
-				ctx.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 33000;
-
-				var ctx3 = document.getElementById("video_canvas3");
-				ctx3.style.width =
-					(16 * (window.innerHeight * window.innerWidth)) / 33000;
-				ctx3.style.height =
-					(9 * (window.innerHeight * window.innerWidth)) / 33000;
-			}
-
-			/* Called when mirror image is checked to change style of video output */
-			function mirrorDisplayFunc(nameOfElement) {
-				var isMirrored = document.getElementById(nameOfElement).checked;
-
-				if (isMirrored) {
-					//If true, mirror
-					document.getElementById("video_canvas").style.transform =
-						"scaleX(-1)";
-					document.getElementById("video_canvas3").style.transform =
-						"scaleX(-1)";
-				} else {
-					document.getElementById("video_canvas").style.transform =
-						"scaleX(1)";
-					document.getElementById("video_canvas3").style.transform =
-						"scaleX(1)";
-				}
-			}
-		</script>
 
 		<script type="module" src="../JS_Files/chronosense.js"></script>
 	</body>

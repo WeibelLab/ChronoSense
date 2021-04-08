@@ -96,7 +96,6 @@ p {
 
 /* Styling of window frame and titlebar */
 body {
-	border: 1px solid #48545c;
 	overflow-y: hidden;
 }
 
@@ -104,9 +103,10 @@ body {
 	display: block;
 	position: fixed;
 	height: 32px;
-	width: calc(100% - 2px);
+	width: 100%;
 	padding: 4px;
-	color: var(--primaryDarkContrastColor);
+	color: var(--primaryLightContrastColor);
+	background-color: var(--primaryDarkContrastColor);
 }
 
 .maximized #titlebar {
@@ -115,10 +115,19 @@ body {
 }
 
 #main {
-	height: calc(100% - 64px);
-	margin-top: 64px;
-	padding: 20px;
+	position: relative;
+	top: 32px;
+
+	height: calc(100% - 32px);
+	border-style: solid;
+	border-color: black;
+	border-width: 1px;
+	
 	overflow-y: auto;
+
+	margin: 0;
+	padding: 0;
+
 }
 
 #titlebar #drag-region {
@@ -243,9 +252,6 @@ body {
 	height: 20px;
 	background-color: var(--primaryDarkContrastColor);
 	color: var(--primaryLightContrastColor);
-}
-
-.center-items {
 }
 
 /*

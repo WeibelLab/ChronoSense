@@ -102,7 +102,19 @@
 
 /* * Styling for the Camera Page */
 #camera-page {
-	display: none;
+	position: relative;
+	display: block;
+	width: 100%;
+	height: calc(100% - 32px);
+
+	margin: 0;
+	padding: 0;
+
+}
+
+.camera-btn-container {
+	position: relative;
+	margin: 10px 0 0 10px;
 }
 
 #dropdown {

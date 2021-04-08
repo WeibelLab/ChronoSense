@@ -8,32 +8,9 @@ import { AudioRecorder } from "./audio_recorder.js";
 import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
-//Variables of HTML elements for later manipulation
-const btnHome = document.getElementById("homePage");
-const btnCamera = document.getElementById("cameraPage");
-const btnKinect = document.getElementById("kinectPage");
-const btnKinectBodyTracking = document.getElementById("kinectBodyPage");
-const btnAbout = document.getElementById("aboutPage");
-
 //Arrays for all devices
 var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
 
-//Constants for application to know which "page" is displayed.
-const HOME_PAGE_NUM = 0;
-const CAMERA_PAGE_NUM = 1;
-const KINECT_PAGE_NUM = 2;
-const KINECT_BODY_PAGE_NUM = 3;
-const ABOUT_PAGE_NUM = 4;
-
-//Holds a value for which page is open for the device so it knows which
-//functions to call from which page.
-//Legend:
-// 0 - Home
-// 1 - Camera
-// 2 - Kinect
-// 3 - Kinect Body Tracking
-// 4 - About
-let currentlyOpenPage = false;
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
@@ -85,44 +62,9 @@ async function handleWindowControls() {
 		}
 	}
 
-	/*
-	 * Set of functions below are for clicking buttons <a> elements on the main
-	 * navigation bar for the application. Mainly to switch src of webview to
-	 * change the contents of the page.
-	 *
-	 * Buttons: homePage, cameraPage, kinectPage, kinectBodyPage, aboutPage
-	 */
-	btnHome.addEventListener("click", (event) => {
-		//console.log("YOU ARE HOME");
-		checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
-	});
-	btnCamera.addEventListener("click", (event) => {
-		//console.log("YOU ARE CAMERA");
-		checkClosingWindowAndChangeContent(CAMERA_PAGE_NUM);
-	});
-
-	btnKinect.addEventListener("click", (event) => {
-		//console.log("YOU ARE KINECT CAM");
-		checkClosingWindowAndChangeContent(KINECT_PAGE_NUM);
-	});
-
-	btnKinectBodyTracking.addEventListener("click", (event) => {
-		//console.log("YOU ARE BODY TRACKING");
-		checkClosingWindowAndChangeContent(KINECT_BODY_PAGE_NUM);
-	});
-
-	btnAbout.addEventListener("click", (event) => {
-		//console.log("YOU ARE ABOUT");
-		checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
-	});
-
-	/* Add event to open and close Kinect drop down menus seamlessly */
+	/* Add event to open and close Camera drop down menus seamlessly */
 	document.addEventListener("click", (evt) => {
-		if (currentlyOpenPage === KINECT_PAGE_NUM) {
-			openCloseKinectDropMenus(evt);
-		} else if (currentlyOpenPage === CAMERA_PAGE_NUM) {
-			openCloseCameraDropMenus(evt);
-		}
+		openCloseCameraDropMenus(evt);
 	}); //End of dropdown open listener
 
 	// * Attach refresh cameras for testing * CHANGE LATER - TEMP *
@@ -183,147 +125,6 @@ async function setupDevices() {
 
 }
 
-/**
- * Function that checks which windows are being closed out in order to call
- * the correct functions from their respective js files to close out running
- * device functionality before switching.
- *
- * Also serves as the function that manipulates the webviewer!
- *
- * @param {number} newPageNum - Holds one of the global constant page values to
- *                      		determine what should be displayed or hidden.
- */
-
-async function checkClosingWindowAndChangeContent(newPageNum) {
-	//Check which window is closing; if changing to same as before, don't
-	//refresh
-	if (currentlyOpenPage == newPageNum) {
-		return;
-	}
-
-	//Manipulate webviewer to change for NEW window parameters.
-	switch (newPageNum) {
-		case HOME_PAGE_NUM:
-			currentlyOpenPage = HOME_PAGE_NUM;
-			changeWindowFeatures();
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case CAMERA_PAGE_NUM:
-			currentlyOpenPage = CAMERA_PAGE_NUM;
-			changeWindowFeatures(CAMERA_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			populateCameraList(
-				document.getElementById("camera-dropdown-content")
-			);
-
-			break;
-
-		case KINECT_PAGE_NUM:
-			currentlyOpenPage = KINECT_PAGE_NUM;
-			changeWindowFeatures(KINECT_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case KINECT_BODY_PAGE_NUM:
-			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case ABOUT_PAGE_NUM:
-			currentlyOpenPage = ABOUT_PAGE_NUM;
-			changeWindowFeatures();
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-	} //End of NEW page switch
-}
-
-/**
- * Changes certain aspects of the application based on the current "page" that
- * the application is showing.
- *
- * @param {number} pageNum - Page number to indicate case choice and manipulate
- *                  		 DOM elements
- */
-function changeWindowFeatures(pageNum) {
-	switch (pageNum) {
-		case KINECT_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "none";
-			//document.getElementById("kinect-page").style.display = "block";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("placeholder-page").style.display = "block"
-			document.getElementById("kinect-body-page").style.display = "none";
-			break;
-
-		case KINECT_BODY_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "none";
-			//document.getElementById("kinect-body-page").style.display = "block";
-			document.getElementById("kinect-body-page").style.display = "none";
-			document.getElementById("placeholder-page").style.display = "block"
-			break;
-
-		case CAMERA_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "block";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "none";
-			document.getElementById("placeholder-page").style.display = "none"
-			break;
-
-		default:
-			//Default to home page
-			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "none";
-
-			document.getElementById("placeholder-page").style.display = "block"
-	}
-} //End of changeWindowFeatures
 
 /**
  * Function used to return an array of all audio/video inputs capable of
