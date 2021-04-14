@@ -17,11 +17,6 @@
 	right: 2px;
 	display: inline;
 
-	/*
-	border-style: solid;
-	border-color: blue;
-	border-width: 2px;
-	*/
 }
 
 .mirrorlabel {
@@ -100,6 +95,34 @@
 	user-select: none;
 }
 
+.general-btn {
+	text-decoration: none;
+	background-color: var(--primaryDarkContrastColor);
+	width: 6em;
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	height: 2em;
+	cursor: pointer;
+
+	margin: 2px;
+
+}
+
+.general-txt {
+	user-select: none;	
+}
+
+.general-txt-box {
+	width: 100%;
+	height: 2.2em;
+
+	font-size: 0.8em;
+
+	padding-left: 4px;
+	border-radius: 3px;
+}
+
 /* * Styling for the Camera Page */
 #camera-page {
 	position: relative;
@@ -153,41 +176,127 @@
 	/* Do not display. This is only used to interpret video files and send to canvas */
 	/* ! Check this later for performance/bandwidth issues */
 	display: none;
-	/*
-	width: 1920px;
-	height: 1080px;
-	*/
+
 }
 
 .camera-canvas {
 	width: 30vw;
-	height: auto;
+	height: 16.875vw;
 	min-width: 480px;
 	min-height: 270px;
 	background: #05386b;
 
-	/*
-	border-style: solid;
-	border-color: pink;
-	border-width: 2px;
-	*/
 }
 
 .camera-buttons-container {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-around;
+	justify-content: space-between;
 	align-items: center;
 
-	/*
-	border-style: solid;
-	border-color: green;
-	border-width: 1px;
-	*/
 }
 
 .camera-buttons-container-spacing {
 	margin: 4px;
+}
+
+.camera-buttons-check {
+	width: 0.8em;
+	visibility: hidden;
+}
+
+.record-inclusion-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	background-color: var(--primaryDarkContrastColor);
+
+	width: 6em;
+	height: 3em;
+	padding: 6px;
+}
+
+.file-name-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: flex-start;
+
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	background-color: var(--primaryDarkContrastColor);
+
+	width: 8em;
+	height: 4em;
+	padding: 2px;
+}
+
+.av-check-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+
+	border-radius: 3px;
+	color: white;
+	font-weight: 400;
+	background-color: var(--primaryDarkContrastColor);
+
+	width: 6em;
+	height: 4em;
+	padding: 4px;
+}
+
+.av-inner-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+
+	width: 100%;
+}
+
+.av-label {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-content: center;
+
+	height: calc(1.2em + 4px);
+}
+
+.av-checkbox {
+	width: 1.2em;
+	height: 1.2em;
+	border-color:white;
+	border-style: solid;
+	border-width: 2px;
+
+	padding: 0;
+	margin: 0;
+
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-content: center;
+
+	cursor: pointer;
+	user-select: none;
+}
+
+.on-off-btn-container {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: center;
+
+	height: 4em;
 }
 
 #mirrorcheck2 {
@@ -249,57 +358,6 @@
 	display: block;
 	margin: 0 auto;
 }
-
-/* ! TODO: create checkbox structure in menu 
-#kinect-dropdown-content div {
-	position: relative;
-	color: var(--primaryDarkContrastColor);
-	display: block;
-	padding: 0.5em 1em;
-	text-decoration: none;
-	cursor: pointer;
-
-	border-style: solid;
-	border-width: 3px;
-	border-color: purple;
-}
-
-#kinect-dropdown-content div:hover {
-	background-color: #cccccc;
-}
-
-#kinect-dropdown-content label {
-	position: absolute;
-	top: 0;
-	left: 0;
-	width: 100%;
-	height: 100%;
-
-	cursor: pointer;
-
-	border-style: solid;
-	border-width: 3px;
-	border-color: black;
-}
-
-#kinect-dropdown-content span {
-	position: absolute;
-	left: 0;
-	top: 0;
-	width: 100%;
-	height: 100%;
-
-	border-style: solid;
-	border-width: 3px;
-	border-color: blue;
-}
-
-#kinect-dropdown-content input {
-	position: relative;
-	height: 100%;
-	opacity: 0;
-}
-*/
 
 .kinect-option-button-container {
 	display: flex;
@@ -370,11 +428,6 @@
 	height: 2em;
 	cursor: pointer;
 
-	/*
-	border-style: solid;
-	border-color: red;
-	border-width: 1px;
-	*/
 }
 
 .kinect_off {
@@ -388,11 +441,6 @@
 	height: 2em;
 	cursor: pointer;
 
-	/*
-	border-style: solid;
-	border-color: yellow;
-	border-width: 1px;
-	*/
 }
 
 /* * Styling for the Kinect Body Page */

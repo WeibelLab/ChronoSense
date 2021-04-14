@@ -119,9 +119,6 @@ body {
 	top: 32px;
 
 	height: calc(100% - 32px);
-	border-style: solid;
-	border-color: black;
-	border-width: 1px;
 	
 	overflow-y: auto;
 

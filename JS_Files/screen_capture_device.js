@@ -11,6 +11,9 @@ export class ScreenCaptureDevice {
 	#sources = []
 	#recorder = null;
 
+	#dirName = null;
+
+	#isRecordOptionChecked = false;
 	#isRecording = false;
 	#isStreaming = false;
 	
@@ -320,6 +323,23 @@ export class ScreenCaptureDevice {
 	 */
 	stop() {
 		this.stopCaptureStream(this.#videoElement);
+	}
+
+	/**
+	 * Returns the boolean value of record selection status
+	 * 
+	 * @returns {bool} - True if selected to record, false otherwise.
+	 */
+	 getRecordStatus() {
+		return this.#isRecordOptionChecked;
+	}
+
+	/**
+	 * 
+	 * @param {string} dirName - (path + name) of directory for recordings to be stored.
+	 */
+	 setDirName(dirName) {
+		this.#dirName = dirName;
 	}
 
 	/**

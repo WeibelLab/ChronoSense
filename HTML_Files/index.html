@@ -39,7 +39,7 @@
 							href="#"
 							class="chrono-dropdown-btn"
 							id="camera-dropdown-btn"
-							>Video Devices</a
+							>Devices</a
 						>
 						<div
 							class="chrono-dropdown-content"
@@ -48,7 +48,10 @@
 							<!-- Dynamically fill when camera devices are connected -->
 						</div>
 					</div>
-					<button class="kinect_on" id="refresh-cameras-btn">Refresh Cameras</button>
+					<button class="general-btn" id="refresh-cameras-btn">Refresh Devices</button>
+					<button id="record-all-btn">Record All Selected</button>
+					<input type="text" disabled="true" id="recording-dir-path" value="./">
+					<button id="record-path-btn">Select Record Directory</button>
 				</div>
 				<div id="camera-video-feed-container">
 					<!-- Dynamically fill when camera devices are selected -->

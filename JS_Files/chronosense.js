@@ -2,15 +2,19 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
+const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { AudioRecorder } from "./audio_recorder.js";
 import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
+var recordBtn = document.getElementById("record-all-btn");
+var recordDirInput = document.getElementById("recording-dir-path");
+var recordDirBtn = document.getElementById("record-path-btn");
+
 //Arrays for all devices
 var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
-
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
@@ -67,8 +71,25 @@ async function handleWindowControls() {
 		openCloseCameraDropMenus(evt);
 	}); //End of dropdown open listener
 
-	// * Attach refresh cameras for testing * CHANGE LATER - TEMP *
+	// Attach record button at the top of the page to a recording method to start recording 
+	// all selected devices.
+	recordBtn.addEventListener("click", () => {
+		recordAllSelectedDevices();
+	});
 
+	// Dialog popup button to select directory folder
+	recordDirBtn.addEventListener("click", () => {
+		dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
+			if (!promise.canceled) {
+				recordDirInput.value = promise.filePaths[0];
+			} else if (recordDirInput.value.localeCompare("") == 0) {
+				recordDirInput.value = "./"; //Default set to current directory
+			}
+		})
+	});
+
+
+    // Refresh cameras in drop down and reset live previews
 	document
 		.getElementById("refresh-cameras-btn")
 		.addEventListener("click", () => {
@@ -121,10 +142,7 @@ async function setupDevices() {
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
 
-
-
 }
-
 
 /**
  * Function used to populate the camera dropdown menu with all unique input
@@ -151,9 +169,9 @@ function refreshCameraDevices() {
 	// First close and  clear current devices
 	//Stop all incoming device data
 	for (let device of devices) {
-		device.stop()
+		device.stop();
 	}
-	devices = []
+	devices = [];
 	// Clear out the Camera list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("camera-dropdown-content"));
@@ -293,9 +311,35 @@ async function onCameraSelection(targetElement, device) {
 		}
 		outermostDiv.remove();
 
-		device.stop()
+		device.stop();
 	}
 }
+
+/**
+ * Starts the recording methods for all devices that have been selected to record.
+ * 
+ * ! Todo: add checks for errors and graceful shutdowns
+ */
+async function recordAllSelectedDevices() {
+	// Start recording on all devices that are selected. Keep running total of devices recording
+	let numRecording = 0;
+	devices.forEach((device) => {
+		if (device.getRecordStatus()) {
+			// Start recording
+			device.setDirName(recordDirInput.value);
+			device.startRecording();
+			numRecording++;
+		} 
+	});
+
+	if (numRecording == 0) {
+		console.log("Error: No device(s) have been selected to record.");
+	} else {
+		recordBtn.innerText = "Stop Recording All Selected";
+	}
+}
+
+
 
 /**
  * Function that is called to make sure all devices are properly shut down
@@ -305,6 +349,6 @@ async function onCameraSelection(targetElement, device) {
 global.onbeforeunload = () => {
 	//Close all Kinects & cameras gracefully
 	for (let device of devices) {
-		device.stop()
+		device.stop();
 	}
 };
