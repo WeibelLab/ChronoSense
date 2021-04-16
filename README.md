@@ -56,7 +56,7 @@
 9.  Test to see if the application (as it is) can now run by going to the main ChronoSenseV3 folder and typing the following command to start the application:  
     `npm start`
 
-10. **(Optional)** Go into the main.js file and uncomment out `mainWindow.webContents.openDevTools();` if you would like to see the debugging window while running the application. 
+10. **(Optional)** Go into the main.js file and uncomment `mainWindow.webContents.openDevTools();` if you would like to see the debugging window while running the application. 
 
 11. Ready to Develop!  
 
