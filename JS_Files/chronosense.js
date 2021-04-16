@@ -5,13 +5,16 @@ const remote = require("electron").remote;
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
-import { AudioRecorder } from "./audio_recorder.js";
-import { GenericDevice } from "./generic_device.js";
+//import { AudioRecorder } from "./audio_recorder.js";
+//import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
 var recordBtn = document.getElementById("record-all-btn");
 var recordDirInput = document.getElementById("recording-dir-path");
 var recordDirBtn = document.getElementById("record-path-btn");
+
+var isRecording = false;
+var isDirSetToDate = true;
 
 //Arrays for all devices
 var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
@@ -21,6 +24,11 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
+
+		//Set default directory to current date and time
+		// Used for setting file current date/time
+		var currDate = new Date();
+		recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
 	}
 };
 
@@ -79,13 +87,21 @@ async function handleWindowControls() {
 
 	// Dialog popup button to select directory folder
 	recordDirBtn.addEventListener("click", () => {
-		dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
-			if (!promise.canceled) {
-				recordDirInput.value = promise.filePaths[0];
-			} else if (recordDirInput.value.localeCompare("") == 0) {
-				recordDirInput.value = "./"; //Default set to current directory
-			}
-		})
+		// Only allow button to set directory if it is not currently recording.
+		if (!isRecording) {
+			dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
+				if (!promise.canceled) {
+					recordDirInput.value = promise.filePaths[0];
+					isDirSetToDate = false; // Change to false if user selects their own folder.
+				} else if (recordDirInput.value.localeCompare("") == 0) {
+					// Default set to current directory + date/time sequence
+					// Used for setting file current date/time
+					var currDate = new Date();
+					recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+					isDirSetToDate = true;
+				}
+			})
+		}
 	});
 
 
@@ -321,24 +337,46 @@ async function onCameraSelection(targetElement, device) {
  * ! Todo: add checks for errors and graceful shutdowns
  */
 async function recordAllSelectedDevices() {
-	// Start recording on all devices that are selected. Keep running total of devices recording
-	let numRecording = 0;
-	devices.forEach((device) => {
-		if (device.getRecordStatus()) {
-			// Start recording
-			device.setDirName(recordDirInput.value);
-			device.startRecording();
-			numRecording++;
-		} 
-	});
+	if (!isRecording) {
+		// Not recording - start
+		// First, change directory to most up to date time if not set by user
+		if (isDirSetToDate) {
+			// Used for setting file current date/time
+			var currDate = new Date();
+			recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+		}
 
-	if (numRecording == 0) {
-		console.log("Error: No device(s) have been selected to record.");
+		// Start recording on all devices that are selected. Keep running total of devices recording
+		let numRecording = 0;
+		devices.forEach((device) => {
+			if (device.getRecordStatus()) {
+				// Start recording
+				device.setDirName(recordDirInput.value);
+				device.startRecording();
+				numRecording++;
+			} 
+		});
+
+		if (numRecording == 0) {
+			console.log("Error: No device(s) have been selected to record.");
+		} else {
+			recordBtn.innerText = "Stop Recording All Selected";
+			isRecording = true;
+		}
 	} else {
-		recordBtn.innerText = "Stop Recording All Selected";
+		// Currently recording - stop 
+		devices.forEach((device) => {
+			if (device.getRecordStatus()) {
+				// Stop Recording
+				device.stopRecording();
+			} 
+		});
+
+		recordBtn.innerText = "Record All Selected";
+		isRecording = false;
+		
 	}
 }
-
 
 
 /**

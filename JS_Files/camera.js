@@ -515,20 +515,20 @@ export class Camera {
 	 */
 	 checkmarkRecordHelper(elementContainer) {
 		// Check record section with visible check mark and bool in class
-		if (this.#isOn && !this.#isRecordOptionChecked) {
-			// Preview is on (live) and record isn't checked, so check
+		if (this.#isOn && !this.#isRecordOptionChecked && !this.#isRecording) {
+			// Preview is on (live) and record isn't checked and not currently recording, so check
 			
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isOn && this.#isAudioChecked) {
+		} else if (this.#isOn && this.#isAudioChecked && !this.#isRecording) {
 			// Preview is off and record isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isRecordOptionChecked = false;
 
 		} else {
-			// Preview is on while changing, send error
-			console.log("Error: Can't enable recording without live feed.");
+			// Preview is off while changing or currently recording this feed; send error
+			console.log("Error: Can't enable recording without live feed or while recording.");
 		}
 	}
 

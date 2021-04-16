@@ -138,10 +138,60 @@
 .camera-btn-container {
 	position: relative;
 	margin: 10px 0 0 10px;
+
+	display: flex; 
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+	height: 5em;
 }
 
 #dropdown {
 	display: block;
+}
+
+.record-dir-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	height: 5em;
+
+}
+
+#record-all-btn {
+	width: 16em;
+	height: 3em;
+
+	margin-right: 3em;
+
+}
+
+.dir-container {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+
+
+	width: 24em;
+	height: 3em;
+}
+
+#recording-dir-path {
+	margin-left: 10px;
+	color: #FAF9F6;
+}
+
+#record-path-btn {
+	background-color: white;
+	color: var(--primaryDarkContrastColor);
+	font-weight: 700;
+
+	margin-right: 3px;
+
+	width: 14em;
+	height: 3em;
 }
 
 #camera-video-feed-container {
