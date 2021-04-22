@@ -14,6 +14,8 @@ function createWindow() {
     mainWindow = new BrowserWindow({ 
         width: width, 
         height: height, 
+        minWidth: 1050,
+        minHeight: 750,
         frame: false,
         webPreferences: {
           nodeIntegrationInWorker: true,
@@ -28,8 +30,11 @@ function createWindow() {
       })
     // Load html into window
     mainWindow.loadFile('HTML_Files/index.html');   //Change back to index.html before ready
-    //For debugging
-    mainWindow.webContents.openDevTools();
+    
+    //For debugging - show dev tool -> similar to chrome web browser tools (F12)
+    // ! Comment out before packaging as an executable !
+    //mainWindow.webContents.openDevTools();
+    
     //Close window when closed
     mainWindow.on('closed', function() {
         mainWindow = null;

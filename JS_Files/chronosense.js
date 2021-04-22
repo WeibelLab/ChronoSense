@@ -2,55 +2,33 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
-const usb = require("usb");
+const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
-import { AudioRecorder } from "./audio_recorder.js";
-import { GenericDevice } from "./generic_device.js";
+//import { AudioRecorder } from "./audio_recorder.js";
+//import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
-//Variables of HTML elements for later manipulation
-const btnHome = document.getElementById("homePage");
-const btnCamera = document.getElementById("cameraPage");
-const btnKinect = document.getElementById("kinectPage");
-const btnKinectBodyTracking = document.getElementById("kinectBodyPage");
-const btnAbout = document.getElementById("aboutPage");
+var recordBtn = document.getElementById("record-all-btn");
+var recordDirInput = document.getElementById("recording-dir-path");
+var recordDirBtn = document.getElementById("record-path-btn");
 
-//Used in Kinect Class for displaying content
-//Send through constructor to Kinect class object
-const displayCanvas2 = document.getElementById("video_canvas2"); //For Camera page
-
-//Used in camera methods
-const camVideo = document.getElementById("camera-video");
+var isRecording = false;
+var isDirSetToDate = true;
 
 //Arrays for all devices
-var kinectDevices = []; //All from class Kinect
-var cameraDevices = []; //All from class Camera
-var devices = [] // ! TEST Generic Device Model -> Move to this instead of kinect/cameraDevices
-
-//Constants for application to know which "page" is displayed.
-const HOME_PAGE_NUM = 0;
-const CAMERA_PAGE_NUM = 1;
-const KINECT_PAGE_NUM = 2;
-const KINECT_BODY_PAGE_NUM = 3;
-const ABOUT_PAGE_NUM = 4;
-
-//Holds a value for which page is open for the device so it knows which
-//functions to call from which page.
-//Legend:
-// 0 - Home
-// 1 - Camera
-// 2 - Kinect
-// 3 - Kinect Body Tracking
-// 4 - About
-let currentlyOpenPage = false;
+var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
-		//var generic = new GenericDevice();
+
+		//Set default directory to current date and time
+		// Used for setting file current date/time
+		var currDate = new Date();
+		recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
 	}
 };
 
@@ -96,55 +74,38 @@ async function handleWindowControls() {
 		}
 	}
 
-	/*
-	 * Set of functions below are for clicking buttons <a> elements on the main
-	 * navigation bar for the application. Mainly to switch src of webview to
-	 * change the contents of the page.
-	 *
-	 * Buttons: homePage, cameraPage, kinectPage, kinectBodyPage, aboutPage
-	 */
-	btnHome.addEventListener("click", (event) => {
-		console.log("YOU ARE HOME");
-		checkClosingWindowAndChangeContent(HOME_PAGE_NUM);
-	});
-	btnCamera.addEventListener("click", (event) => {
-		console.log("YOU ARE CAMERA");
-		checkClosingWindowAndChangeContent(CAMERA_PAGE_NUM);
-	});
-
-	btnKinect.addEventListener("click", (event) => {
-		console.log("YOU ARE KINECT CAM");
-		checkClosingWindowAndChangeContent(KINECT_PAGE_NUM);
-	});
-
-	btnKinectBodyTracking.addEventListener("click", (event) => {
-		console.log("YOU ARE BODY TRACKING");
-		checkClosingWindowAndChangeContent(KINECT_BODY_PAGE_NUM);
-	});
-
-	btnAbout.addEventListener("click", (event) => {
-		console.log("YOU ARE ABOUT");
-		checkClosingWindowAndChangeContent(ABOUT_PAGE_NUM);
-	});
-
-	/* Add event to refresh Kinect Devices on push - WORKS*/
-	document
-		.getElementById("kinect-refresh-btn")
-		.addEventListener("click", (evt) => {
-			refreshKinectDevices();
-		});
-
-	/* Add event to open and close Kinect drop down menus seamlessly */
+	/* Add event to open and close Camera drop down menus seamlessly */
 	document.addEventListener("click", (evt) => {
-		if (currentlyOpenPage === KINECT_PAGE_NUM) {
-			openCloseKinectDropMenus(evt);
-		} else if (currentlyOpenPage === CAMERA_PAGE_NUM) {
-			openCloseCameraDropMenus(evt);
-		}
+		openCloseCameraDropMenus(evt);
 	}); //End of dropdown open listener
 
-	// * Attach refresh cameras for testing * CHANGE LATER - TEMP *
+	// Attach record button at the top of the page to a recording method to start recording 
+	// all selected devices.
+	recordBtn.addEventListener("click", () => {
+		recordAllSelectedDevices();
+	});
 
+	// Dialog popup button to select directory folder
+	recordDirBtn.addEventListener("click", () => {
+		// Only allow button to set directory if it is not currently recording.
+		if (!isRecording) {
+			dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
+				if (!promise.canceled) {
+					recordDirInput.value = promise.filePaths[0];
+					isDirSetToDate = false; // Change to false if user selects their own folder.
+				} else if (recordDirInput.value.localeCompare("") == 0) {
+					// Default set to current directory + date/time sequence
+					// Used for setting file current date/time
+					var currDate = new Date();
+					recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+					isDirSetToDate = true;
+				}
+			})
+		}
+	});
+
+
+    // Refresh cameras in drop down and reset live previews
 	document
 		.getElementById("refresh-cameras-btn")
 		.addEventListener("click", () => {
@@ -192,313 +153,11 @@ async function setupDevices() {
 	Camera.getDeviceObjects().then((cameraDevices) => {
 		devices = devices.concat(cameraDevices);
 
-		console.log(devices);
+		//console.log(devices);
 		// Once done getting all device objects, add to dropdown menu
 		populateCameraList(document.getElementById("camera-dropdown-content"));
 	});
 
-
-
-}
-
-/**
- * Function that checks which windows are being closed out in order to call
- * the correct functions from their respective js files to close out running
- * device functionality before switching.
- *
- * Also serves as the function that manipulates the webviewer!
- *
- * @param {number} newPageNum - Holds one of the global constant page values to
- *                      		determine what should be displayed or hidden.
- */
-
-async function checkClosingWindowAndChangeContent(newPageNum) {
-	//Check which window is closing; if changing to same as before, don't
-	//refresh
-	if (currentlyOpenPage == newPageNum) {
-		return;
-	}
-
-	//Manipulate webviewer to change for NEW window parameters.
-	switch (newPageNum) {
-		case HOME_PAGE_NUM:
-			currentlyOpenPage = HOME_PAGE_NUM;
-			changeWindowFeatures();
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case CAMERA_PAGE_NUM:
-			currentlyOpenPage = CAMERA_PAGE_NUM;
-			changeWindowFeatures(CAMERA_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			populateCameraList(
-				document.getElementById("camera-dropdown-content")
-			);
-
-			break;
-
-		case KINECT_PAGE_NUM:
-			currentlyOpenPage = KINECT_PAGE_NUM;
-			changeWindowFeatures(KINECT_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case KINECT_BODY_PAGE_NUM:
-			currentlyOpenPage = KINECT_BODY_PAGE_NUM;
-			changeWindowFeatures(KINECT_BODY_PAGE_NUM);
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-
-		case ABOUT_PAGE_NUM:
-			currentlyOpenPage = ABOUT_PAGE_NUM;
-			changeWindowFeatures();
-
-			//Stop all incoming device data
-			for (let device of devices) {
-				device.stop()
-
-			}
-			// Clear Camera page in order to not have duplicate canvases
-			clearPageContent(
-				document.getElementById("camera-video-feed-container")
-			);
-
-			break;
-	} //End of NEW page switch
-}
-
-/**
- * Changes certain aspects of the application based on the current "page" that
- * the application is showing.
- *
- * @param {number} pageNum - Page number to indicate case choice and manipulate
- *                  		 DOM elements
- */
-function changeWindowFeatures(pageNum) {
-	switch (pageNum) {
-		case KINECT_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "block";
-			document.getElementById("kinect-body-page").style.display = "none";
-			break;
-
-		case KINECT_BODY_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "block";
-			break;
-
-		case CAMERA_PAGE_NUM:
-			document.getElementById("camera-page").style.display = "block";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "none";
-			break;
-
-		default:
-			//Default to home page
-			document.getElementById("camera-page").style.display = "none";
-			document.getElementById("kinect-page").style.display = "none";
-			document.getElementById("kinect-body-page").style.display = "none";
-	}
-} //End of changeWindowFeatures
-
-/**
- * Function used to return an array of all audio/video inputs capable of
- * display/recording. The ONLY filtering is looking for input devices.
- *
- * @return {array} 	of objects with each device's properties
- *          		-> "deviceId, groupId, kind, label"
- */
-async function getInputDevices() {
-	var devices = await navigator.mediaDevices.enumerateDevices();
-	var inputDevices = [];
-	for (var i = 0; i < devices.length; i++) {
-		if (
-			devices[i].kind.localeCompare("audioinput") == 0 ||
-			devices[i].kind.localeCompare("videoinput") == 0
-		) {
-			inputDevices.push(devices[i]);
-		}
-	}
-	return inputDevices;
-}
-
-/**
- * Function used to return an array of all unique audio/video inputs capable
- * of display/recording.
- *
- * @return {Promise} - A promise that resolves to an array of objects with each
- * 						device's properties -> "deviceId, groupId, kind, label"
- */
-async function getUniqueInputDevices() {
-	return navigator.mediaDevices.enumerateDevices().then((devices) => {
-		var uniqueInputDevices = [];
-		for (var i = 0; i < devices.length; i++) {
-			if (
-				devices[i].kind.localeCompare("audioinput") == 0 ||
-				devices[i].kind.localeCompare("videoinput") == 0
-			) {
-				//Now search through added devices if it already exists
-				var matched = false;
-				for (var j = 0; j < uniqueInputDevices.length; j++) {
-					if (
-						uniqueInputDevices[j].groupId.localeCompare(
-							devices[i].groupId
-						) == 0
-					) {
-						matched = true;
-						break; //If match, break out and don't add to
-					}
-				}
-
-				if (
-					!matched &&
-					devices[i].deviceId.localeCompare("default") != 0 &&
-					devices[i].deviceId.localeCompare("communications") != 0
-				) {
-					//Filter out "default" and "communications" so there is a alphanumeric
-					//identifier.
-					uniqueInputDevices.push(devices[i]);
-				}
-			}
-		}
-		console.log(uniqueInputDevices);
-
-		return new Promise((resolve, reject) => {
-			resolve(uniqueInputDevices);
-		});
-	});
-}
-
-/**
- * Function used to return an array of all unique video inputs capable
- * of display/recording.
- *
- * @return {Promise} - A promise that resolves to an array of objects with each
- * 					   device's properties -> "deviceId, groupId, kind, label"
- */
-async function getUniqueVideoInputDevices() {
-	return navigator.mediaDevices.enumerateDevices().then((devices) => {
-		console.log(devices);
-		var uniqueInputDevices = [];
-		for (var i = 0; i < devices.length; i++) {
-			if (devices[i].kind.localeCompare("videoinput") == 0) {
-				//Now search through added devices if it already exists
-				var matched = false;
-				for (var j = 0; j < uniqueInputDevices.length; j++) {
-					if (
-						uniqueInputDevices[j].groupId.localeCompare(
-							devices[i].groupId
-						) == 0
-					) {
-						matched = true;
-						break; //If match, break out and don't add to
-					}
-				}
-
-				if (
-					!matched &&
-					devices[i].deviceId.localeCompare("default") != 0 &&
-					devices[i].deviceId.localeCompare("communications") != 0
-				) {
-					//Filter out "default" and "communications" so there is a alphanumeric
-					//identifier and no duplicates.
-					uniqueInputDevices.push(devices[i]);
-				}
-			}
-		}
-		return new Promise((resolve, reject) => {
-			resolve(uniqueInputDevices);
-		});
-	});
-}
-
-/**
- * On Camera dropdown menu change, use selected option to start streaming video.
- *
- * @param {HTML Select Element} dropdown - Dropdown menu on HTML page
- */
-function onCameraDropdownChange(option) {
-	//Stop cameras and Kinect
-	stopAllCameraStream(cameraDevices);
-	stopAllKinectStream(kinectDevices).then(() => {
-		//Check if Kinect or generic camera/webcam
-		if (option.text.includes("kinect") || option.text.includes("Kinect")) {
-			//Kinect
-			var serialNumber = option.value; //serial number
-			var kinect = null; //Kinect device object
-
-			//Look through Kinects to find specified device
-			for (var i = 0; i < kinectDevices.length; i++) {
-				if (
-					kinectDevices[i].getSerial().localeCompare(serialNumber) ==
-					0
-				) {
-					kinect = kinectDevices[i];
-					break;
-				}
-			}
-
-			if (kinect != null) {
-				kinect.setDisplayCanvas(displayCanvas2);
-				kinect.start();
-				kinect.colorVideoFeed();
-			}
-		} else {
-			//NOT a Kinect
-			var deviceId = option.value;
-			var camera = null;
-
-			//Look through cameras for specified device
-			for (var j = 0; j < cameraDevices.length; j++) {
-				if (
-					cameraDevices[j].getDeviceId().localeCompare(deviceId) == 0
-				) {
-					camera = cameraDevices[j];
-					break;
-				}
-			}
-
-			if (camera != null) {
-				camera.setInputAndOutput(camVideo, displayCanvas2);
-				camera.startCameraStream();
-			}
-		}
-	});
 }
 
 /**
@@ -526,9 +185,9 @@ function refreshCameraDevices() {
 	// First close and  clear current devices
 	//Stop all incoming device data
 	for (let device of devices) {
-		device.stop()
+		device.stop();
 	}
-	devices = []
+	devices = [];
 	// Clear out the Camera list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("camera-dropdown-content"));
@@ -559,493 +218,6 @@ function clearContainer(container) {
 	while (container.lastElementChild) {
 		container.removeChild(container.lastElementChild);
 	}
-}
-
-/**
- * Refreshes the entire list of Kinect Devices. Deleting missing devices and
- * adding new devices.
- */
-function refreshKinectDevices() {
-	destroyAllKinects(kinectDevices); //Close and clear all devices
-	//Remove all kinect list <a> elements
-	//Currently an ad hoc (hard coded) method for specific app page and will change later
-	var myList = document.getElementById("kinect-dropdown-content");
-	while (myList.firstElementChild) {
-		myList.removeChild(myList.lastElementChild);
-	}
-
-	var tempKinect = new Kinect(-1); //Used to call Kinect specific getter methods for general info
-	var kinectCount = tempKinect.getInstalledCount();
-
-	//i represents the Kinect indices
-	for (var i = 0; i < kinectCount; i++) {
-		//Create the object, then add to the device array
-		createKinect(i, kinectDevices);
-
-		let newDeviceElem = document.createElement("a");
-		newDeviceElem.title = kinectDevices[i].getSerial(); //serial
-		newDeviceElem.text = "Kinect (" + kinectDevices[i].getSerial() + ")";
-		document
-			.getElementById("kinect-dropdown-content")
-			.appendChild(newDeviceElem);
-	}
-}
-
-/**
- * Creats a Kinect object and adds it to the array of devices
- *
- * @param {number} index - Index of the Kinect Device in the SDK
- * @param {array} deviceArr - Array of Kinect devices where new device is added
- */
-function createKinect(index, deviceArr) {
-	//Create the object, then add to the device array
-	let kinect = new Kinect(index);
-	deviceArr.push(kinect);
-}
-
-/**
- * Destroys a Kinect object and deletes it from the array of devices
- *
- * @param {string} serial - Serial number of the Kinect Device to destroy
- * @param {array} deviceArr - Array of Kinect devices where specific device is stored
- */
-function destroyKinect(serial, deviceArr) {
-	/* console.log(`[chronosense.js:destroyKinect()] - serial #: ${serial}`); */
-	//Check if a device has specified serial number
-	let i,
-		length = deviceArr.length;
-	for (i = 0; i < length; i++) {
-		if (serial.localeCompare(deviceArr[i].getSerial()) == 0) {
-			stopKinectStream(deviceArr[i]);
-			deviceArr = deviceArr.splice(i, 1);
-			return;
-		}
-	}
-}
-
-/**
- * Destroy all of the kinects in the device array & remove from array.
- *
- * @param {array} deviceArr - Array of Kinect devices
- */
-function destroyAllKinects(deviceArr) {
-	//Go through all kinects closing and clearing the array
-	let i,
-		length = deviceArr.length;
-	stopAllKinectStream(deviceArr);
-	deviceArr.length = 0;
-}
-
-/**
- * Create a Camera object and add it to the array of devices
- *
- * @param {array} deviceArr - Array of Camera devices
- * @param {string} device - Device object retrieved from getInputDevices containing necessary properties
- */
-function createCamera(deviceArr, device) {
-	var camera = new Camera(
-		device.deviceId,
-		device.groupId,
-		device.kind,
-		device.label
-	);
-	deviceArr.push(camera);
-}
-
-/**
- * Destroys a Camera object and deletes it from the array of devices
- *
- * @param {array} deviceArr - Array of Camera devices where specific device is stored
- * @param {string} deviceId - Device identifier for local video devices
- */
-function destroyCamera(deviceArr, deviceId) {
-	/* console.log(`[chronosense.js:destroyCamera()] -  deviceId: ${deviceId}`); */
-	//Check if a device has specified deviceId
-	let i,
-		length = deviceArr.length;
-	for (i = 0; i < length; i++) {
-		if (deviceId.localeCompare(deviceArr[i].getDeviceId()) == 0) {
-			stopCameraStream(deviceArr[i]);
-			deviceArr = deviceArr.splice(i, 1);
-			return;
-		}
-	}
-}
-
-/**
- * Destroy all of Cameras in the device array & remove from array
- *
- * @param {array} deviceArr - Array of Camera devices
- */
-function destroyAllCameras(deviceArr) {
-	//Go through all Cameras closing and clearing the array
-	let i,
-		length = deviceArr.length;
-	stopAllCameraStream(deviceArr);
-
-	deviceArr.length = 0;
-}
-
-/**
- * Stop the streaming (close all tracks) of a single Camera device.
- *
- * @param {Camera} device - Camera object to stop/close
- */
-function stopCameraStream(device) {
-	device.stopCameraStream();
-}
-
-/**
- * Stop the streaming (close all tracks) of a ALL Camera devices.
- *
- * @param {array} deviceArr - Array of Camera devices to stop/close
- */
-function stopAllCameraStream(deviceArr) {
-	for (var i = 0; i < deviceArr.length; i++) {
-		deviceArr[i].stopCameraStream();
-	}
-}
-
-/**
- * Stop the streaming of a single Kinect device.
- *
- * @param {Kinect} device - Kinect object to stop/close
- */
-function stopKinectStream(device) {
-	return device.stopListeningAndCameras().then((resolve, reject) => {
-		device.close();
-		return new Promise((resolve, reject) => {
-			resolve(true);
-		});
-	});
-}
-
-/**
- * Stop the streaming of a ALL Kinect devices.
- *
- * @param {array} deviceArr - Array of Kinect devices to stop/close
- */
-async function stopAllKinectStream(deviceArr) {
-	console.log(
-		"[chronosense.js:stopAllKinectStream()] - BEGIN Stopping Kinect streams"
-	);
-	for (var i = 0; i < deviceArr.length; i++) {
-		await stopKinectStream(deviceArr[i]);
-	}
-	console.log(
-		"[chronosense.js:stopAllKinectStream()] - DONE Stopping Kinect streams"
-	);
-	return new Promise((resolve, reject) => {
-		resolve(true);
-	});
-}
-
-/**
- * Opens or closes dropdown menus to account for clicking outside options to close & open seamlessly.
- * ! Maybe simplify if possible with HTML IDs
- *
- * @param {MouseEvent} evt - Mouse click event on DOM
- */
-function openCloseKinectDropMenus(evt) {
-	var isKinectOpen = false;
-	var isFpsOpen = false;
-	var isResOpen = false;
-	var isFormatOpen = false;
-	var isDepthOpen = false;
-	var isSyncOpen = false;
-
-	const kinectList = document.getElementById("kinect-dropdown");
-	const kinectOptionFPS = document.getElementById(
-		"kinect-option-dropdown-fps"
-	);
-	const kinectOptionRes = document.getElementById(
-		"kinect-option-dropdown-res"
-	);
-	const kinectOptionFormat = document.getElementById(
-		"kinect-option-dropdown-format"
-	);
-	const kinectOptionDepth = document.getElementById(
-		"kinect-option-dropdown-depth"
-	);
-	const kinectOptionSync = document.getElementById(
-		"kinect-option-dropdown-sync"
-	);
-	let clickedElement = evt.target;
-
-	do {
-		if (kinectList == clickedElement) {
-			document.getElementById(
-				"kinect-option-dropdown-content-fps"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-res"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-format"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-depth"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-sync"
-			).style.display = "none";
-
-			isFpsOpen = false;
-			isResOpen = false;
-			isFormatOpen = false;
-			isDepthOpen = false;
-			isSyncOpen = false;
-
-			if (!isKinectOpen) {
-				isKinectOpen = true;
-				document.getElementById(
-					"kinect-dropdown-content"
-				).style.display = "block";
-				return;
-			} else {
-				isKinectOpen = false;
-				document.getElementById(
-					"kinect-dropdown-content"
-				).style.display = "none";
-				return;
-			}
-		}
-		if (kinectOptionFPS == clickedElement) {
-			document.getElementById("kinect-dropdown-content").style.display =
-				"none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-res"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-format"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-depth"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-sync"
-			).style.display = "none";
-
-			isKinectOpen = false;
-			isResOpen = false;
-			isFormatOpen = false;
-			isDepthOpen = false;
-			isSyncOpen = false;
-
-			if (!isFpsOpen) {
-				isFpsOpen = true;
-				document.getElementById(
-					"kinect-option-dropdown-content-fps"
-				).style.display = "block";
-				return;
-			} else {
-				isFpsOpen = false;
-				document.getElementById(
-					"kinect-option-dropdown-content-fps"
-				).style.display = "none";
-				return;
-			}
-		}
-		if (kinectOptionRes == clickedElement) {
-			document.getElementById("kinect-dropdown-content").style.display =
-				"none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-fps"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-format"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-depth"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-sync"
-			).style.display = "none";
-
-			isKinectOpen = false;
-			isFpsOpen = false;
-			isFormatOpen = false;
-			isDepthOpen = false;
-			isSyncOpen = false;
-
-			if (!isResOpen) {
-				isResOpen = true;
-				document.getElementById(
-					"kinect-option-dropdown-content-res"
-				).style.display = "block";
-				return;
-			} else {
-				isResOpen = false;
-				document.getElementById(
-					"kinect-option-dropdown-content-res"
-				).style.display = "none";
-				return;
-			}
-		}
-		if (kinectOptionFormat == clickedElement) {
-			document.getElementById("kinect-dropdown-content").style.display =
-				"none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-fps"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-res"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-depth"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-sync"
-			).style.display = "none";
-
-			isKinectOpen = false;
-			isFpsOpen = false;
-			isResOpen = false;
-			isDepthOpen = false;
-			isSyncOpen = false;
-
-			if (!isFormatOpen) {
-				isFormatOpen = true;
-				document.getElementById(
-					"kinect-option-dropdown-content-format"
-				).style.display = "block";
-				return;
-			} else {
-				isFormatOpen = false;
-				document.getElementById(
-					"kinect-option-dropdown-content-format"
-				).style.display = "none";
-				return;
-			}
-		}
-		if (kinectOptionDepth == clickedElement) {
-			document.getElementById("kinect-dropdown-content").style.display =
-				"none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-fps"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-res"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-format"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-sync"
-			).style.display = "none";
-
-			isKinectOpen = false;
-			isFpsOpen = false;
-			isResOpen = false;
-			isFormatOpen = false;
-			isSyncOpen = false;
-
-			if (!isDepthOpen) {
-				isDepthOpen = true;
-				document.getElementById(
-					"kinect-option-dropdown-content-depth"
-				).style.display = "block";
-				return;
-			} else {
-				isDepthOpen = false;
-				document.getElementById(
-					"kinect-option-dropdown-content-depth"
-				).style.display = "none";
-				return;
-			}
-		}
-		if (kinectOptionSync == clickedElement) {
-			document.getElementById("kinect-dropdown-content").style.display =
-				"none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-fps"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-res"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-format"
-			).style.display = "none";
-
-			document.getElementById(
-				"kinect-option-dropdown-content-depth"
-			).style.display = "none";
-
-			isKinectOpen = false;
-			isFpsOpen = false;
-			isResOpen = false;
-			isFormatOpen = false;
-			isDepthOpen = false;
-
-			if (!isSyncOpen) {
-				isSyncOpen = true;
-				document.getElementById(
-					"kinect-option-dropdown-content-sync"
-				).style.display = "block";
-				return;
-			} else {
-				isSyncOpen = false;
-				document.getElementById(
-					"kinect-option-dropdown-content-sync"
-				).style.display = "none";
-				return;
-			}
-		}
-		// Go up the DOM
-		clickedElement = clickedElement.parentNode;
-	} while (clickedElement);
-	//Clicked outside of Kinect devices list
-	document.getElementById("kinect-dropdown-content").style.display = "none";
-
-	document.getElementById(
-		"kinect-option-dropdown-content-fps"
-	).style.display = "none";
-
-	document.getElementById(
-		"kinect-option-dropdown-content-res"
-	).style.display = "none";
-
-	document.getElementById(
-		"kinect-option-dropdown-content-format"
-	).style.display = "none";
-
-	document.getElementById(
-		"kinect-option-dropdown-content-depth"
-	).style.display = "none";
-
-	document.getElementById(
-		"kinect-option-dropdown-content-sync"
-	).style.display = "none";
-
-	isKinectOpen = false;
-	isFpsOpen = false;
-	isResOpen = false;
-	isFormatOpen = false;
-	isDepthOpen = false;
-	isSyncOpen = false;
 }
 
 /**
@@ -1107,7 +279,7 @@ async function addDropdownMenuOption(
 
 	parentDiv.id = "Device" + dropdownID;
 	childDiv.innerText = dropdownName;
-	checkImg.src = "../images/checkmark.png";
+	checkImg.src = "../images/checkmark.webp";
 	checkImg.style.visibility = "hidden";
 
 	parentDiv.appendChild(childDiv);
@@ -1155,45 +327,57 @@ async function onCameraSelection(targetElement, device) {
 		}
 		outermostDiv.remove();
 
-		device.stop()
+		device.stop();
 	}
 }
 
 /**
- * Create Kinect Page HTML elements necessary to start streaming feed to UI on selection from custom dropdown menu.
- *
- * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
+ * Starts the recording methods for all devices that have been selected to record.
+ * 
+ * ! Todo: add checks for errors and graceful shutdowns
  */
-function onKinectSelection(targetElement) {
-	//If VISIBLE, make check invisible, clear out HTML elements, close feed.
-	//If INVISIBLE, make visible, create HTML elements, start feed.
-	if (
-		targetElement.childNodes[1].style.visibility.localeCompare("hidden") ===
-		0
-	) {
-		//First create the necessary elements
-		// ! video, canvas, buttons, video option menus, etc.
-		//Finally, make check mark visible indicating the device is "live"
-		targetElement.childNodes[1].style.visibility = "visible";
+async function recordAllSelectedDevices() {
+	if (!isRecording) {
+		// Not recording - start
+		// First, change directory to most up to date time if not set by user
+		if (isDirSetToDate) {
+			// Used for setting file current date/time
+			var currDate = new Date();
+			recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+		}
+
+		// Start recording on all devices that are selected. Keep running total of devices recording
+		let numRecording = 0;
+		devices.forEach((device) => {
+			if (device.getRecordStatus()) {
+				// Start recording
+				device.setDirName(recordDirInput.value);
+				device.startRecording();
+				numRecording++;
+			} 
+		});
+
+		if (numRecording == 0) {
+			console.log("Error: No device(s) have been selected to record.");
+		} else {
+			recordBtn.innerText = "Stop Recording All Selected";
+			isRecording = true;
+		}
 	} else {
-		//First delete the necessary elements (for performance)
-		//Finally, make check mark visible indicating the device is NOT "live"
-		targetElement.childNodes[1].style.visibility = "hidden";
+		// Currently recording - stop 
+		devices.forEach((device) => {
+			if (device.getRecordStatus()) {
+				// Stop Recording
+				device.stopRecording();
+			} 
+		});
+
+		recordBtn.innerText = "Record All Selected";
+		isRecording = false;
+		
 	}
 }
 
-/**
- * Mirror the specified canvas element about the y-axis (x=1 -> x=-1).
- */
-function mirrorCanvas(canvas) {
-	if (canvas.style.transform.localeCompare("scaleX(-1)") === 0) {
-		// Change back to "normal" scaling
-		canvas.style.transform = "scaleX(1)";
-	} else {
-		// Mirror canvas
-		canvas.style.transform = "scaleX(-1)";
-	}
-}
 
 /**
  * Function that is called to make sure all devices are properly shut down
@@ -1203,6 +387,6 @@ function mirrorCanvas(canvas) {
 global.onbeforeunload = () => {
 	//Close all Kinects & cameras gracefully
 	for (let device of devices) {
-		device.stop()
+		device.stop();
 	}
 };
