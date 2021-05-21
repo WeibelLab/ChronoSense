@@ -2,10 +2,11 @@ const { spawn } = require("child_process");
 const Stream = require("stream");
 const path = require('path');
 const fs = require("fs");
-/*
+
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
-*/
+
+
 
 export class AVRecorder {
 
@@ -31,24 +32,28 @@ export class AVRecorder {
 		if (!fs.existsSync(this.#dirName)) {
 			fs.mkdirSync(this.#dirName);
 		}
+		// Add an 'raw' folder inside the directory that contains the unseekable video files
+		if (!fs.existsSync(this.#dirName.concat("raw/"))) {
+			fs.mkdirSync(this.#dirName.concat("raw/"));
+		}
 
 		this.#fileName = fileName;
 		this.#fileName = this.#fileName.replace(/[/\\?%*:|"<>]/g, '');
 		this.#fileName = this.#fileName.replace(/\s/g,''); //regex away whitespace characters
-		this.#fileName = this.#fileName.concat(".mp4"); //Add file extension at the end of the file
+		this.#fileName = this.#fileName.concat(".webm"); //Add file extension at the end of the file
 		// Check if filename exists and if so add a 1 at the end
 		let fileEndNum = 1;
-		while (fs.existsSync(this.#dirName.concat(this.#fileName))) {
+		while (fs.existsSync(this.#dirName.concat("raw/").concat(this.#fileName))) {
 			// File name exists, change name and check again
 			this.#fileName = this.#fileName.slice(0, this.#fileName.length - 4);
 			this.#fileName = this.#fileName.concat(fileEndNum.toString());
-			this.#fileName = this.#fileName.concat(".mp4");
+			this.#fileName = this.#fileName.concat(".webm");
 			fileEndNum++;
 		}
 
 		this.#recorder = new MediaRecorder(mediaStream); //TODO: allow modification of options dict param by user. 
 
-		this.#storageStream = fs.createWriteStream(this.#dirName.concat(this.#fileName));
+		this.#storageStream = fs.createWriteStream(this.#dirName.concat("raw/").concat(this.#fileName));
 
 		this.#blobReader = new FileReader();
 
@@ -84,11 +89,29 @@ export class AVRecorder {
 	}
 
 	/**
-	 * stopRecording() stop and saves the current recording.
+	 * stopRecording() stop and saves the current recording. Begin processing 'raw' video files so that 
+	 * they are seekable.
 	 */ 
 	 
 	stopRecording() {
 		this.#recorder.stop();
+
+		// ! Add call to EBML to turn 'raw' video files into proper, seekable video files
+		this.postProcessVideoFile();
+	}
+
+	/**
+	 * Call FFMPEG to make video scrollable. Ingests the .webm file and turns it into a seekable
+	 * .mp4 file outside of the 'raw' directory.
+	 */
+	async postProcessVideoFile() {
+
+		var subprocess = spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
+			"-i",
+			this.#dirName.concat("raw/").concat(this.#fileName),
+			this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
+		], {detached: true});
+
 	}
 
 } //End of AVRecorder Class
