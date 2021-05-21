@@ -1,6 +1,9 @@
 # ChronoSenseV3
 
-![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")
+![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")  
+
+## Branch Notes:  
+The media_pipe_feature branch has a canvas element at the bottom of the application that takes the first running video feed and starts a [MediaPipe](https://google.github.io/mediapipe/) hand pose estimation pipeline that displays in real-time. Click the button at the bottom while a video feed is live to see it in action.  
 
 
 ## Installation / run with Docker
@@ -64,4 +67,5 @@
 1. Clone the repository  
 2. Run `npm install` in the cloned repo directory  
 3. Run `npm run package`  
-4. Look for newly created directory inside of your current repo directory which will contain the created executable for ChronoSense
+4. Look for newly created directory inside of your current repo directory which will contain the created executable for ChronoSense  
+

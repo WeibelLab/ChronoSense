@@ -9,6 +9,8 @@ import { Camera } from "./camera.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
+import { startMediaPipe } from "./mediaPipe.js";
+
 var recordBtn = document.getElementById("record-all-btn");
 var recordDirInput = document.getElementById("recording-dir-path");
 var recordDirBtn = document.getElementById("record-path-btn");
@@ -29,6 +31,12 @@ document.onreadystatechange = () => {
 		// Used for setting file current date/time
 		var currDate = new Date();
 		recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+	
+		// ! Testing MediaPipe
+		var mediaBtn = document.getElementById("test-mediapipe-btn");
+		mediaBtn.addEventListener("click", () => {
+			startMediaPipe();
+		});
 	}
 };
 
