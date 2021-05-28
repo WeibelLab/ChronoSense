@@ -2,8 +2,27 @@
 
 ![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")
 
-## Run ChronoSense Electron App:
+## Kinect Branch Overview
+This branch contains the development of a Azure Kinect specific device integration into ChronoSense. It uses the [kinect-azure](https://github.com/wouterverweirder/kinect-azure#readme) NPM package to integrate the [Azure Kinect SDK](https://docs.microsoft.com/en-us/azure/kinect-dk/) into the ChronoSense Electron application. The kinect.js file is used instead of camera.js for any connected Kinect devices, and the preview can be depth, color, or body tracking overlayed video (see the README of [kinect-azure](https://github.com/wouterverweirder/kinect-azure#readme) for an example image of body tracking preview data).
 
+File Differences - Main vs. Kinect Branches:  
+- audiorecorder.js  
+    - Hard-coded example of recording from the mic array on the Kinect, instead of from a single mic as seen in camera.js.
+- kinect.js  
+    - The Kinect class is written similarly to the Camera class in camera.js.
+    - Instead of using MediaStream, it uses the [kinect-azure](https://github.com/wouterverweirder/kinect-azure#readme) functionality.
+- chronosense.js  
+    - setupDevices() scans for cameras and kinect devices separately, but treats them as 'devices' with similar properties.
+- camera.js  
+    - getDeviceObjects() filters out Kinect devices since they are instantiated in Kinect.js.
+- jointwriter.js  
+    - Writes the body tracking data to a customizable CSV file. 
+    - Joint data retrieved from the [kinect-azure](https://github.com/wouterverweirder/kinect-azure#readme) skeleton object returned when capturing video via the Kinect.
+
+## Overview  
+ChronoSense is a foundational piece of recording software built on webtech with the express goal of making recording accesible, extensible, and ubiquitous no matter the device.
+
+## Run ChronoSense Electron App:
 -   CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies/electron (node-gyp, kinect-azure, production windows build tools, etc.).
 -   Next enter `npm start` and the application window will open up.
 

@@ -619,6 +619,8 @@ export class Camera {
 		}).then((currentDevices) => {
 			//console.log(currentDevices);
 			for (var k = 0; k < currentDevices.length; k++) {
+				// ! In order to use Kinect Devices, uncomment all below. It 
+				// ! filters out Kinect devices that have already been allocated in kinect.js.
 				//if (
 				//	!(
 				//		currentDevices[k].label.includes("kinect") ||
