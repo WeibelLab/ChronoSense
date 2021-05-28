@@ -1,7 +1,7 @@
 /*
 * Description: File used as a generic device communication class for devices
 *              without drivers, sdks, or that use network communcation to send data. 
-*
+* 
 *
 */
 // ! CURRENTLY DATA TRANSFER OVER LOCAL TCP WORKING !
