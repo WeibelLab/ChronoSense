@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const download = require('download');
 const extract = require('extract-zip');
+var isWin = process.platform === "win32";
 
 const CHRONOSENSE_ROOT_DIR = path.resolve(__dirname);
 const FFMPEG_DIR = path.resolve(CHRONOSENSE_ROOT_DIR, 'ffmpeg');
@@ -15,6 +16,9 @@ const init = async (callback) => {
         await fs.writeFile(FFMPEG_ZIP, await download(FFMPEG_URL));
     }
     */
+    if (!isWin) {
+        return;
+    }
 
     if (!(await fs.pathExists(FFMPEG_DIR))) {
         console.log('downloading ffmpeg to:' + CHRONOSENSE_ROOT_DIR);

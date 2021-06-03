@@ -2,10 +2,10 @@ const { spawn } = require("child_process");
 const Stream = require("stream");
 const path = require('path');
 const fs = require("fs");
+var isWin = process.platform === "win32";
 
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
-
 
 
 export class AVRecorder {
@@ -106,11 +106,20 @@ export class AVRecorder {
 	 */
 	async postProcessVideoFile() {
 
-		var subprocess = spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
-			"-i",
-			this.#dirName.concat("raw/").concat(this.#fileName),
-			this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-		], {detached: true});
+		if (!isWin) {
+			spawn("ffmpeg", [
+				"-i",
+				this.#dirName.concat("raw/").concat(this.#fileName),
+				this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
+			], {detached: true});
+		}
+		else {
+			spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
+				"-i",
+				this.#dirName.concat("raw/").concat(this.#fileName),
+				this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
+			], {detached: true});
+		}
 
 	}
 
