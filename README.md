@@ -3,9 +3,9 @@
 ![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")  
 
 ## Overview  
-ChronoSense is a foundational piece of recording software built on webtech with the express goal of making recording accesible, extensible, and ubiquitous no matter the device or operating system. Streaming data to other applications for decoupled, near real-time analysis and processing is an express goal of the system. The idea being that one large piece of the puzzle has been completed so future extensions and integrations (e.g. [MediaPipe](https://google.github.io/mediapipe/), [TensorFlow](https://www.tensorflow.org/), etc.) are wholly separate with data/video feed input from the web or locally existing as the only necessary connection that doesn't require another bespoke foundational piecee of recording software.  
+ChronoSense is a foundational piece of recording software built on webtech with the express goal of making recording accesible, extensible, and ubiquitous no matter the device or operating system. Streaming data to other applications for decoupled, near real-time analysis and processing is a primary function of the system. The idea being that one large piece of the puzzle has been completed so future extensions and integrations (e.g. [MediaPipe](https://google.github.io/mediapipe/), [TensorFlow](https://www.tensorflow.org/), etc.) are wholly separate with data/video feed input from the web or locally existing as the only necessary connection that doesn't require another bespoke foundational piece of recording software.  
 
-*ChronoSense pushes the starting line forward in any AV research or development project.*
+*ChronoSense pushes the starting line forward for any AV research or development project.*
 
 ## Run ChronoSense Electron App:
 1.   CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies & Electron.
