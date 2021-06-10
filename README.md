@@ -20,6 +20,8 @@ ChronoSense is a foundational piece of recording software built on webtech with 
 3.  Navigate to where you cloned the ChronoSense folder and run the command:  
     `npm install`
 
+3b. **(MacOS only)** Be sure `ffmpeg` is available in your PATH, we recommend using [Homebrew](https://brew.sh/) with `brew install ffmpeg`
+
 4.  Test to see if the application (as it is) can now run by going to the main ChronoSense folder and typing the following command to start the application:  
     `npm start`
 

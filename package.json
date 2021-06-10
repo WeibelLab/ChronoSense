@@ -12,7 +12,7 @@
 	"author": "Alexander Schonken",
 	"license": "ISC",
 	"dependencies": {
-		"download": "^7.1.0",
+		"download": "^6.2.5",
 		"electron": "^11.4.1",
 		"electron-packager": "^15.2.0",
 		"extract-zip": "2.0.1",
