@@ -5,22 +5,18 @@
 	"main": "main.js",
 	"scripts": {
 		"start": "electron --no-sandbox --use-gl=swiftshader .",
-		"install": ".\\node_modules\\.bin\\electron-rebuild.cmd",
+		"install": "node ./install_helper.js",
 		"postinstall": "node ./get_ffmpeg.js",
 		"package": "electron-packager ."
 	},
 	"author": "Alexander Schonken",
 	"license": "ISC",
 	"dependencies": {
-		"csv-write-stream": "^2.0.0",
 		"download": "^7.1.0",
 		"electron": "^11.4.1",
 		"electron-packager": "^15.2.0",
 		"extract-zip": "2.0.1",
-		"fs-extra": "^8.1.0",
-		"naudiodon": "^2.2.1",
-		"ts-ebml": "^2.0.2",
-		"wav-headers": "^1.0.1"
+		"fs-extra": "^8.1.0"
 	},
 	"devDependencies": {
 		"electron-rebuild": "^1.11.0"

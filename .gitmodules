@@ -1,3 +1,0 @@
-[submodule "kinect-azure"]
-	path = kinect-azure
-	url = https://github.com/WeibelLab/kinect-azure.git
