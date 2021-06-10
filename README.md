@@ -1,6 +1,6 @@
 # ChronoSense
 
-![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSenseV3 3/4/21")  
+![alt text](./readme_images/ChronoSenseScreenshot.webp "ChronoSense 3/4/21")  
 
 ## Overview  
 ChronoSense is a foundational piece of recording software built on webtech with the express goal of making recording accesible, extensible, and ubiquitous no matter the device or operating system. Streaming data to other applications for decoupled, near real-time analysis and processing is a primary function of the system. The idea being that one large piece of the puzzle has been completed so future extensions and integrations (e.g. [MediaPipe](https://google.github.io/mediapipe/), [TensorFlow](https://www.tensorflow.org/), etc.) are wholly separate with data/video feed input from the web or locally existing as the only necessary connection that doesn't require another bespoke foundational piece of recording software.  
@@ -13,14 +13,14 @@ ChronoSense is a foundational piece of recording software built on webtech with 
 
 ## Get Up and Running for Developing:
 1.  Clone the repository to a location of your choosing using the command:  
-    `git clone https://github.com/WeibelLab/ChronoSenseV3.git`
+    `git clone https://github.com/WeibelLab/ChronoSense.git`
 
 2.  Make sure you have [Node.js](https://nodejs.org/en/) installed (includes node and npm commands).
 
-3.  Navigate to where you cloned the ChronoSenseV3 folder and run the command:  
+3.  Navigate to where you cloned the ChronoSense folder and run the command:  
     `npm install`
 
-4.  Test to see if the application (as it is) can now run by going to the main ChronoSenseV3 folder and typing the following command to start the application:  
+4.  Test to see if the application (as it is) can now run by going to the main ChronoSense folder and typing the following command to start the application:  
     `npm start`
 
 5. **(Optional)** Go into the main.js file and uncomment `mainWindow.webContents.openDevTools();` if you would like to see the debugging window while running the application. 
