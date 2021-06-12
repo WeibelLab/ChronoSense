@@ -256,7 +256,6 @@ export class ScreenCaptureDevice {
 		let aVCheckContainer = document.createElement("div");
 		let videoCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
-		let audioVisualContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordInclusionContainer = document.createElement("div");
 
@@ -410,6 +409,12 @@ export class ScreenCaptureDevice {
 		videoContainer.appendChild(optionContainer); // Allows user to select screen/window to capture.
         videoContainer.appendChild(videoElement);
         videoContainer.appendChild(videoButtonsContainer);
+
+		// Autostart screen capture with all options selected
+		this.checkmarkVideoHelper(videoCheckContainer)
+		this.checkmarkAudioHelper(audioCheckContainer)
+		this.checkmarkRecordHelper(recordInclusionContainer)
+		this.displaySourceOptions();
 
 		return videoContainer;
 	}

@@ -309,7 +309,6 @@ export class Camera {
 		let aVCheckContainer = document.createElement("div");
 		let videoCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
-		let audioVisualContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordInclusionContainer = document.createElement("div");
 
@@ -454,6 +453,12 @@ export class Camera {
 		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(videoButtonsContainer);
 
+		// Autostart camera with all options selected
+		this.checkmarkVideoHelper(videoCheckContainer)
+		this.checkmarkAudioHelper(audioCheckContainer)
+		this.checkmarkRecordHelper(recordInclusionContainer)
+		this.startCameraStream();
+
 		return videoContainer;
 	}
 
@@ -515,14 +520,14 @@ export class Camera {
 	 */
 	 checkmarkRecordHelper(elementContainer) {
 		// Check record section with visible check mark and bool in class
-		if (this.#isOn && !this.#isRecordOptionChecked && !this.#isRecording) {
-			// Preview is on (live) and record isn't checked and not currently recording, so check
+		if (!this.#isRecordOptionChecked && !this.#isRecording) {
+			// Record isn't checked and not currently recording, so check
 			
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isOn && this.#isAudioChecked && !this.#isRecording) {
-			// Preview is off and record isn't checked, so check
+		} else if (this.#isRecordOptionChecked && !this.#isRecording) {
+			// Record is checked and not currently recording, so uncheck
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isRecordOptionChecked = false;
 
