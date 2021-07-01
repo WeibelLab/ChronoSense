@@ -483,7 +483,7 @@ export class ScreenCaptureDevice {
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isOn && this.#isAudioChecked && !this.#isRecording) {
+		} else if (this.#isOn && !this.#isRecording) {
 			// Preview is off and record isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isRecordOptionChecked = false;

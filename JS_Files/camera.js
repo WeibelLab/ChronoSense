@@ -172,7 +172,9 @@ export class Camera {
 
 		// Check for A/V selections
 		if (this.#isAudioChecked) {
-			constraints.audio = true;
+			constraints.audio = {
+				deviceId: this.#deviceId,
+			};
 
 		}
 		if (this.#isVideoChecked) {
@@ -590,9 +592,9 @@ export class Camera {
 		var cameraDevices = []
 		
 		return navigator.mediaDevices.enumerateDevices().then((devices) => {
-			//console.log(devices);
 			var uniqueInputDevices = [];
 			for (var i = 0; i < devices.length; i++) {
+				console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
 				if (devices[i].kind.localeCompare("videoinput") == 0) {
 					//Now search through added devices if it already exists
 					var matched = false;
