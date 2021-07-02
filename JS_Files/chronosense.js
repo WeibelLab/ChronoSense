@@ -322,6 +322,8 @@ async function onCameraSelection(targetElement, device) {
 
 		let outermostDiv = document.getElementById(device.getDeviceId());
 
+		device.clearUI();
+
 		while (outermostDiv.lastElementChild) {
 			outermostDiv.removeChild(outermostDiv.lastElementChild);
 		}

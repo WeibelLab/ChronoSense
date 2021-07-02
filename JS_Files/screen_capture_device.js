@@ -51,7 +51,7 @@ export class ScreenCaptureDevice {
 	 * Displays previews for all capture options and allows the user to click them to start streaming.
 	 *
 	 */
-	displaySourceOptions() {
+	displaySourceOptions(recordInclusionContainer) {
 		// Display source options on top of video element with thumbnail & name.
 		// User can click on one to select it and start streaming in video/audio.
 		
@@ -87,7 +87,7 @@ export class ScreenCaptureDevice {
 				newDiv.onclick = () => {
 					// Start streaming this particular source option
 					// ! Allow options later 
-					this.startCaptureStream(this.#videoElement, source);
+					this.startCaptureStream(this.#videoElement, source, recordInclusionContainer);
 					this.hideSourceOptions();
 				};
 
@@ -141,7 +141,7 @@ export class ScreenCaptureDevice {
 	 * @param {MediaStream} source - MediaStream object from a screen or window.
 	 * @return {bool} - Returns true if the capture stream started successfully, false if otherwise.
 	 */
-	async startCaptureStream(videoElement, source) {
+	async startCaptureStream(videoElement, source, recordInclusionContainer) {
         if (!this.#isOn) {
 			let constraints = {audio: false, video: false};
 
@@ -176,6 +176,7 @@ export class ScreenCaptureDevice {
 			}
 
 			this.#isOn = true;
+			this.checkmarkRecordHelper(recordInclusionContainer)
 			return true;
 		}
 	}
@@ -374,7 +375,7 @@ export class ScreenCaptureDevice {
 
 		onElement.innerText = "ON";
 		onElement.onclick = () => {
-			this.displaySourceOptions();
+			this.displaySourceOptions(recordInclusionContainer);
 		};
 		onElement.classList.add("general-btn");
 		onElement.style.height = "48%";
@@ -411,12 +412,18 @@ export class ScreenCaptureDevice {
         videoContainer.appendChild(videoButtonsContainer);
 
 		// Autostart screen capture with all options selected
-		this.checkmarkVideoHelper(videoCheckContainer)
-		this.checkmarkAudioHelper(audioCheckContainer)
-		this.checkmarkRecordHelper(recordInclusionContainer)
-		this.displaySourceOptions();
+		this.checkmarkVideoHelper(videoCheckContainer);
+		this.checkmarkAudioHelper(audioCheckContainer);
+		this.displaySourceOptions(recordInclusionContainer);
 
 		return videoContainer;
+	}
+
+	clearUI(){
+		this.#isVideoChecked = false;
+		this.#isAudioChecked = false;
+		this.#isRecordOptionChecked = false;
+		return;
 	}
 
 	/**
@@ -483,7 +490,7 @@ export class ScreenCaptureDevice {
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isOn && this.#isAudioChecked && !this.#isRecording) {
+		} else if (this.#isOn && !this.#isRecording) {
 			// Preview is off and record isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isRecordOptionChecked = false;
