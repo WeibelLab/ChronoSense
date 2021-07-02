@@ -456,12 +456,19 @@ export class Camera {
 		videoContainer.appendChild(videoButtonsContainer);
 
 		// Autostart camera with all options selected
-		this.checkmarkVideoHelper(videoCheckContainer)
-		this.checkmarkAudioHelper(audioCheckContainer)
-		this.checkmarkRecordHelper(recordInclusionContainer)
+		this.checkmarkVideoHelper(videoCheckContainer);
+		this.checkmarkAudioHelper(audioCheckContainer);
+		this.checkmarkRecordHelper(recordInclusionContainer);
 		this.startCameraStream();
 
 		return videoContainer;
+	}
+
+	clearUI(){
+		this.#isVideoChecked = false;
+		this.#isAudioChecked = false;
+		this.#isRecordOptionChecked = false;
+		return;
 	}
 
 	/**
