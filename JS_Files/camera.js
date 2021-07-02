@@ -149,8 +149,7 @@ export class Camera {
 	 * @return {bool} - true if success, false if fail
 	 */
 
-	async startCameraStream() {
-		let constraints = {audio: false, video: false};
+	async startCameraStream(constraints = {audio: false, video: false}) {
 
 		/* First check that the canvas and video elements are valid */
 		if (this.#videoElement == null || this.#canvasElement == null) {
@@ -170,20 +169,26 @@ export class Camera {
 			return false;
 		}
 
-		// Check for A/V selections
-		if (this.#isAudioChecked) {
-			constraints.audio = {
-				deviceId: this.#deviceId,
-			};
+		if (Object.is(constraints.audio, false) && Object.is(constraints.video, false)){
+			// Check for A/V selections
+			if (this.#isAudioChecked) {
+				constraints.audio = {
+					deviceId: this.#deviceId,
+				};
+
+			}
+			if (this.#isVideoChecked) {
+				constraints.video = {
+					deviceId: this.#deviceId,
+					width: { ideal: this.#videoResolutionWidth },
+					height: { ideal: this.#videoResolutionHeight }
+				};
+			}
+		}
+		else {
 
 		}
-		if (this.#isVideoChecked) {
-			constraints.video = {
-				deviceId: this.#deviceId,
-				width: { ideal: this.#videoResolutionWidth },
-				height: { ideal: this.#videoResolutionHeight }
-			};
-		}
+		
 
 		var stream = null;
 
@@ -245,6 +250,21 @@ export class Camera {
 		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
 
+	restartCameraStream(audioSelector) {
+		this.stopCameraStream();
+		let constraints = {video: false, audio: false};
+		constraints.video = {
+			deviceId: this.#deviceId,
+			width: { ideal: this.#videoResolutionWidth },
+			height: { ideal: this.#videoResolutionHeight }
+		};
+		const audioSource = audioSelector.value;
+		constraints.audio = {
+			deviceId: audioSource,
+		};
+		this.startCameraStream(constraints);
+	}
+
 	/**
 	 * Start recording current camera canvas feed
 	 *
@@ -289,6 +309,19 @@ export class Camera {
 		}
 	}
 
+	gotAudioDevices(deviceInfos, audioSelector) {
+		for (let i = 0; i !== deviceInfos.length; ++i) {
+		  const deviceInfo = deviceInfos[i];
+		  const option = document.createElement('option');
+		  option.value = deviceInfo.deviceId;
+		  if (deviceInfo.kind === 'audioinput') {
+			// console.log("hello "+option.value);
+			option.text = deviceInfo.label || `microphone ${audioSelector.length + 1}`;
+			audioSelector.appendChild(option);
+		  }
+		}
+	  }
+
 	// * Start Required Methods for a Chronosense Device Add-On
 	
 	/**
@@ -302,6 +335,8 @@ export class Camera {
 		//First create the necessary elements
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
+		let audioContainer = document.createElement("div");
+		let audioSelector = document.createElement("select");
 		let videoButtonsContainer = document.createElement("div");
 		let videoButtonsContainerSub = document.createElement("div");
 		let videoElement = document.createElement("video");
@@ -453,6 +488,17 @@ export class Camera {
 
 		//videoContainer.appendChild(canvasElement);
 		videoContainer.appendChild(videoElement);
+		videoContainer.appendChild(audioContainer);
+		audioContainer.appendChild(audioSelector);
+
+		navigator.mediaDevices.enumerateDevices().then(devices => {
+			this.gotAudioDevices(devices, audioSelector);
+		});
+
+		audioSelector.onchange = () => {
+			this.restartCameraStream(audioSelector);
+		}
+
 		videoContainer.appendChild(videoButtonsContainer);
 
 		// Autostart camera with all options selected
