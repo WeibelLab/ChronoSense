@@ -185,9 +185,6 @@ export class Camera {
 				};
 			}
 		}
-		else {
-
-		}
 		
 
 		var stream = null;
@@ -251,7 +248,9 @@ export class Camera {
 	}
 
 	restartCameraStream(audioSelector) {
-		this.stopCameraStream();
+		if(this.#isOn){
+			this.stopCameraStream();
+		}
 		let constraints = {video: false, audio: false};
 		constraints.video = {
 			deviceId: this.#deviceId,
@@ -454,7 +453,7 @@ export class Camera {
 
 		onElement.innerText = "ON";
 		onElement.onclick = () => {
-			this.startCameraStream();
+			this.restartCameraStream(audioSelector);
 		};
 		onElement.classList.add("general-btn");
 		onElement.style.height = "48%";
