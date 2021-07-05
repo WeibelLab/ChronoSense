@@ -181,61 +181,48 @@ export class Camera {
 	 * @return {bool} - true if success, false if fail
 	 */
 
-	async startCameraStream() {
-
-		/* First check that the canvas and video elements are valid */
-		if (this.#videoElement == null || this.#canvasElement == null) {
-			console.log(
-				"[camera.js:startCameraStream()] - ERROR: Video and canvas elements not set"
-			);
-			
-			return false;
-		}
-
-		/* Second check that this object has a deviceId set */
-		if (this.#deviceId === null) {
-			console.log(
-				"[camera.js:startCameraStream()] - ERROR: deviceId NOT set"
-			);
-			
-			return false;
-		}
-
-		if (Object.is(this.#constraints.audio, false) && Object.is(this.#constraints.video, false)){
-			// Check for A/V selections
-			if (this.#isAudioChecked) {
-				this.#constraints.audio = {
-					deviceId: this.#deviceId,
-				};
-
+	async startStream() {
+		if (!this.#isOn){
+			this.#isOn = true;
+			/* First check that the canvas and video elements are valid */
+			if (this.#videoElement == null || this.#canvasElement == null) {
+				console.log(
+					"[camera.js:startStream()] - ERROR: Video and canvas elements not set"
+				);
+				
+				return false;
 			}
-			if (this.#isVideoChecked) {
-				this.#constraints.video = {
-					deviceId: this.#deviceId,
-					width: { ideal: this.#videoResolutionWidth },
-					height: { ideal: this.#videoResolutionHeight }
-				};
+
+			/* Second check that this object has a deviceId set */
+			if (this.#deviceId === null) {
+				console.log(
+					"[camera.js:startStream()] - ERROR: deviceId NOT set"
+				);
+				
+				return false;
 			}
+
+			var stream = null;
+
+			/* Try to open and start the stream */
+			try {
+				stream = await navigator.mediaDevices.getUserMedia(this.#constraints);
+				if (this.#isVideoChecked){
+					this.#videoElement.srcObject = stream;
+				}
+				if (this.#isAudioChecked){
+					this.monitorAudio(stream);
+				}
+
+			} catch (err) {
+				console.log(
+					`camera.js:startStream()] - ERROR: ${err.message}`
+				);
+				return false;
+			}
+
+			return true;
 		}
-		
-
-		var stream = null;
-
-		/* Try to open cameras and start the stream */
-		try {
-			stream = await navigator.mediaDevices.getUserMedia(this.#constraints);
-			this.#videoElement.srcObject = stream;
-			this.monitorAudio(stream);
-
-		} catch (err) {
-			console.log(
-				`camera.js:startCameraStream()] - ERROR: ${err.message}`
-			);
-			return false;
-		}
-
-		this.#isOn = true;
-		return true;
 	}
 
 	/**
@@ -266,40 +253,38 @@ export class Camera {
 	 * Stop the camera feed.
 	 *
 	 */
-	stopCameraStream() {
-		this.#isOn = false;
-		if (
-			this.#videoElement !== null &&
-			this.#videoElement.srcObject !== null
-		) {
-			this.stopRecording();
-			this.#videoElement.srcObject.getTracks().forEach((track) => {
-				track.stop();
-			});
+	async stopStream() {
+		if (this.#isOn) {
+			this.#isOn = false;
+			if (
+				this.#videoElement !== null &&
+				this.#videoElement.srcObject !== null
+			) {
+				this.stopRecording();
+				this.#videoElement.srcObject.getTracks().forEach((track) => {
+					track.stop();
+				})
+			}
+			try {
+				if (this.#isAudioChecked){
+					await this.#audioContext.close();
+				}
+			} catch (err) {
+				console.log("#audioContext not open")
+			}
+			//console.log("[camera.js:stopStream()] - Camera has been stopped");
 		}
-		try {
-			this.#audioContext.close();
-		}
-		catch{
-			console.log("unable to close audioContext");
-		}
-		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
 
-	restartCameraStream() {
-		if(this.#isOn){
-			this.stopCameraStream();
+	changeAudioConstraints() {
+		if (this.#isOn) {
+			this.stopStream();
 		}
-		this.#constraints.video = {
-			deviceId: this.#deviceId,
-			width: { ideal: this.#videoResolutionWidth },
-			height: { ideal: this.#videoResolutionHeight }
-		};
 		const audioSource = this.#audioSelector.value;
 		this.#constraints.audio = {
 			deviceId: audioSource,
 		};
-		this.startCameraStream();
+		this.startStream();
 	}
 
 	/**
@@ -497,14 +482,14 @@ export class Camera {
 
 		onElement.innerText = "ON";
 		onElement.onclick = () => {
-			this.restartCameraStream();
+			this.startStream();
 		};
 		onElement.classList.add("general-btn");
 		onElement.style.height = "48%";
 
 		offElement.innerText = "OFF";
 		offElement.onclick = () => {
-			this.stopCameraStream();
+			this.stopStream();
 		};
 		offElement.classList.add("general-btn");
 		offElement.style.height = "48%";
@@ -541,7 +526,7 @@ export class Camera {
 		});
 
 		this.#audioSelector.onchange = () => {
-			this.restartCameraStream();
+			this.changeAudioConstraints();
 		}
 
 		videoContainer.appendChild(videoButtonsContainer);
@@ -551,7 +536,7 @@ export class Camera {
 		this.checkmarkAudioHelper(audioCheckContainer);
 		this.checkmarkRecordHelper(recordInclusionContainer);
 
-		this.startCameraStream();
+		this.startStream();
 
 		return videoContainer;
 	}
@@ -576,11 +561,17 @@ export class Camera {
 			
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isVideoChecked = true;
+			this.#constraints.video = {
+				deviceId: this.#deviceId,
+				width: { ideal: this.#videoResolutionWidth },
+				height: { ideal: this.#videoResolutionHeight }
+			};
 		
 		} else if (!this.#isOn && this.#isVideoChecked) {
 			// Preview is off and video isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isVideoChecked = false;
+			this.#constraints.video = false;
 
 		} else {
 			// Preview is on while changing, send error
@@ -601,11 +592,16 @@ export class Camera {
 			
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isAudioChecked = true;
+			const audioSource = this.#audioSelector.value;
+			this.#constraints.audio = {
+				deviceId: audioSource,
+			};
 		
 		} else if (!this.#isOn && this.#isAudioChecked) {
 			// Preview is off and audio isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isAudioChecked = false;
+			this.#constraints.audio = false;
 
 		} else {
 			// Preview is on while changing, send error
@@ -661,7 +657,7 @@ export class Camera {
 	 * Function used to stop the device from transmitting data/running
 	 */
 	 stop() {
-		this.stopCameraStream();
+		this.stopStream();
 	}
 
 	/**
