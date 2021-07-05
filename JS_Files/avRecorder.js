@@ -93,7 +93,7 @@ export class AVRecorder {
 	 * they are seekable.
 	 */ 
 	 
-	stopRecording() {
+	async stopRecording() {
 		this.#recorder.stop();
 
 		// ! Add call to EBML to turn 'raw' video files into proper, seekable video files

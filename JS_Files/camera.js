@@ -8,6 +8,10 @@ export class Camera {
 	#videoElement = null;
 	#canvasElement = null;
 	#canvasContext = null;
+	#audioSelector = null;
+	#audioMonitorUI = null;
+	#audioContext = null;
+	#constraints = {audio: false, video: false}
 	#isOn = false;
 
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
@@ -140,6 +144,34 @@ export class Camera {
 		}
 	}
 
+	monitorAudio(stream) {
+		var max_level_L = 0;
+		var old_level_L = 0;
+		var cnvs = this.#audioMonitorUI;
+		var cnvs_cntxt = cnvs.getContext("2d");
+		this.#audioContext = new AudioContext();
+		var microphone = this.#audioContext.createMediaStreamSource(stream);
+		var javascriptNode = this.#audioContext.createScriptProcessor(1024, 1, 1);
+		
+		microphone.connect(javascriptNode);
+		javascriptNode.connect(this.#audioContext.destination);
+		javascriptNode.onaudioprocess = function(event){
+			var inpt_L = event.inputBuffer.getChannelData(0);
+			var instant_L = 0.0;
+			var sum_L = 0.0;
+			for(var i = 0; i < inpt_L.length; ++i) {
+				sum_L += inpt_L[i] * inpt_L[i];
+			}
+			instant_L = Math.sqrt(sum_L / inpt_L.length);
+			max_level_L = Math.max(max_level_L, instant_L);				
+			instant_L = Math.max( instant_L, old_level_L -0.008 );
+			old_level_L = instant_L;
+			cnvs_cntxt.clearRect(0, 0, cnvs.width, cnvs.height);
+			cnvs_cntxt.fillStyle = '#00ff00';
+			cnvs_cntxt.fillRect(2,2,(cnvs.width-4)*(instant_L/max_level_L),(cnvs.height-4)); // x,y,w,h
+		}
+	}
+	
 	/**
 	 * Open up the camera device specified in the constructor and start streaming
 	 * input from the opened camera device to canvas (through Video element).
@@ -149,7 +181,7 @@ export class Camera {
 	 * @return {bool} - true if success, false if fail
 	 */
 
-	async startCameraStream(constraints = {audio: false, video: false}) {
+	async startCameraStream() {
 
 		/* First check that the canvas and video elements are valid */
 		if (this.#videoElement == null || this.#canvasElement == null) {
@@ -169,16 +201,16 @@ export class Camera {
 			return false;
 		}
 
-		if (Object.is(constraints.audio, false) && Object.is(constraints.video, false)){
+		if (Object.is(this.#constraints.audio, false) && Object.is(this.#constraints.video, false)){
 			// Check for A/V selections
 			if (this.#isAudioChecked) {
-				constraints.audio = {
+				this.#constraints.audio = {
 					deviceId: this.#deviceId,
 				};
 
 			}
 			if (this.#isVideoChecked) {
-				constraints.video = {
+				this.#constraints.video = {
 					deviceId: this.#deviceId,
 					width: { ideal: this.#videoResolutionWidth },
 					height: { ideal: this.#videoResolutionHeight }
@@ -191,8 +223,9 @@ export class Camera {
 
 		/* Try to open cameras and start the stream */
 		try {
-			stream = await navigator.mediaDevices.getUserMedia(constraints);
+			stream = await navigator.mediaDevices.getUserMedia(this.#constraints);
 			this.#videoElement.srcObject = stream;
+			this.monitorAudio(stream);
 
 		} catch (err) {
 			console.log(
@@ -244,24 +277,29 @@ export class Camera {
 				track.stop();
 			});
 		}
+		try {
+			this.#audioContext.close();
+		}
+		catch{
+			console.log("unable to close audioContext");
+		}
 		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
 	}
 
-	restartCameraStream(audioSelector) {
+	restartCameraStream() {
 		if(this.#isOn){
 			this.stopCameraStream();
 		}
-		let constraints = {video: false, audio: false};
-		constraints.video = {
+		this.#constraints.video = {
 			deviceId: this.#deviceId,
 			width: { ideal: this.#videoResolutionWidth },
 			height: { ideal: this.#videoResolutionHeight }
 		};
-		const audioSource = audioSelector.value;
-		constraints.audio = {
+		const audioSource = this.#audioSelector.value;
+		this.#constraints.audio = {
 			deviceId: audioSource,
 		};
-		this.startCameraStream(constraints);
+		this.startCameraStream();
 	}
 
 	/**
@@ -308,15 +346,15 @@ export class Camera {
 		}
 	}
 
-	gotAudioDevices(deviceInfos, audioSelector) {
+	gotAudioDevices(deviceInfos) {
 		for (let i = 0; i !== deviceInfos.length; ++i) {
 		  const deviceInfo = deviceInfos[i];
 		  const option = document.createElement('option');
 		  option.value = deviceInfo.deviceId;
 		  if (deviceInfo.kind === 'audioinput') {
 			// console.log("hello "+option.value);
-			option.text = deviceInfo.label || `microphone ${audioSelector.length + 1}`;
-			audioSelector.appendChild(option);
+			option.text = deviceInfo.label || `microphone ${this.#audioSelector.length + 1}`;
+			this.#audioSelector.appendChild(option);
 		  }
 		}
 	  }
@@ -335,7 +373,9 @@ export class Camera {
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
 		let audioContainer = document.createElement("div");
-		let audioSelector = document.createElement("select");
+		this.#audioSelector = document.createElement("select");
+		let audioMonitorContainer = document.createElement("div");
+		this.#audioMonitorUI = document.createElement("canvas");
 		let videoButtonsContainer = document.createElement("div");
 		let videoButtonsContainerSub = document.createElement("div");
 		let videoElement = document.createElement("video");
@@ -347,6 +387,10 @@ export class Camera {
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordInclusionContainer = document.createElement("div");
+
+		this.#audioMonitorUI.style.backgroundColor = "black";
+		this.#audioMonitorUI.width = "100";
+		this.#audioMonitorUI.height = "10";
 
 		//Set correct properties
 		//Video element is NOT inserted into DOM since it is used as translation to canvas
@@ -453,7 +497,7 @@ export class Camera {
 
 		onElement.innerText = "ON";
 		onElement.onclick = () => {
-			this.restartCameraStream(audioSelector);
+			this.restartCameraStream();
 		};
 		onElement.classList.add("general-btn");
 		onElement.style.height = "48%";
@@ -488,14 +532,16 @@ export class Camera {
 		//videoContainer.appendChild(canvasElement);
 		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(audioContainer);
-		audioContainer.appendChild(audioSelector);
+		audioContainer.appendChild(this.#audioSelector);
+		audioContainer.appendChild(audioMonitorContainer);
+		audioMonitorContainer.appendChild(this.#audioMonitorUI);
 
 		navigator.mediaDevices.enumerateDevices().then(devices => {
-			this.gotAudioDevices(devices, audioSelector);
+			this.gotAudioDevices(devices);
 		});
 
-		audioSelector.onchange = () => {
-			this.restartCameraStream(audioSelector);
+		this.#audioSelector.onchange = () => {
+			this.restartCameraStream();
 		}
 
 		videoContainer.appendChild(videoButtonsContainer);
@@ -504,6 +550,7 @@ export class Camera {
 		this.checkmarkVideoHelper(videoCheckContainer);
 		this.checkmarkAudioHelper(audioCheckContainer);
 		this.checkmarkRecordHelper(recordInclusionContainer);
+
 		this.startCameraStream();
 
 		return videoContainer;
@@ -613,7 +660,7 @@ export class Camera {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	stop() {
+	 stop() {
 		this.stopCameraStream();
 	}
 
@@ -646,7 +693,7 @@ export class Camera {
 		return navigator.mediaDevices.enumerateDevices().then((devices) => {
 			var uniqueInputDevices = [];
 			for (var i = 0; i < devices.length; i++) {
-				console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
+				// console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
 				if (devices[i].kind.localeCompare("videoinput") == 0) {
 					//Now search through added devices if it already exists
 					var matched = false;
