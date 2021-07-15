@@ -9,7 +9,7 @@ import { Camera } from "./camera.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
-import { startMediaPipe } from "./mediaPipe.js";
+import { startMediaPipe } from "./mediaPipeOld.js";
 
 var recordBtn = document.getElementById("record-all-btn");
 var recordDirInput = document.getElementById("recording-dir-path");
@@ -32,11 +32,11 @@ document.onreadystatechange = () => {
 		var currDate = new Date();
 		recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
 	
-		// ! Testing MediaPipe
-		var mediaBtn = document.getElementById("test-mediapipe-btn");
-		mediaBtn.addEventListener("click", () => {
-			startMediaPipe();
-		});
+		// // ! Testing MediaPipe
+		// var mediaBtn = document.getElementById("test-mediapipe-btn");
+		// mediaBtn.addEventListener("click", () => {
+		// 	startMediaPipe();
+		// });
 	}
 };
 
@@ -118,6 +118,9 @@ async function handleWindowControls() {
 		.getElementById("refresh-cameras-btn")
 		.addEventListener("click", () => {
 			refreshCameraDevices();
+			// Added
+			var display = document.getElementById("mediapipe-canvas");
+			display.style.display='none';
 		});
 } //End of handleWindowControls()
 
@@ -199,6 +202,11 @@ function refreshCameraDevices() {
 	// Clear out the Camera list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("camera-dropdown-content"));
+
+	// Added
+	clearPageContent(document.getElementById("mediapipe-canvas"))
+	clearDropdown(document.getElementById("mediapipe-canvas"))
+
 	setupDevices(); // Finds, creates, and adds all devices to dropdown
 }
 

@@ -1,4 +1,6 @@
 import { AVRecorder } from "./avRecorder.js";
+import { startMediaPipe } from "./mediaPipe.js";
+import { startHand } from "./hand.js";
 
 export class Camera {
 	#deviceId = null;
@@ -187,8 +189,27 @@ export class Camera {
 
 		/* Try to open cameras and start the stream */
 		try {
-			stream = await navigator.mediaDevices.getUserMedia(constraints);
-			this.#videoElement.srcObject = stream;
+			// stream = await navigator.mediaDevices.getUserMedia(constraints);
+			// this.#videoElement.srcObject = stream;
+			var testValue = document.getElementById("camera-video-feed-container");
+            testValue = testValue.childNodes[3].childNodes[1].childNodes[0];
+			testValue = testValue.options[testValue.selectedIndex].text
+			console.log(testValue);
+
+			if ( testValue == "Default") {
+				stream = await navigator.mediaDevices.getUserMedia(constraints);
+				this.#videoElement.srcObject = stream;					
+			}
+			else if (testValue == "Hollistic") {
+				var display = document.getElementById("mediapipe-canvas")
+				display.style.display='block';
+				startMediaPipe(testValue);
+			}
+			else {
+				var display = document.getElementById("mediapipe-canvas")
+				display.style.display='block';
+				startHand(testValue);
+			}
 
 		} catch (err) {
 			console.log(
@@ -238,6 +259,9 @@ export class Camera {
 			this.stopRecording();
 			this.#videoElement.srcObject.getTracks().forEach((track) => {
 				track.stop();
+				// Added
+				var display = document.getElementById("mediapipe-canvas");
+				display.style.display='none';
 			});
 		}
 		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");
@@ -300,6 +324,11 @@ export class Camera {
 		//First create the necessary elements
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
+
+		// Added
+		let testContainer = document.createElement("div");
+		let testSelector = document.createElement("select");
+
 		let videoButtonsContainer = document.createElement("div");
 		let videoButtonsContainerSub = document.createElement("div");
 		let videoElement = document.createElement("video");
@@ -452,6 +481,20 @@ export class Camera {
 
 		//videoContainer.appendChild(canvasElement);
 		videoContainer.appendChild(videoElement);
+
+		//Added
+		videoContainer.appendChild(testContainer);
+		testContainer.appendChild(testSelector);
+		const testOption = document.createElement('option');
+		testOption.text = "Default";
+		testSelector.append(testOption);
+		const testOption2 = document.createElement('option');
+		testOption2.text = "Hollistic";
+		testSelector.append(testOption2);
+		const testOption3 = document.createElement('option');
+		testOption3.text = "Hand";
+		testSelector.append(testOption3);
+
 		videoContainer.appendChild(videoButtonsContainer);
 
 		return videoContainer;

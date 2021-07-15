@@ -250,3 +250,7 @@ body {
 	background-color: var(--primaryDarkContrastColor);
 	color: var(--primaryLightContrastColor);
 }
+
+#mediapipe-canvas {
+	display:none;
+}
