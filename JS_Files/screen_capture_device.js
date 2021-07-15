@@ -21,7 +21,6 @@ export class ScreenCaptureDevice {
 	#isRecording = false;
 	#isOn = false;
 	#isAudioChecked = false;
-	#isVideoChecked = false;
 	
 	/**
 	 * Constructor for a ScreenCaptureDevice object that captures stream of video/audio from user screens & windows.
@@ -145,6 +144,17 @@ export class ScreenCaptureDevice {
         if (!this.#isOn) {
 			let constraints = {audio: false, video: false};
 
+			constraints.video = {
+				mandatory: {
+					chromeMediaSource: 'desktop',
+					chromeMediaSourceId: source.id,
+					minWidth: 1280,
+					maxWidth: this.#videoResolutionWidth,
+					minHeight: 720,
+					maxHeight: this.#videoResolutionHeight
+				}
+			};
+
 			if (this.#isAudioChecked) {
 				constraints.audio = {
 					mandatory: {
@@ -153,30 +163,17 @@ export class ScreenCaptureDevice {
 				};
 	
 			}
-			if (this.#isVideoChecked) {
-				constraints.video = {
-					mandatory: {
-						chromeMediaSource: 'desktop',
-						chromeMediaSourceId: source.id,
-						minWidth: 1280,
-						maxWidth: this.#videoResolutionWidth,
-						minHeight: 720,
-						maxHeight: this.#videoResolutionHeight
-					}
-				};
-			}
 
 			try {
 				var stream = await navigator.mediaDevices.getUserMedia(constraints)
-				videoElement.srcObject = stream;
+				this.#videoElement.srcObject = stream;
 	
 			} catch (error) {
-				console.log(error);
+				console.log("STARTCAPTURE:"+error);
 				return false;
 			}
 
 			this.#isOn = true;
-			this.checkmarkRecordHelper(recordInclusionContainer)
 			return true;
 		}
 	}
@@ -255,7 +252,6 @@ export class ScreenCaptureDevice {
 		let onElement = document.createElement("button");
 		let offElement = document.createElement("button");
 		let aVCheckContainer = document.createElement("div");
-		let videoCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordInclusionContainer = document.createElement("div");
@@ -326,7 +322,6 @@ export class ScreenCaptureDevice {
 
 		// Build aVCheckContainer 
 		aVCheckContainer.classList.add("av-check-container");
-		videoCheckContainer.classList.add("av-inner-container");
 		audioCheckContainer.classList.add("av-inner-container");
 
 		var checkImgVideo = document.createElement("img");
@@ -341,9 +336,6 @@ export class ScreenCaptureDevice {
 		videoNameDiv.innerText = "Video:";
 		videoNameDiv.classList.add("general-txt");
 		videoNameDiv.classList.add("av-label");
-		let videoCheckBoxContainer = document.createElement("div");
-		videoCheckBoxContainer.classList.add("av-checkbox");
-		videoCheckBoxContainer.appendChild(checkImgVideo);
 
 		let audioNameDiv = document.createElement("div");
 		audioNameDiv.innerText = "Audio:";
@@ -353,21 +345,14 @@ export class ScreenCaptureDevice {
 		audioCheckBoxContainer.classList.add("av-checkbox");
 		audioCheckBoxContainer.appendChild(checkImgAudio);
 
-		videoCheckContainer.addEventListener("click", (evt) => {
-			this.checkmarkVideoHelper(evt.currentTarget);
-		});
-
 		audioCheckContainer.addEventListener("click", (evt) => {
 			this.checkmarkAudioHelper(evt.currentTarget);
 		});
 
 		// ! Final step for aVCheckContainer - add a decibel meter below audio option for live monitoring.
 
-		videoCheckContainer.appendChild(videoNameDiv);
-		videoCheckContainer.appendChild(videoCheckBoxContainer);
 		audioCheckContainer.appendChild(audioNameDiv);
 		audioCheckContainer.appendChild(audioCheckBoxContainer);
-		aVCheckContainer.appendChild(videoCheckContainer);
 		aVCheckContainer.appendChild(audioCheckContainer);
 
 		// Build on/off buttons
@@ -412,43 +397,17 @@ export class ScreenCaptureDevice {
         videoContainer.appendChild(videoButtonsContainer);
 
 		// Autostart screen capture with all options selected
-		this.checkmarkVideoHelper(videoCheckContainer);
 		this.checkmarkAudioHelper(audioCheckContainer);
+		this.checkmarkRecordHelper(recordInclusionContainer);
 		this.displaySourceOptions(recordInclusionContainer);
 
 		return videoContainer;
 	}
 
 	clearUI(){
-		this.#isVideoChecked = false;
 		this.#isAudioChecked = false;
 		this.#isRecordOptionChecked = false;
 		return;
-	}
-
-	/**
-	 * Reveal/hide target's checkmark img, set boolean value of video to true.  
-	 * 
-	 * @param {HTML Div Element} elementContainer - Container of multiple child elements where checkmark image is
-	 * 												held as childNode[1]->childNode[0] from elementContainer.
-	 */
-	 checkmarkVideoHelper(elementContainer) {
-		// Check video section with visible check mark and bool in class
-		if (!this.#isOn && !this.#isVideoChecked) {
-			// Preview is off and video isn't checked, so check
-			
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
-			this.#isVideoChecked = true;
-		
-		} else if (!this.#isOn && this.#isVideoChecked) {
-			// Preview is off and video isn't checked, so check
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
-			this.#isVideoChecked = false;
-
-		} else {
-			// Preview is on while changing, send error
-			console.log("Error: Can't change sources when stream is live.");
-		}
 	}
 
 	/**
@@ -484,13 +443,13 @@ export class ScreenCaptureDevice {
 	 */
 	 checkmarkRecordHelper(elementContainer) {
 		// Check record section with visible check mark and bool in class
-		if (this.#isOn && !this.#isRecordOptionChecked && !this.#isRecording) {
+		if (!this.#isRecordOptionChecked && !this.#isRecording) {
 			// Preview is on (live) and record isn't checked and not currently recording, so check
 			
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
 			this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isOn && !this.#isRecording) {
+		} else if (this.#isRecordOptionChecked && !this.#isRecording) {
 			// Preview is off and record isn't checked, so check
 			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
 			this.#isRecordOptionChecked = false;

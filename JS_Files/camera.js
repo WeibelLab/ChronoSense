@@ -249,6 +249,17 @@ export class Camera {
 		}
 	}
 
+	async closeAudioContext(){
+		try{
+			await this.#audioContext.close();
+		} catch (err) {
+			console.log("#audioContext not open")
+		}
+		var cnvs = this.#audioMonitorUI;
+		var cnvs_cntxt = cnvs.getContext("2d");
+		cnvs_cntxt.clearRect(0, 0, cnvs.width, cnvs.height);
+	}
+
 	/**
 	 * Stop the camera feed.
 	 *
@@ -265,12 +276,8 @@ export class Camera {
 					track.stop();
 				})
 			}
-			try {
-				if (this.#isAudioChecked){
-					await this.#audioContext.close();
-				}
-			} catch (err) {
-				console.log("#audioContext not open")
+			if (this.#isAudioChecked){
+				this.closeAudioContext();
 			}
 			//console.log("[camera.js:stopStream()] - Camera has been stopped");
 		}
