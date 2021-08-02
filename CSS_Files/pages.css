@@ -167,6 +167,13 @@
 
 }
 
+/* disabled styling */
+#record-all-btn:disabled {
+	background-color: #22262c;
+	opacity: 30%;
+	cursor: not-allowed;
+  }
+
 .dir-container {
 	display: flex;
 	flex-direction: row;
@@ -513,4 +520,8 @@
 
 #mirrorlabel3 {
 	display: inline;
+}
+
+label {
+	float:left;
 }
