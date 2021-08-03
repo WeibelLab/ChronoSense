@@ -21,7 +21,7 @@ export class ScreenCaptureDevice {
 	#isRecording = false;
 	#isOn = false;
 	#isAudioChecked = false;
-	
+
 	/**
 	 * Constructor for a ScreenCaptureDevice object that captures stream of video/audio from user screens & windows.
 	 *
@@ -212,6 +212,10 @@ export class ScreenCaptureDevice {
 			this.#isRecording = true;
 			// Disable the record filename input when recording
 			this.#fileNameInputElement.disabled = true;
+			//Disables record/video/audio checkbox option when recording starts
+			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+    			elem.disabled = true;
+			});
 		} else {
 			this.stopRecording();
 		}
@@ -227,6 +231,10 @@ export class ScreenCaptureDevice {
 			this.#isRecording = false;
 			// Reenable recording file name after finished recording
 			this.#fileNameInputElement.disabled = false;
+			//Enables record/video/audio checkbox option when recording stops
+			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+    			elem.disabled = false;
+			});
 		}
 	}
 
@@ -279,24 +287,20 @@ export class ScreenCaptureDevice {
 		// Build recordInclusionContainer
 		recordInclusionContainer.classList.add("record-inclusion-container");
 
-		let recordTextContainer = document.createElement("div");
-		recordTextContainer.classList.add("general-txt");
-		recordTextContainer.innerText = "Record:";
-
-		let recordCheckbox = document.createElement("div");
-		recordCheckbox.classList.add("av-checkbox");
-
-		var checkImgRecord = document.createElement("img");
-		checkImgRecord.src = "../images/checkmarkWhite.webp";
-		checkImgRecord.classList.add("camera-buttons-check")
+		let recordCheckbox = document.createElement("input");
+		recordCheckbox.type = 'checkbox';
+		recordCheckbox.id = 'record-checkbox-test';
+		recordCheckbox.checked = true;
+		var recordLabel = document.createElement('label');
+		recordLabel.htmlFor = 'record-checkbox-test';
+		recordLabel.appendChild(document.createTextNode('Record: '));
 
 		recordInclusionContainer.addEventListener("click", (evt) => {
-			this.checkmarkRecordHelper(evt.currentTarget);
+			this.checkmarkHelper('Record');
 		});
 
-
-		recordCheckbox.appendChild(checkImgRecord);
-		recordInclusionContainer.appendChild(recordTextContainer);
+		// Added
+		recordInclusionContainer.appendChild(recordLabel);
 		recordInclusionContainer.appendChild(recordCheckbox);
 
 		// Build fileNameContainer
@@ -324,36 +328,32 @@ export class ScreenCaptureDevice {
 		aVCheckContainer.classList.add("av-check-container");
 		audioCheckContainer.classList.add("av-inner-container");
 
-		var checkImgVideo = document.createElement("img");
-		var checkImgAudio = document.createElement("img");
-		checkImgVideo.src = "../images/checkmarkWhite.webp";
-		checkImgVideo.classList.add("camera-buttons-check")
 
-		checkImgAudio.src = "../images/checkmarkWhite.webp";
-		checkImgAudio.classList.add("camera-buttons-check")
+		let audioCheckBoxContainer = document.createElement("input");
 
-		let videoNameDiv = document.createElement("div");
-		videoNameDiv.innerText = "Video:";
-		videoNameDiv.classList.add("general-txt");
-		videoNameDiv.classList.add("av-label");
+		audioCheckBoxContainer.type = 'checkbox';
+		audioCheckBoxContainer.id = 'audio-checkbox-test';
+		audioCheckBoxContainer.checked = true;
+		var audioLabel = document.createElement('label');
+		audioLabel.htmlFor = 'audio-checkbox-test';
+		audioLabel.appendChild(document.createTextNode('Audio: '));
 
-		let audioNameDiv = document.createElement("div");
-		audioNameDiv.innerText = "Audio:";
-		audioNameDiv.classList.add("general-txt");
-		audioNameDiv.classList.add("av-label");
-		let audioCheckBoxContainer = document.createElement("div");
-		audioCheckBoxContainer.classList.add("av-checkbox");
-		audioCheckBoxContainer.appendChild(checkImgAudio);
+		recordCheckbox.classList.add('checkbox-disabled');
+		audioCheckBoxContainer.classList.add('checkbox-disabled');
+
 
 		audioCheckContainer.addEventListener("click", (evt) => {
-			this.checkmarkAudioHelper(evt.currentTarget);
+			this.checkmarkHelper('Audio');
 		});
 
 		// ! Final step for aVCheckContainer - add a decibel meter below audio option for live monitoring.
-
-		audioCheckContainer.appendChild(audioNameDiv);
+		
+		//Added
+		audioCheckContainer.append(audioLabel);
 		audioCheckContainer.appendChild(audioCheckBoxContainer);
+		
 		aVCheckContainer.appendChild(audioCheckContainer);
+		// End Added
 
 		// Build on/off buttons
 		videoButtonsContainerSub.classList.add("on-off-btn-container");
@@ -397,8 +397,10 @@ export class ScreenCaptureDevice {
         videoContainer.appendChild(videoButtonsContainer);
 
 		// Autostart screen capture with all options selected
-		this.checkmarkAudioHelper(audioCheckContainer);
-		this.checkmarkRecordHelper(recordInclusionContainer);
+		// this.checkmarkAudioHelper(audioCheckContainer);
+		// this.checkmarkRecordHelper(recordInclusionContainer);
+		this.checkmarkHelper('Audio');
+		this.checkmarkHelper('Record');
 		this.displaySourceOptions(recordInclusionContainer);
 
 		return videoContainer;
@@ -411,52 +413,37 @@ export class ScreenCaptureDevice {
 	}
 
 	/**
-	 * Reveal/hide target's checkmark img, set boolean value of audio to true.  
+	 * Changes boolean value of record/audio/video option to be true or false
 	 * 
-	 * @param {HTML Div Element} elementContainer - Container of multiple child elements where checkmark image is
-	 * 												held as childNode[1]->childNode[0] from elementContainer.
+	 * @param {String} elementOption - String value of option that needs to was checked
 	 */
-	 checkmarkAudioHelper(elementContainer) {
-		// Check audio section with visible check mark and bool in class
-		if (!this.#isOn && !this.#isAudioChecked) {
-			// Preview is off and audio isn't checked, so check
-			
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
-			this.#isAudioChecked = true;
-		
-		} else if (!this.#isOn && this.#isAudioChecked) {
-			// Preview is off and audio isn't checked, so check
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
-			this.#isAudioChecked = false;
-
-		} else {
-			// Preview is on while changing, send error
-			console.log("Error: Can't change sources when stream is live.");
+	 checkmarkHelper(elementOption) {
+		if (elementOption == 'Audio') {
+			if (/*!this.#isOn && */!this.#isAudioChecked) {
+				// Preview is off and audio isn't checked, so check
+				this.#isAudioChecked = true;	
+			} else if (/*!this.#isOn && */this.#isAudioChecked) {
+				// Preview is off and audio isn't checked, so check
+				this.#isAudioChecked = false;
+	
+			} else {
+				// Preview is on while changing, send error
+				console.log("Error: Can't change sources when stream is live.");
+			}
 		}
-	}
-
-	/**
-	 * Reveal/hide target's checkmark img, set boolean value of isRecordOptionChecked to true.  
-	 * 
-	 * @param {HTML Div Element} elementContainer - Container of multiple child elements where checkmark image is
-	 * 												held as childNode[1]->childNode[0] from elementContainer.
-	 */
-	 checkmarkRecordHelper(elementContainer) {
-		// Check record section with visible check mark and bool in class
-		if (!this.#isRecordOptionChecked && !this.#isRecording) {
-			// Preview is on (live) and record isn't checked and not currently recording, so check
-			
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "visible";
-			this.#isRecordOptionChecked = true;
+		else if (elementOption == 'Record') {
+			// Check record section with visible check mark and bool in class
+			if (!this.#isRecordOptionChecked && !this.#isRecording) {
+				// Record isn't checked and not currently recording, so check
+				this.#isRecordOptionChecked = true;
 		
-		} else if (this.#isRecordOptionChecked && !this.#isRecording) {
-			// Preview is off and record isn't checked, so check
-			elementContainer.childNodes[1].childNodes[0].style.visibility = "hidden";
-			this.#isRecordOptionChecked = false;
-
-		} else {
-			// Preview is off while changing or currently recording this feed; send error
-			console.log("Error: Can't enable recording without live feed or while recording.");
+			} else if (this.#isRecordOptionChecked && !this.#isRecording) {
+				// Record is checked and not currently recording, so uncheck
+				this.#isRecordOptionChecked = false;
+			} else {
+				// Preview is off while changing or currently recording this feed; send error
+				console.log("Error: Can't enable recording without live feed or while recording.");
+			}
 		}
 	}
 
