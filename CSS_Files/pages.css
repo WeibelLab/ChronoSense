@@ -262,7 +262,7 @@
 	visibility: hidden;
 }
 
-.record-inclusion-container {
+.record-check-container {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
