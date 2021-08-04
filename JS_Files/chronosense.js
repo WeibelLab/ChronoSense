@@ -225,6 +225,8 @@ function clearContainer(container) {
 	}
 }
 
+var isCameraOpen = false;
+
 /**
  * Opens or closes Camera dropdown menus to account for clicking outside options to close & open seamlessly.
  * ! Maybe simplify if possible with HTML IDs
@@ -232,7 +234,6 @@ function clearContainer(container) {
  * @param {MouseEvent} evt - Mouse click event on DOM
  */
 function openCloseCameraDropMenus(evt) {
-	var isCameraOpen = false;
 
 	const cameraList = document.getElementById("camera-dropdown");
 
@@ -259,8 +260,8 @@ function openCloseCameraDropMenus(evt) {
 	} while (clickedElement);
 	//Clicked outside of Camera devices list
 	document.getElementById("camera-dropdown-content").style.display = "none";
-
 	isCameraOpen = false;
+
 } //End of camera switch
 
 /**

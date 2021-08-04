@@ -277,6 +277,10 @@ export class Camera {
 
 	}
 
+	updateRecordStatus() {
+		this.checkboxConstraintHelper();
+	}
+
 	updateConstraints() {
 		this.stopStream();
 		this.checkboxConstraintHelper();
@@ -420,7 +424,7 @@ export class Camera {
 		this.#recordCheckbox.checked = true;
 		var recordLabel = document.createElement('label');
 		recordLabel.htmlFor = this.#recordCheckbox;
-		recordLabel.appendChild(document.createTextNode('Record: '));
+		recordLabel.appendChild(document.createTextNode('Record:  '));
 
 		recordCheckContainer.appendChild(recordLabel);
 		recordCheckContainer.appendChild(this.#recordCheckbox);
@@ -445,13 +449,17 @@ export class Camera {
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
+		this.#recordCheckbox.classList.add('flipswitch');
+		this.#videoCheckbox.classList.add('flipswitch');
+		this.#audioCheckbox.classList.add('flipswitch');
+
 		this.#recordCheckbox.classList.add('checkbox-disabled');
 		this.#videoCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 		//this.#audioSelector.classList.add('checkbox-disabled')
 
 		recordCheckContainer.addEventListener("click", () => {
-			this.updateConstraints();
+			this.updateRecordStatus();
 		});
 		
 		videoCheckContainer.addEventListener("click", () => {
@@ -565,8 +573,12 @@ export class Camera {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	 stop() {
+	stop() {
 		this.stopStream();
+	}
+
+	clearUI(){
+		return false;
 	}
 
 	/**
