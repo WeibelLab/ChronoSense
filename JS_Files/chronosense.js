@@ -82,7 +82,7 @@ async function handleWindowControls() {
 	// Attach record button at the top of the page to a recording method to start recording 
 	// all selected devices.
 	recordBtn.addEventListener("click", () => {
-		recordAllSelectedDevices();
+		recordButtonClick();
 	});
 
 	// Dialog popup button to select directory folder
@@ -112,6 +112,11 @@ async function handleWindowControls() {
 			refreshCameraDevices();
 		});
 } //End of handleWindowControls()
+
+
+async function recordButtonClick() {
+	await recordAllSelectedDevices();
+}
 
 /**
  * Searches for all devices connected on startup for organizing and initializing.
@@ -220,6 +225,8 @@ function clearContainer(container) {
 	}
 }
 
+var isCameraOpen = false;
+
 /**
  * Opens or closes Camera dropdown menus to account for clicking outside options to close & open seamlessly.
  * ! Maybe simplify if possible with HTML IDs
@@ -227,7 +234,6 @@ function clearContainer(container) {
  * @param {MouseEvent} evt - Mouse click event on DOM
  */
 function openCloseCameraDropMenus(evt) {
-	var isCameraOpen = false;
 
 	const cameraList = document.getElementById("camera-dropdown");
 
@@ -254,8 +260,8 @@ function openCloseCameraDropMenus(evt) {
 	} while (clickedElement);
 	//Clicked outside of Camera devices list
 	document.getElementById("camera-dropdown-content").style.display = "none";
-
 	isCameraOpen = false;
+
 } //End of camera switch
 
 /**
