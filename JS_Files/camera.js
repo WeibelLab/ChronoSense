@@ -201,13 +201,9 @@ export class Camera {
 				this.#videoElement.srcObject = stream;					
 			}
 			else if (testValue == "Hollistic") {
-				var display = document.getElementById("mediapipe-canvas")
-				display.style.display='block';
-				startMediaPipe(testValue);
+				startMediaPipe(this);
 			}
 			else {
-				var display = document.getElementById("mediapipe-canvas")
-				display.style.display='block';
 				startHand(testValue);
 			}
 
@@ -259,9 +255,11 @@ export class Camera {
 			this.stopRecording();
 			this.#videoElement.srcObject.getTracks().forEach((track) => {
 				track.stop();
-				// Added
-				var display = document.getElementById("mediapipe-canvas");
-				display.style.display='none';
+				// Turning off mediapipe canvas when stream is off
+				var deviceElement = document.getElementById(this.#deviceId);
+				if (deviceElement.lastChild.id == 'mediapipe-canvas') {
+					deviceElement.removeChild(deviceElement.lastChild);
+				}
 			});
 		}
 		//console.log("[camera.js:stopCameraStream()] - Camera has been stopped");

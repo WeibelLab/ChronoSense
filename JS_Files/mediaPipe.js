@@ -1,10 +1,7 @@
+import * as plugin from "./plugin.js"
 export function startMediaPipe(testValue) {
-
-  var videoElement = document.getElementById("camera-video-feed-container");
-  videoElement = videoElement.childNodes[3].childNodes[0];
-  const canvasElement = document.getElementById("mediapipe-canvas");
-  // const canvasCtx = canvasElement.getContext('2d');
-  //const canvasElement = canvasEle;
+  var videoElement = plugin.get_stream(testValue);
+  const canvasElement = create_UI(testValue);
   const canvasCtx = canvasElement.getContext('2d');
   
   function onResults(results) {
@@ -48,4 +45,19 @@ export function startMediaPipe(testValue) {
     height: 720
   });
   camera.start();
+}
+
+function create_UI(testValue) {
+  var deviceId = plugin.get_device(testValue);
+  var deviceElement = document.getElementById(deviceId);
+  // Checking whether or not device created a mediapipe canvas
+  if (deviceElement.lastChild.id != 'mediapipe-canvas') {
+    let mediapipeContainer = document.createElement('canvas');
+    mediapipeContainer.classList.add("camera-canvas");
+    mediapipeContainer.id = 'mediapipe-canvas';
+  
+    deviceElement.append(mediapipeContainer);
+  }
+  // Returns a canvas to output
+  return document.getElementById('mediapipe-canvas');
 }
