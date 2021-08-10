@@ -201,10 +201,10 @@ export class Camera {
 				this.#videoElement.srcObject = stream;					
 			}
 			else if (testValue == "Hollistic") {
-				startMediaPipe(this);
+				startMediaPipe(this,'Hollistic');
 			}
 			else {
-				startHand(testValue);
+				startMediaPipe(this,'Hand');
 			}
 
 		} catch (err) {
