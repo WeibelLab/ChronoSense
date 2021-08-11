@@ -7,7 +7,6 @@ var isWin = process.platform === "win32";
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
 
-
 export class AVRecorder {
 
 	#mediaStream = null;
@@ -85,7 +84,6 @@ export class AVRecorder {
 	 
 	startRecording() {
 		this.#recorder.start(1000); //timeslice every 500ms
-
 	}
 
 	/**
@@ -93,7 +91,7 @@ export class AVRecorder {
 	 * they are seekable.
 	 */ 
 	 
-	async stopRecording() {
+	stopRecording() {
 		this.#recorder.stop();
 
 		// ! Add call to EBML to turn 'raw' video files into proper, seekable video files
@@ -104,8 +102,7 @@ export class AVRecorder {
 	 * Call FFMPEG to make video scrollable. Ingests the .webm file and turns it into a seekable
 	 * .mp4 file outside of the 'raw' directory.
 	 */
-	async postProcessVideoFile() {
-
+	postProcessVideoFile() {
 		if (!isWin) {
 			spawn("ffmpeg", [
 				"-i",
@@ -120,7 +117,6 @@ export class AVRecorder {
 				this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
 			], {detached: true});
 		}
-
 	}
 
 } //End of AVRecorder Class

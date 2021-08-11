@@ -6,7 +6,6 @@ export class ScreenCaptureDevice {
     #label = "Screen Capture";
     #deviceId = "ScreenCaptureModule";
 	#videoElement = null;
-	#videoContainer = null;
 	#optionContainer = null;
 	#sources = []
 	#recorder = null;
@@ -15,7 +14,7 @@ export class ScreenCaptureDevice {
 	#recordCheckbox = null;
 	#videoCheckbox = null;
 	#audioCheckbox = null;
-
+	#constraints = {audio: false, video: false}
 
 	#videoResolutionWidth = 1280; // Default: 1280
 	#videoResolutionHeight = 720; // Default: 720
@@ -89,7 +88,23 @@ export class ScreenCaptureDevice {
 				newDiv.onclick = () => {
 					// Start streaming this particular source option
 					// ! Allow options later 
-					this.startCaptureStream(this.#videoElement, source, recordCheckContainer);
+					this.#constraints.video = {
+						mandatory: {
+							chromeMediaSource: 'desktop',
+							chromeMediaSourceId: source.id,
+							minWidth: 1280,
+							maxWidth: this.#videoResolutionWidth,
+							minHeight: 720,
+							maxHeight: this.#videoResolutionHeight
+						}
+					};
+		
+					this.#constraints.audio = {
+						mandatory: {
+							chromeMediaSource: 'desktop'
+						}
+					};
+					this.startCaptureStream();
 					this.hideSourceOptions();
 				};
 
@@ -143,31 +158,10 @@ export class ScreenCaptureDevice {
 	 * @param {MediaStream} source - MediaStream object from a screen or window.
 	 * @return {bool} - Returns true if the capture stream started successfully, false if otherwise.
 	 */
-	async startCaptureStream(videoElement, source, recordCheckContainer) {
+	async startCaptureStream() {
         if (this.#stream == null ) {
-			let constraints = {audio: false, video: false};
-
-			constraints.video = {
-				mandatory: {
-					chromeMediaSource: 'desktop',
-					chromeMediaSourceId: source.id,
-					minWidth: 1280,
-					maxWidth: this.#videoResolutionWidth,
-					minHeight: 720,
-					maxHeight: this.#videoResolutionHeight
-				}
-			};
-
-			if (this.#audioCheckbox.checked) {
-				constraints.audio = {
-					mandatory: {
-						chromeMediaSource: 'desktop'
-					}
-				};
-			}
-
 			try {
-				this.#stream = await navigator.mediaDevices.getUserMedia(constraints)
+				this.#stream = await navigator.mediaDevices.getUserMedia(this.#constraints)
 				this.#videoElement.srcObject = this.#stream;
 			} catch (error) {
 				console.log("STARTCAPTURE:"+error);
@@ -195,23 +189,9 @@ export class ScreenCaptureDevice {
 			});
 			this.#stream = null;
 		}
-		// Ask what this is
-		// if (this.#audioCheckbox.checked) {
-		// 	await this.closeAudioContext();
-		// }
 		console.log("screen_capture_device.js:stopStream()] - Camera has been stopped");
 
 	}
-
-	// updateRecordStatus() {
-	// 	this.checkboxConstraintHelper();
-	// }
-
-	// updateConstraints() {
-	// 	//this.stopCaptureStream();
-	// 	this.checkboxConstraintHelper();
-	// 	//this.startCaptureStream();
-	// }
 
 	/**
 	 * Starts recording video/audio from the currently streaming source.
@@ -267,7 +247,6 @@ export class ScreenCaptureDevice {
 		// * video, canvas, buttons, video option menus, etc.
 		let videoContainer = document.createElement("div");
 		videoContainer.style.position = "relative";
-		this.#videoContainer = videoContainer;
 		let videoButtonsContainer = document.createElement("div");
 		let videoElement = document.createElement("video");
 		this.#videoElement = videoElement;
@@ -362,26 +341,32 @@ export class ScreenCaptureDevice {
 		this.#videoCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 
-		// recordCheckContainer.addEventListener("click", () => {
-		// 	// Don't think I need a helper b/c screen capture only updates true and false
-		// 	//this.updateRecordStatus();
-		// 	this.#recordStatus = this.#recordCheckbox.checked;
-		// });
 
 		videoCheckContainer.addEventListener("click", () => {
 			if(this.#videoCheckbox.checked) {
-				console.log(this.#videoCheckbox.checked)
-				this.displaySourceOptions(recordCheckContainer);
-			} else {
-				console.log(this.#videoCheckbox.checked)
 				this.stopCaptureStream();
+				this.displaySourceOptions(recordCheckContainer);
+				this.#audioCheckbox.checked = true;
+			} else {
+				this.stopCaptureStream();
+				this.#audioCheckbox.checked = false;
+				// can't record audio without screen capture so stop capture
 			}
 		});
 
-		// audioCheckContainer.addEventListener("click", () => {
-			//Can directly check the state of the checkbox
-		// 	this.updateConstraints();
-		// });
+		audioCheckContainer.addEventListener("click", () => {
+			this.stopCaptureStream();
+			if(this.#audioCheckbox.checked) {
+				this.#constraints.audio = {
+					mandatory: {
+						chromeMediaSource: 'desktop'
+					}
+				};
+			} else {
+				this.#constraints.audio = false;
+			}
+			this.startCaptureStream();
+		});
 
 		// ! Final step for avCheckContainer - add a decibel meter below audio option for live monitoring.
 		videoCheckContainer.append(videoLabel);
@@ -393,25 +378,6 @@ export class ScreenCaptureDevice {
 		avCheckContainer.appendChild(videoCheckContainer);
 		avCheckContainer.appendChild(audioCheckContainer);
 
-		// // Build on/off buttons
-		// videoButtonsContainerSub.classList.add("on-off-btn-container");
-
-		// onElement.innerText = "ON";
-		// onElement.onclick = () => {
-		// 	this.displaySourceOptions(recordCheckContainer);
-		// };
-		// // onElement.classList.add("general-btn");
-		// // onElement.style.height = "48%";
-
-		// // offElement.innerText = "OFF";
-		// offElement.onclick = () => {
-		// 	this.stopCaptureStream();
-		// };
-		// offElement.classList.add("general-btn");
-		// offElement.style.height = "48%";
-		
-		// videoButtonsContainerSub.appendChild(onElement);
-		// videoButtonsContainerSub.appendChild(offElement);
 
 		// Start adding buttons and containers to the full video element
 		videoButtonsContainer.classList.add("camera-buttons-container");
@@ -423,9 +389,6 @@ export class ScreenCaptureDevice {
 		// Add avCheckContainer 
 		videoButtonsContainer.appendChild(avCheckContainer);
 
-		// Deleted
-		// // Add on/off buttons
-		// videoButtonsContainer.appendChild(videoButtonsContainerSub);
 
 		// Attach all to div in the correct order and add to the page
 		videoContainer.classList.add("video-inner-container");
@@ -436,57 +399,10 @@ export class ScreenCaptureDevice {
         videoContainer.appendChild(videoElement);
         videoContainer.appendChild(videoButtonsContainer);
 
-		// Autostart screen capture with all options selected
-		//this.checkboxConstraintHelper();
 		this.displaySourceOptions(recordCheckContainer);
 
 		return videoContainer;
 	}
-
-	// /**
-	//  * Changes boolean value of record/audio/video option to be true or false
-	//  * 
-	//  * @param {String} elementOption - String value of option that needs to was checked
-	//  */
-	//  checkmarkHelper(elementOption) {
-	// 	if (elementOption == 'Audio') {
-	// 		if (/*!this.#isOn && */!this.#isAudioChecked) {
-	// 			// Preview is off and audio isn't checked, so check
-	// 			this.#isAudioChecked = true;	
-	// 		} else if (/*!this.#isOn && */this.#isAudioChecked) {
-	// 			// Preview is off and audio isn't checked, so check
-	// 			this.#isAudioChecked = false;
-	
-	// 		} else {
-	// 			// Preview is on while changing, send error
-	// 			console.log("Error: Can't change sources when stream is live.");
-	// 		}
-	// 	}
-	// 	else if (elementOption == 'Record') {
-	// 		// Check record section with visible check mark and bool in class
-	// 		if (!this.#isRecordOptionChecked && !this.#isRecording) {
-	// 			// Record isn't checked and not currently recording, so check
-	// 			this.#isRecordOptionChecked = true;
-		
-	// 		} else if (this.#isRecordOptionChecked && !this.#isRecording) {
-	// 			// Record is checked and not currently recording, so uncheck
-	// 			this.#isRecordOptionChecked = false;
-	// 		} else {
-	// 			// Preview is off while changing or currently recording this feed; send error
-	// 			console.log("Error: Can't enable recording without live feed or while recording.");
-	// 		}
-	// 	}
-	// }
-
-
-	// /**
-	//  * Changes boolean value of record/audio/video option to be true or false
-	//  * 
-	//  * @param {String} elementOption - String value of option that needs to was checked
-	//  */
-	//  async checkboxConstraintHelper() {
-	// 	this.#recordStatus = this.#recordCheckbox.checked;
-	// }
 
 	/**
 	 * Getter function to retrieve the object's "label"

@@ -20,7 +20,6 @@ export class Camera {
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
 
-	#recordStatus = false;
 	#isRecording = false;
 	#fileNameInputElement = null;
 	#recorder;
@@ -293,7 +292,7 @@ export class Camera {
 	 * ! Note: Assumes connection of canvas elements prior to call.
 	 *
 	 */
-	startRecording() {
+	async startRecording() {
 		if (!this.#isRecording) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
@@ -327,7 +326,7 @@ export class Camera {
 	/**
 	 * Stop recording current camera canvas feed
 	 */
-	stopRecording() {
+	async stopRecording() {
 		if (this.#isRecording) {
 			this.#recorder.stopRecording();
 			this.#isRecording = false;
@@ -549,7 +548,7 @@ export class Camera {
 			this.#constraints.audio = false;
 		}
 
-		this.#recordStatus = this.#recordCheckbox.checked;
+		// this.#recordStatus = this.#recordCheckbox.checked;
 	}
 
 	/**
@@ -587,7 +586,7 @@ export class Camera {
 	 * @returns {bool} - True if selected to record, false otherwise.
 	 */
 	getRecordStatus() {
-		return this.#recordStatus;
+		return this.#recordCheckbox.checked;
 	}
 
 	/**
