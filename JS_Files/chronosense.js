@@ -114,8 +114,8 @@ async function handleWindowControls() {
 } //End of handleWindowControls()
 
 
-async function recordButtonClick() {
-	await recordAllSelectedDevices();
+function recordButtonClick() {
+	recordAllSelectedDevices();
 }
 
 /**

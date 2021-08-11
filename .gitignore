@@ -129,3 +129,5 @@ ffmpeg/*
 
 # Executable folder
 ChronoSense-win32-x64/
+
+.DS_Store
