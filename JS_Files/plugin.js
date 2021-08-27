@@ -1,3 +1,5 @@
+
+
 export class Plugin {
 	pluginName = null;
 	pluginMediaType = null;
@@ -17,16 +19,24 @@ export class Plugin {
 
     init(){}
 
-    start(){}
-
-    stop(){}
-
 }
 
-export function deviceList(){
-    
+function init() {
+	const path = require('path');
+	const fs = require('fs');
+	const directoryPath = "./plugins";
+
+	fs.readdir(directoryPath, function (err, files) {
+		if (err) {
+			return console.log('Unable to scan plugins directory: ' + err);
+		} 
+		files.forEach(file => {
+			console.log(file);
+			const module = import('../plugins/' + file).then(m =>
+				m.init()
+			);
+		});
+	});
 }
 
-export function pluginList(){
-
-}
+init();

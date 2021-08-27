@@ -2,6 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
+import { Plugin } from "./plugin.js";
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
@@ -17,7 +18,16 @@ var isRecording = false;
 var isDirSetToDate = true;
 
 //Arrays for all devices
-var devices = [] // Generic Device Model -> Move to this instead of specific device arrays
+var devices = []; // Generic Device Model -> Move to this instead of specific device arrays
+
+const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
+
+export async function getDevices() {
+	let _devices = [];
+	await wait(1000).then(() => _devices = devices)
+	return _devices;
+}
+
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
@@ -123,7 +133,7 @@ function recordButtonClick() {
  * Also, it adds events for plugging and unplugging USB devices.
  *
  */
-async function setupDevices() {
+function setupDevices() {
 	/*
 	 * Complete an initial scan for Kinect devices already plugged in and
 	 * populate the Kinect Devices list in the UI.
@@ -146,7 +156,6 @@ async function setupDevices() {
 	 */
 	devices = devices.concat(ScreenCaptureDevice.getDeviceObjects());
 
-
 	/*
 	 * Complete an initial scan for Camera devices already plugged in and
 	 * populate the Camera Devices list in the UI.
@@ -161,8 +170,7 @@ async function setupDevices() {
 		//console.log(devices);
 		// Once done getting all device objects, add to dropdown menu
 		populateDeviceList(document.getElementById("device-dropdown-content"));
-	});
-
+	})
 }
 
 /**
@@ -320,7 +328,6 @@ async function onCameraSelection(targetElement, device) {
 			"camera-video-feed-container"
 		);
 		cameraVideoFeedOuterContainer.appendChild(device.getUI());
-
 
 	} else {
 		//Make check mark invisible indicating the device is NOT "live"
