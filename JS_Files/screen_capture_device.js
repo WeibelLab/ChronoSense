@@ -194,7 +194,7 @@ export class ScreenCaptureDevice {
 			});
 			this.#stream = null;
 		}
-		console.log("screen_capture_device.js:stopStream()] - Camera has been stopped");
+		// console.log("screen_capture_device.js:stopStream()] - Camera has been stopped");
 
 	}
 

@@ -74,9 +74,9 @@ async function handleWindowControls() {
 		}
 	}
 
-	/* Add event to open and close Camera drop down menus seamlessly */
+	/* Add event to open and close device drop down menus seamlessly */
 	document.addEventListener("click", (evt) => {
-		openCloseCameraDropMenus(evt);
+		openCloseDeviceDropMenus(evt);
 	}); //End of dropdown open listener
 
 	// Attach record button at the top of the page to a recording method to start recording 
@@ -105,11 +105,11 @@ async function handleWindowControls() {
 	});
 
 
-    // Refresh cameras in drop down and reset live previews
+    // Refresh devices in drop down and reset live previews
 	document
 		.getElementById("refresh-cameras-btn")
 		.addEventListener("click", () => {
-			refreshCameraDevices();
+			refreshDevices();
 		});
 } //End of handleWindowControls()
 
@@ -160,7 +160,7 @@ async function setupDevices() {
 
 		//console.log(devices);
 		// Once done getting all device objects, add to dropdown menu
-		populateCameraList(document.getElementById("camera-dropdown-content"));
+		populateDeviceList(document.getElementById("device-dropdown-content"));
 	});
 
 }
@@ -171,7 +171,7 @@ async function setupDevices() {
  *
  * @param {HTML Element} dropdown - Custom dropdown content div element to store options
  */
-function populateCameraList(dropdown) {
+function populateDeviceList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
 
@@ -184,18 +184,18 @@ function populateCameraList(dropdown) {
 }
 
 /**
- * Refresh the Camera list and connected devices on the "Camera Page"
+ * Refresh the device list and connected devices
  */
-function refreshCameraDevices() {
+function refreshDevices() {
 	// First close and  clear current devices
 	//Stop all incoming device data
 	for (let device of devices) {
 		device.stop();
 	}
 	devices = [];
-	// Clear out the Camera list of devices
+	// Clear out the list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
-	clearDropdown(document.getElementById("camera-dropdown-content"));
+	clearDropdown(document.getElementById("device-dropdown-content"));
 	setupDevices(); // Finds, creates, and adds all devices to dropdown
 }
 
@@ -225,32 +225,32 @@ function clearContainer(container) {
 	}
 }
 
-var isCameraOpen = false;
+var isDeviceListOpen = false;
 
 /**
- * Opens or closes Camera dropdown menus to account for clicking outside options to close & open seamlessly.
+ * Opens or closes device dropdown menus to account for clicking outside options to close & open seamlessly.
  * ! Maybe simplify if possible with HTML IDs
  *
  * @param {MouseEvent} evt - Mouse click event on DOM
  */
-function openCloseCameraDropMenus(evt) {
+function openCloseDeviceDropMenus(evt) {
 
-	const cameraList = document.getElementById("camera-dropdown");
+	const deviceList = document.getElementById("device-dropdown");
 
 	let clickedElement = evt.target;
 
 	do {
-		if (cameraList == clickedElement) {
-			if (!isCameraOpen) {
-				isCameraOpen = true;
+		if (deviceList == clickedElement) {
+			if (!isDeviceListOpen) {
+				isDeviceListOpen = true;
 				document.getElementById(
-					"camera-dropdown-content"
+					"device-dropdown-content"
 				).style.display = "block";
 				return;
 			} else {
-				isCameraOpen = false;
+				isDeviceListOpen = false;
 				document.getElementById(
-					"camera-dropdown-content"
+					"device-dropdown-content"
 				).style.display = "none";
 				return;
 			}
@@ -258,11 +258,11 @@ function openCloseCameraDropMenus(evt) {
 		// Go up the DOM
 		clickedElement = clickedElement.parentNode;
 	} while (clickedElement);
-	//Clicked outside of Camera devices list
-	document.getElementById("camera-dropdown-content").style.display = "none";
-	isCameraOpen = false;
+	//Clicked outside of devices list
+	document.getElementById("device-dropdown-content").style.display = "none";
+	isDeviceListOpen = false;
 
-} //End of camera switch
+} //End of device switch
 
 /**
  * Add custom dropdown menu option to specified menu.
