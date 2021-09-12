@@ -23,6 +23,7 @@ var devices = []; // Generic Device Model -> Move to this instead of specific de
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
 export async function getDevices() {
+	// get devices has a one second timeout to allow for list population
 	let _devices = [];
 	await wait(1000).then(() => _devices = devices)
 	return _devices;
