@@ -1,9 +1,11 @@
-
+import { getDevices } from "../JS_Files/chronosense.js"
 
 export class Plugin {
 	pluginName = null;
 	pluginMediaType = null;
 	pluginDeviceType = null;
+	pluginDeviceList = null;
+	activeDeviceList = null;
 
     /**
 	 *
@@ -17,12 +19,75 @@ export class Plugin {
 		this.pluginDeviceType = pluginDeviceType;
 	}
 
-    init(){}
+    async init() {
+		this.activeDeviceList = [];
+		addToPluginList(this);
+        this.pluginDeviceList = await this.queryDevices();
+        this.pluginDeviceList = await this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+	}
+
+	async queryDevices() {
+		let devices = await getDevices()
+		return devices;
+	}
+
+	async filterDevices(devices, deviceType) {
+		let filteredDevices = [];
+		if (deviceType == "All"){
+			return devices;
+		}
+		devices.forEach(device => {
+			if (device.constructor.name == deviceType){
+				filteredDevices.push(device)
+			}
+		});
+		return filteredDevices;
+	}
+
+	addToActiveDeviceList(d) {
+		this.activeDeviceList.push(d);
+	}
+
+	checkIfActiveDevice(d) {
+		return this.activeDeviceList.includes(d);
+	}
+
+	removeActiveDeviceList(d) {
+		const index = this.activeDeviceList.indexOf(d);
+		this.activeDeviceList.splice(index, 1);
+	}
+
+	createUI(){}
 
 }
 
+let	pluginList = [];
+
+function addToPluginList(p) {
+	pluginList.push(p);
+}
+
+export function getPluginCount() {
+	return pluginList.length;
+}
+
+export function getPluginList() {
+	return pluginList;
+}
+
+export function getPluginUI() {
+	pluginList.forEach(p => {
+		p.createUI();
+	});
+}
+
+export async function reInitPlugins() {
+	pluginList.forEach(p => {
+		p.init();
+	});
+}
+
 function init() {
-	const path = require('path');
 	const fs = require('fs');
 	const directoryPath = "./plugins";
 
@@ -31,7 +96,6 @@ function init() {
 			return console.log('Unable to scan plugins directory: ' + err);
 		} 
 		files.forEach(file => {
-			console.log(file);
 			const module = import('../plugins/' + file).then(m =>
 				m.init()
 			);

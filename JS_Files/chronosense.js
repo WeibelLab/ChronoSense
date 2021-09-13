@@ -2,7 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
-import { Plugin } from "./plugin.js";
+import { getPluginCount, getPluginUI, getPluginList, reInitPlugins } from "./plugin.js";
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
@@ -206,6 +206,7 @@ function refreshDevices() {
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("device-dropdown-content"));
 	setupDevices(); // Finds, creates, and adds all devices to dropdown
+	reInitPlugins();
 }
 
 /**
@@ -329,12 +330,22 @@ async function onCameraSelection(targetElement, device) {
 			"camera-video-feed-container"
 		);
 		cameraVideoFeedOuterContainer.appendChild(device.getUI());
+		if(getPluginCount() > 0){
+			getPluginUI();
+		}
 
 	} else {
 		//Make check mark invisible indicating the device is NOT "live"
 		targetElement.childNodes[1].style.visibility = "hidden";
 
 		let outermostDiv = document.getElementById(device.getDeviceId());
+
+		if(getPluginCount() > 0){
+			let ps = getPluginList();
+			ps.forEach(p => {
+				p.removeActiveDeviceList(device);
+			})
+		}
 
 		device.clearUI();
 

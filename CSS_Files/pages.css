@@ -260,6 +260,12 @@
 
 }
 
+.plugin-container {
+	background: #05386b;
+	display: flex;
+	padding: 6px;
+}
+
 .camera-buttons-container {
 	display: flex;
 	flex-direction: row;
@@ -289,7 +295,7 @@
 	background-color: var(--primaryDarkContrastColor);
 
 	width: 7em;
-	height: 3em;
+	height: 2em;
 	padding: 6px;
 }
 
