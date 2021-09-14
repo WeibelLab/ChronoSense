@@ -456,7 +456,12 @@ export class ScreenCaptureDevice {
 	 * @returns {bool} - True if selected to record, false otherwise.
 	 */
 	 getRecordStatus() {
-		return this.#recordCheckbox.checked;
+		try{
+			return this.#recordCheckbox.checked;
+		}
+		catch{
+			return false;
+		}
 	}
 
 	/**
