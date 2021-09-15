@@ -238,7 +238,22 @@
 	
 }
 
-.video-inner-container {
+.camera-inner-container {
+	position: relative;
+
+	flex-grow: 0;
+	flex-shrink: 0;
+
+	box-shadow: 2px 2px 10px black;
+	
+	margin: 1em;
+	padding: 0;
+
+	border-radius: 5px;
+
+}
+
+.screen-cap-inner-container {
 	position: relative;
 
 	flex-grow: 0;
@@ -267,6 +282,12 @@
 	min-height: 270px;
 	background: #05386b;
 
+}
+
+.plugin-container {
+	background: #05386b;
+	display: flex;
+	padding: 6px;
 }
 
 .camera-buttons-container {
@@ -298,7 +319,7 @@
 	background-color: var(--primaryDarkContrastColor);
 
 	width: 7em;
-	height: 3em;
+	height: 2em;
 	padding: 6px;
 }
 
