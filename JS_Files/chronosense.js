@@ -10,6 +10,7 @@ import { Camera } from "./camera.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 
 var recordBtn = document.getElementById("record-all-btn");
+recordBtn.classList.add("notRecording");
 var recordDirInput = document.getElementById("recording-dir-path");
 var recordDirBtn = document.getElementById("record-path-btn");
 
@@ -368,7 +369,9 @@ async function recordAllSelectedDevices() {
 		if (numRecording == 0) {
 			console.log("Error: No device(s) have been selected to record.");
 		} else {
-			recordBtn.innerText = "Stop Recording All Selected";
+			recordBtn.innerText = "Stop Recording";
+			recordBtn.classList.remove("notRecording");
+			recordBtn.classList.add("recording");
 			isRecording = true;
 		}
 	} else {
@@ -380,7 +383,10 @@ async function recordAllSelectedDevices() {
 			} 
 		});
 
-		recordBtn.innerText = "Record All Selected";
+		recordBtn.innerText = "Start Recording";
+		recordBtn.classList.remove("recording");
+		recordBtn.classList.add("notRecording");
+
 		isRecording = false;
 		
 	}

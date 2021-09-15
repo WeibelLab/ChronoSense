@@ -26,6 +26,7 @@ body {
 :root {
 	/* class for global color variables */
 	--primaryDarkContrastColor: #05386b; /*Dark Blue*/
+	--lighterPrimaryDarkContrastColor: #07498b; /*Dark Blue*/
 	--secondaryDarkConstrastColor: #379683; /*Dark Forest Green*/
 	--backgroundColor: #5cdb95; /*Mint green*/
 	--secondaryLightContrastColor: #8ee4af; /*Wintergreen*/
