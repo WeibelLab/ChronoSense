@@ -111,9 +111,12 @@ body {
 	height: 32px;
 	width: 100%;
 	padding: 4px;
-	font-family: "segoe-mdl2";
 	color: var(--primaryLightContrastColor);
 	background-color: var(--primaryDarkContrastColor);
+}
+
+#window-controls {
+	font-family: "segoe-mdl2";
 }
 
 .maximized #titlebar {
