@@ -96,9 +96,11 @@ function init() {
 			return console.log('Unable to scan plugins directory: ' + err);
 		} 
 		files.forEach(file => {
-			const module = import('../plugins/' + file).then(m =>
-				m.init()
-			);
+			if (file[0] != "."){
+				const module = import('../plugins/' + file).then(m =>
+					m.init()
+				);
+			}
 		});
 	});
 }
