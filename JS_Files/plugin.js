@@ -27,7 +27,7 @@ export class Plugin {
 	}
 
 	async refresh() {
-		this.activeDeviceList.splice(0, this.activeDeviceList.length);
+		this.activeDeviceList.length = 0;
 		this.pluginDeviceList = await this.queryDevices();
         this.pluginDeviceList = this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
 	}
