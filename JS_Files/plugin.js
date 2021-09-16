@@ -17,17 +17,17 @@ export class Plugin {
 		this.pluginName = pluginName;
 		this.pluginMediaType = pluginMediaType;
 		this.pluginDeviceType = pluginDeviceType;
+		this.activeDeviceList = [];
 	}
 
     async init() {
-		this.activeDeviceList = [];
 		addToPluginList(this);
         this.pluginDeviceList = await this.queryDevices();
         this.pluginDeviceList = this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
 	}
 
 	async refresh() {
-		this.activeDeviceList = [];
+		this.activeDeviceList.splice(0, this.activeDeviceList.length);
 		this.pluginDeviceList = await this.queryDevices();
         this.pluginDeviceList = this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
 	}
