@@ -581,8 +581,8 @@ export class Camera {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	stop() {
-		this.stopStream();
+	async stop() {
+		await this.stopStream();
 	}
 
 	clearUI(){

@@ -442,8 +442,8 @@ export class ScreenCaptureDevice {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	stop() {
-		this.stopCaptureStream(this.#videoElement);
+	async stop() {
+		await this.stopCaptureStream(this.#videoElement);
 	}
 
 	clearUI(){

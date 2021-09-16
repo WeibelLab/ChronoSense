@@ -26,6 +26,12 @@ export class Plugin {
         this.pluginDeviceList = await this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
 	}
 
+	async refresh() {
+		this.activeDeviceList = [];
+		this.pluginDeviceList = await this.queryDevices();
+        this.pluginDeviceList = await this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+	}
+
 	async queryDevices() {
 		let devices = await getDevices()
 		return devices;
@@ -81,9 +87,9 @@ export function getPluginUI() {
 	});
 }
 
-export async function reInitPlugins() {
+export async function refreshPlugins() {
 	pluginList.forEach(p => {
-		p.init();
+		p.refresh();
 	});
 }
 
