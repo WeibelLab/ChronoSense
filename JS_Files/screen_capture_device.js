@@ -24,6 +24,7 @@ export class ScreenCaptureDevice {
 
 	#dirName = null;
 
+	#isVisible = false;
 	#isRecording = false;
 	#stream = null;
 
@@ -37,9 +38,16 @@ export class ScreenCaptureDevice {
 
 	async getPluginDiv() {
 		let _pluginDiv;
-		// wait long enough for ui to render
-		await wait(100).then(_pluginDiv = this.#pluginDiv);
-		return _pluginDiv;
+		if (this.#isVisible){
+			_pluginDiv = this.#pluginDiv;
+			return _pluginDiv;
+		}
+		else{
+			await wait(100).then( () => {
+				_pluginDiv = this.#pluginDiv;
+				return _pluginDiv;
+			});
+		}
 	}
 
 	/**
@@ -414,7 +422,7 @@ export class ScreenCaptureDevice {
 
 
 		this.displaySourceOptions(recordCheckContainer);
-
+		this.#isVisible = true;
 		return screenCapContainer;
 	}
 
@@ -452,6 +460,7 @@ export class ScreenCaptureDevice {
 	}
 
 	clearUI(){
+		this.#isVisible = false;
 		return false;
 	}
 

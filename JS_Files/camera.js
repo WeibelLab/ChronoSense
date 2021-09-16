@@ -23,6 +23,7 @@ export class Camera {
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
 
+	#isVisible = false;
 	#isRecording = false;
 	#fileNameInputElement = null;
 	#recorder;
@@ -44,9 +45,16 @@ export class Camera {
 
 	async getPluginDiv() {
 		let _pluginDiv;
-		// wait long enough for ui to render
-		await wait(100).then(_pluginDiv = this.#pluginDiv);
-		return _pluginDiv;
+		if (this.#isVisible){
+			_pluginDiv = this.#pluginDiv;
+			return _pluginDiv;
+		}
+		else{
+			await wait(100).then( () => {
+				_pluginDiv = this.#pluginDiv;
+				return _pluginDiv;
+			});
+		}
 	}
 
 	/**
@@ -278,9 +286,16 @@ export class Camera {
 				track.stop();
 			})
 		}
-		if (this.#audioCheckbox.checked){
-			// console.log("closing audio");
-			await this.closeAudioContext();
+		try {
+			if (this.#isVisible){
+				if (this.#audioCheckbox.checked){
+					// console.log("closing audio");
+					await this.closeAudioContext();
+				}
+			}
+		}
+		catch {
+			console.log("camera not open");
 		}
 		//console.log("[camera.js:stopStream()] - Camera has been stopped");
 
@@ -529,6 +544,7 @@ export class Camera {
 		// Autostart camera with all options selected
 		this.checkboxConstraintHelper();
 		this.startStream();
+		this.#isVisible = true;
 		return cameraContainer;
 	}
 
@@ -591,6 +607,7 @@ export class Camera {
 	}
 
 	clearUI(){
+		this.#isVisible = false;
 		return false;
 	}
 
