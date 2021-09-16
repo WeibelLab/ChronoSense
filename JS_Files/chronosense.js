@@ -332,7 +332,7 @@ async function onCameraSelection(targetElement, device) {
 		);
 		cameraVideoFeedOuterContainer.appendChild(device.getUI());
 		if(getPluginCount() > 0){
-			getPluginUI();
+			await getPluginUI();
 		}
 
 	} else {
@@ -348,14 +348,13 @@ async function onCameraSelection(targetElement, device) {
 			})
 		}
 
+		await device.stop();
 		device.clearUI();
 
 		while (outermostDiv.lastElementChild) {
 			outermostDiv.removeChild(outermostDiv.lastElementChild);
 		}
 		outermostDiv.remove();
-
-		device.stop();
 	}
 }
 

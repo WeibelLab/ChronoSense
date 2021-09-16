@@ -23,13 +23,15 @@ export class Plugin {
 		this.activeDeviceList = [];
 		addToPluginList(this);
         this.pluginDeviceList = await this.queryDevices();
-        this.pluginDeviceList = await this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+        this.pluginDeviceList = this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+		return;
 	}
 
 	async refresh() {
 		this.activeDeviceList = [];
 		this.pluginDeviceList = await this.queryDevices();
-        this.pluginDeviceList = await this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+        this.pluginDeviceList = this.filterDevices(this.pluginDeviceList, this.pluginDeviceType);
+		return;
 	}
 
 	async queryDevices() {
@@ -37,7 +39,7 @@ export class Plugin {
 		return devices;
 	}
 
-	async filterDevices(devices, deviceType) {
+	filterDevices(devices, deviceType) {
 		let filteredDevices = [];
 		if (deviceType == "All"){
 			return devices;
@@ -52,6 +54,7 @@ export class Plugin {
 
 	addToActiveDeviceList(d) {
 		this.activeDeviceList.push(d);
+		return;
 	}
 
 	checkIfActiveDevice(d) {
@@ -61,6 +64,7 @@ export class Plugin {
 	removeActiveDeviceList(d) {
 		const index = this.activeDeviceList.indexOf(d);
 		this.activeDeviceList.splice(index, 1);
+		return;
 	}
 
 	createUI(){}
@@ -71,6 +75,7 @@ let	pluginList = [];
 
 function addToPluginList(p) {
 	pluginList.push(p);
+	return;
 }
 
 export function getPluginCount() {
@@ -81,19 +86,21 @@ export function getPluginList() {
 	return pluginList;
 }
 
-export function getPluginUI() {
-	pluginList.forEach(p => {
-		p.createUI();
+export async function getPluginUI() {
+	pluginList.forEach(async p => {
+		await p.createUI();
 	});
+	return;
 }
 
 export async function refreshPlugins() {
-	pluginList.forEach(p => {
-		p.refresh();
+	pluginList.forEach(async p => {
+		await p.refresh();
 	});
+	return;
 }
 
-function init() {
+async function init() {
 	const fs = require('fs');
 	const directoryPath = "./plugins";
 
@@ -103,12 +110,13 @@ function init() {
 		} 
 		files.forEach(file => {
 			if (file[0] != "."){
-				const module = import('../plugins/' + file).then(m =>
-					m.init()
+				const module = import('../plugins/' + file).then(async m =>
+					await m.init()
 				);
 			}
 		});
 	});
+	return;
 }
 
 init();
