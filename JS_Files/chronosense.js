@@ -330,7 +330,7 @@ async function onCameraSelection(targetElement, device) {
 		let cameraVideoFeedOuterContainer = document.getElementById(
 			"camera-video-feed-container"
 		);
-		cameraVideoFeedOuterContainer.appendChild(device.getUI());
+		cameraVideoFeedOuterContainer.appendChild(await device.getUI());
 		if(getPluginCount() > 0){
 			await getPluginUI();
 		}

@@ -1,6 +1,8 @@
 const { desktopCapturer } = require('electron');
 import { AVRecorder } from './avRecorder.js';
 
+const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
+
 export class ScreenCaptureDevice {
 
     #label = "Screen Capture";
@@ -33,8 +35,11 @@ export class ScreenCaptureDevice {
         this.getCaptureSources();
     }
 
-	getPluginDiv() {
-		return this.#pluginDiv;
+	async getPluginDiv() {
+		let _pluginDiv;
+		// wait long enough for ui to render
+		await wait(100).then(_pluginDiv = this.#pluginDiv);
+		return _pluginDiv;
 	}
 
 	/**
