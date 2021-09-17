@@ -1,6 +1,8 @@
 const { desktopCapturer } = require('electron');
 import { AVRecorder } from './avRecorder.js';
 
+const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
+
 export class ScreenCaptureDevice {
 
     #label = "Screen Capture";
@@ -10,6 +12,7 @@ export class ScreenCaptureDevice {
 	#sources = []
 	#recorder = null;
 	#fileNameInputElement = null;
+	#pluginDiv = null;
 
 	#recordCheckbox = null;
 	#videoCheckbox = null;
@@ -21,6 +24,7 @@ export class ScreenCaptureDevice {
 
 	#dirName = null;
 
+	#isVisible = false;
 	#isRecording = false;
 	#stream = null;
 
@@ -31,6 +35,20 @@ export class ScreenCaptureDevice {
     constructor() {
         this.getCaptureSources();
     }
+
+	async getPluginDiv() {
+		let _pluginDiv;
+		if (this.#isVisible){
+			_pluginDiv = this.#pluginDiv;
+			return _pluginDiv;
+		}
+		else{
+			await wait(100).then( () => {
+				_pluginDiv = this.#pluginDiv;
+				return _pluginDiv;
+			});
+		}
+	}
 
 	/**
 	 * Collects all of the possible screen and window sources into an array for later use.
@@ -189,7 +207,7 @@ export class ScreenCaptureDevice {
 			});
 			this.#stream = null;
 		}
-		console.log("screen_capture_device.js:stopStream()] - Camera has been stopped");
+		// console.log("screen_capture_device.js:stopStream()] - Camera has been stopped");
 
 	}
 
@@ -245,8 +263,9 @@ export class ScreenCaptureDevice {
 	getUI() {
 		//First create the necessary elements
 		// * video, canvas, buttons, video option menus, etc.
+		let screenCapContainer = document.createElement("div");
 		let videoContainer = document.createElement("div");
-		videoContainer.style.position = "relative";
+		screenCapContainer.style.position = "relative";
 		let videoButtonsContainer = document.createElement("div");
 		let videoElement = document.createElement("video");
 		this.#videoElement = videoElement;
@@ -258,6 +277,7 @@ export class ScreenCaptureDevice {
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordCheckContainer = document.createElement("div");
+		this.#pluginDiv = document.createElement("div");
 
 		// Unique to screen capture to display different capture options.
 		let optionContainer = document.createElement("div");
@@ -391,17 +411,19 @@ export class ScreenCaptureDevice {
 
 
 		// Attach all to div in the correct order and add to the page
-		videoContainer.classList.add("video-inner-container");
+		screenCapContainer.classList.add("screen-cap-inner-container");
 		//Camera specific identifier
-		videoContainer.id = `${this.getDeviceId()}`;
+		screenCapContainer.id = `${this.getDeviceId()}`;
 
-		videoContainer.appendChild(optionContainer); // Allows user to select screen/window to capture.
-        videoContainer.appendChild(videoElement);
-        videoContainer.appendChild(videoButtonsContainer);
+		screenCapContainer.appendChild(optionContainer); // Allows user to select screen/window to capture.
+        screenCapContainer.appendChild(videoElement);
+        screenCapContainer.appendChild(videoButtonsContainer);
+		screenCapContainer.appendChild(this.#pluginDiv);
+
 
 		this.displaySourceOptions(recordCheckContainer);
-
-		return videoContainer;
+		this.#isVisible = true;
+		return screenCapContainer;
 	}
 
 	/**
@@ -433,11 +455,12 @@ export class ScreenCaptureDevice {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	stop() {
-		this.stopCaptureStream(this.#videoElement);
+	async stop() {
+		await this.stopCaptureStream(this.#videoElement);
 	}
 
 	clearUI(){
+		this.#isVisible = false;
 		return false;
 	}
 

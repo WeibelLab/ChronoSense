@@ -35,13 +35,17 @@
 	user-select: none;
 }
 
+.chrono-dropdown-btn:hover {
+	background-color: #ffffff;
+}
+
 .chrono-dropdown-btn {
 	text-decoration: none;
 	display: block;
 	text-align: center;
 	width: 8em;
 	color: var(--primaryDarkContrastColor);
-	background-color: #f1f1f1;
+	background-color: #e4e4e4;
 	font-weight: 700;
 	padding: 8px;
 	border-style: solid;
@@ -59,7 +63,7 @@
 .chrono-dropdown-content {
 	display: none; /* Change to block when button clicked */
 	position: absolute;
-	background-color: #f1f1f1;
+	background-color: #ffffff;
 	min-width: 8em;
 	width: auto;
 	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -81,7 +85,7 @@
 }
 
 .chrono-dropdown-content div:hover {
-	background-color: #cccccc;
+	background-color: #e4e4e4;
 }
 
 .chrono-dropdown-content > div div {
@@ -93,6 +97,10 @@
 	width: 1em;
 	height: auto;
 	user-select: none;
+}
+
+.general-btn:hover {
+	background-color: var(--lighterPrimaryDarkContrastColor);
 }
 
 .general-btn {
@@ -159,17 +167,33 @@
 
 }
 
+.notRecording {
+	background-color: #084f96;
+}
+
+.notRecording:hover {
+	background-color: #0b67c2;
+}
+
+.recording {
+	background-color: #a50a0a;
+}
+
+.recording:hover {
+	background-color: #d61010;
+}
+
 #record-all-btn {
 	width: 16em;
 	height: 3em;
-
+	border: black;
+	border-style: solid;
 	margin-right: 3em;
-
 }
 
 /* disabled styling */
 #record-all-btn:disabled {
-	background-color: #22262c;
+	background-color: #afb9c9;
 	opacity: 30%;
 	cursor: not-allowed;
   }
@@ -214,7 +238,22 @@
 	
 }
 
-.video-inner-container {
+.camera-inner-container {
+	position: relative;
+
+	flex-grow: 0;
+	flex-shrink: 0;
+
+	box-shadow: 2px 2px 10px black;
+	
+	margin: 1em;
+	padding: 0;
+
+	border-radius: 5px;
+
+}
+
+.screen-cap-inner-container {
 	position: relative;
 
 	flex-grow: 0;
@@ -243,6 +282,12 @@
 	min-height: 270px;
 	background: #05386b;
 
+}
+
+.plugin-container {
+	background: #05386b;
+	display: flex;
+	padding: 6px;
 }
 
 .camera-buttons-container {
@@ -274,7 +319,7 @@
 	background-color: var(--primaryDarkContrastColor);
 
 	width: 7em;
-	height: 3em;
+	height: 2em;
 	padding: 6px;
 }
 

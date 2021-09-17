@@ -1,5 +1,7 @@
 import { AVRecorder } from "./avRecorder.js";
 
+const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
+
 export class Camera {
 	#deviceId = null;
 	#groupId = null;
@@ -14,12 +16,14 @@ export class Camera {
 	#audioCheckbox = null;
 	#audioMonitorUI = null;
 	#audioContext = null;
+	#pluginDiv = null;
 	#constraints = {audio: false, video: false}
 	#stream = null;
 
 	#videoResolutionWidth = 1280; //Default to 1280 - for best FOV
 	#videoResolutionHeight = 720; //Default to 720 - for best FOV
 
+	#isVisible = false;
 	#isRecording = false;
 	#fileNameInputElement = null;
 	#recorder;
@@ -37,6 +41,20 @@ export class Camera {
 		this.#groupId = groupId;
 		this.#kind = kind;
 		this.#label = label;
+	}
+
+	async getPluginDiv() {
+		let _pluginDiv;
+		if (this.#isVisible){
+			_pluginDiv = this.#pluginDiv;
+			return _pluginDiv;
+		}
+		else{
+			await wait(100).then( () => {
+				_pluginDiv = this.#pluginDiv;
+				return _pluginDiv;
+			});
+		}
 	}
 
 	/**
@@ -268,9 +286,16 @@ export class Camera {
 				track.stop();
 			})
 		}
-		if (this.#audioCheckbox.checked){
-			// console.log("closing audio");
-			await this.closeAudioContext();
+		try {
+			if (this.#isVisible){
+				if (this.#audioCheckbox.checked){
+					// console.log("closing audio");
+					await this.closeAudioContext();
+				}
+			}
+		}
+		catch {
+			console.log("camera not open");
 		}
 		//console.log("[camera.js:stopStream()] - Camera has been stopped");
 
@@ -365,12 +390,13 @@ export class Camera {
 	getUI() {
 		//First create the necessary elements
 		// * video, canvas, buttons, video option menus, etc.
+		let cameraContainer = document.createElement("div");
 		let videoContainer = document.createElement("div");
 		let audioContainer = document.createElement("div");
 		this.#audioSelector = document.createElement("select");
 		let audioMonitorContainer = document.createElement("div");
 		this.#audioMonitorUI = document.createElement("canvas");
-		let videoButtonsContainer = document.createElement("div");
+		let cameraButtonsContainer = document.createElement("div");
 		let videoElement = document.createElement("video");
 		let canvasElement = document.createElement("canvas");
 		let avCheckContainer = document.createElement("div");
@@ -378,6 +404,7 @@ export class Camera {
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordCheckContainer = document.createElement("div");
+		this.#pluginDiv = document.createElement("div");
 
 		this.#audioMonitorUI.style.backgroundColor = "black";
 		this.#audioMonitorUI.width = "100";
@@ -479,23 +506,24 @@ export class Camera {
 		avCheckContainer.appendChild(videoCheckContainer);
 		avCheckContainer.appendChild(audioCheckContainer);
 
-		var recordBtn = document.getElementById("record-all-btn");
+		// var recordBtn = document.getElementById("record-all-btn");
 
 		// Start adding buttons and containers to the full video element
-		videoButtonsContainer.classList.add("camera-buttons-container");
-		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
+		cameraButtonsContainer.classList.add("camera-buttons-container");
+		cameraButtonsContainer.classList.add("camera-buttons-container-spacing");
 		// Add recordCheckContainer
-		videoButtonsContainer.appendChild(recordCheckContainer);
+		cameraButtonsContainer.appendChild(recordCheckContainer);
 		// Add fileNameContainer
-		videoButtonsContainer.appendChild(fileNameContainer);
+		cameraButtonsContainer.appendChild(fileNameContainer);
 		// Add avCheckContainer 
-		videoButtonsContainer.appendChild(avCheckContainer);
+		cameraButtonsContainer.appendChild(avCheckContainer);
 
 		// Attach all to div in the correct order and add to the page
-		videoContainer.classList.add("video-inner-container");
+		cameraContainer.classList.add("camera-inner-container");
 		//Camera specific identifier
-		videoContainer.id = `${this.getDeviceId()}`;
+		cameraContainer.id = `${this.getDeviceId()}`;
 
+		cameraContainer.appendChild(videoContainer);
 		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(audioContainer);
 		audioContainer.appendChild(this.#audioSelector);
@@ -510,12 +538,14 @@ export class Camera {
 			this.updateConstraints();
 		}
 
-		videoContainer.appendChild(videoButtonsContainer);
+		cameraContainer.appendChild(cameraButtonsContainer);
+		cameraContainer.appendChild(this.#pluginDiv);
 
 		// Autostart camera with all options selected
 		this.checkboxConstraintHelper();
 		this.startStream();
-		return videoContainer;
+		this.#isVisible = true;
+		return cameraContainer;
 	}
 
 	/**
@@ -572,11 +602,12 @@ export class Camera {
 	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
-	stop() {
-		this.stopStream();
+	async stop() {
+		await this.stopStream();
 	}
 
 	clearUI(){
+		this.#isVisible = false;
 		return false;
 	}
 
