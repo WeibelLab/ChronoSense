@@ -215,7 +215,7 @@ export class ScreenCaptureDevice {
 	 * Starts recording video/audio from the currently streaming source.
 	 */
 	startRecording() {
-		if (!this.#isRecording) {
+		if (!this.#isRecording && this.#isVisible) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
 				this.#dirName,

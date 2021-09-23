@@ -318,7 +318,7 @@ export class Camera {
 	 *
 	 */
 	async startRecording() {
-		if (!this.#isRecording) {
+		if (!this.#isRecording && this.#isVisible) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
 				this.#dirName,
