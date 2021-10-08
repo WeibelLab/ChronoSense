@@ -9,6 +9,7 @@ import { Camera } from "./camera.js";
 //import { AudioRecorder } from "./audio_recorder.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
+const { fork } = require('child_process');
 
 var recordBtn = document.getElementById("record-all-btn");
 recordBtn.classList.add("notRecording");
@@ -17,6 +18,7 @@ var recordDirBtn = document.getElementById("record-path-btn");
 
 var isRecording = false;
 var isDirSetToDate = true;
+var forked = null;
 
 //Arrays for all devices
 var devices = []; // Generic Device Model -> Move to this instead of specific device arrays
@@ -30,12 +32,18 @@ export async function getDevices() {
 	return _devices;
 }
 
+export function getForkedProcess() {
+	return forked;
+}
+
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
+		forked = fork('./JS_Files/postProcess.js');
+
 
 		//Set default directory to current date and time
 		// Used for setting file current date/time
