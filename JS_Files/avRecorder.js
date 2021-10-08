@@ -1,9 +1,5 @@
-const Stream = require("stream");
 const fs = require("fs");
 import { getForkedProcess } from "./chronosense.js";
-
-// const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
-// const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
 
 export class AVRecorder {
 	#mediaStream = null;
@@ -48,7 +44,7 @@ export class AVRecorder {
 			fileEndNum++;
 		}
 
-		this.#recorder = new MediaRecorder(mediaStream); //TODO: allow modification of options dict param by user. 
+		this.#recorder = new MediaRecorder(this.#mediaStream); //TODO: allow modification of options dict param by user. 
 
 		this.#storageStream = fs.createWriteStream(this.#dirName.concat("raw/").concat(this.#fileName));
 
@@ -77,7 +73,8 @@ export class AVRecorder {
 		this.#forked = getForkedProcess();
 
 		this.#forked.on('message', (msg) => {
-			console.log('Message from child', msg);
+			// TODO: investigate log duplication, prints once the first time, twice the second, three the third, etc
+			console.log('Message from child', msg, Math.random()); 
 		});
 
 	}
@@ -102,29 +99,5 @@ export class AVRecorder {
 		// this.postProcessVideoFile();
 		this.#forked.send({ dirName: this.#dirName, fileName: this.#fileName });
 	}
-
-	/**
-	 * Call FFMPEG to make video scrollable. Ingests the .webm file and turns it into a seekable
-	 * .mp4 file outside of the 'raw' directory.
-	 */
-	// postProcessVideoFile() {
-		// 
-		// if (!isWin) {
-		// 	const child = spawn("ffmpeg", [
-		// 		"-i",
-		// 		this.#dirName.concat("raw/").concat(this.#fileName),
-		// 		this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-		// 	], {detached: true, stdio: 'ignore'});
-		// 	child.unref();
-		// }
-		// else {
-		// 	const child = spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
-		// 		"-i",
-		// 		this.#dirName.concat("raw/").concat(this.#fileName),
-		// 		this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-		// 	], {detached: true, stdio: 'ignore'});
-		// 	child.unref();
-		// }
-	// }
 
 } //End of AVRecorder Class

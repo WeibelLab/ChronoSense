@@ -248,6 +248,7 @@ export class ScreenCaptureDevice {
 			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
     			elem.disabled = false;
 			});
+			this.#recorder = null;
 		}
 	}
 
