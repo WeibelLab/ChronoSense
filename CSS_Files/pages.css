@@ -253,6 +253,44 @@
 
 }
 
+.camera-inner-container:hover .close-button{
+	display:block;
+  }
+
+.screen-cap-inner-container:hover .close-button{
+	display:block;
+}
+
+.close-button {
+	margin-top: 0px;
+	margin-right: 16px;
+	background-color: #0f1115;
+	float: left;
+	position:absolute;
+	z-index:98;
+	border: 1.5px solid;
+	border-color: #31363c;
+	border-radius: 50%;
+	cursor: pointer;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 30px;
+	height: 30px;
+	display:none;
+}
+
+.close-button:hover {
+	background-color: #22262c;
+	border-color: #8d949d;
+	transition-duration: 0.1s;
+}
+
+.close-button-image {
+	height: 20px;
+	width: 20px
+}
+
 .screen-cap-inner-container {
 	position: relative;
 

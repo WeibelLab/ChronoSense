@@ -405,6 +405,8 @@ export class Camera {
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordCheckContainer = document.createElement("div");
+		let closeButton = document.createElement("button");
+		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
 
 		this.#audioMonitorUI.style.backgroundColor = "black";
@@ -421,6 +423,11 @@ export class Camera {
 
 		this.setInputAndOutput(videoElement, canvasElement); //Connect elements to class variables.
 	
+		// Build Close Button
+		closeButton.classList.add("close-button");
+		closeImage.classList.add("close-button-image")
+		closeImage.setAttribute("src","../images/x.svg");
+		closeButton.appendChild(closeImage);
 
 		// Build fileNameContainer
 		fileNameContainer.classList.add("file-name-container");
@@ -524,6 +531,10 @@ export class Camera {
 		//Camera specific identifier
 		cameraContainer.id = `${this.getDeviceId()}`;
 
+		//Sharing camera id with close
+		closeButton.id = cameraContainer.id;
+		cameraContainer.appendChild(closeButton);
+
 		cameraContainer.appendChild(videoContainer);
 		videoContainer.appendChild(videoElement);
 		videoContainer.appendChild(audioContainer);
@@ -609,7 +620,8 @@ export class Camera {
 
 	clearUI(){
 		this.#isVisible = false;
-		return false;
+		this.#recordCheckbox = null;
+		return;
 	}
 
 	/**

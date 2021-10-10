@@ -278,6 +278,8 @@ export class ScreenCaptureDevice {
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
 		let recordCheckContainer = document.createElement("div");
+		let closeButton = document.createElement("button");
+		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
 
 		// Unique to screen capture to display different capture options.
@@ -299,6 +301,12 @@ export class ScreenCaptureDevice {
         videoElement.autoplay = true;
 		videoElement.muted = true;
 		videoElement.classList.add("camera-canvas"); //! Change later OR allow user to manipulate sizing of containers (e.g. drag edges)
+		
+		// Build Close Button
+		closeButton.classList.add("close-button");
+		closeImage.classList.add("close-button-image")
+		closeImage.setAttribute("src","../images/x.svg");
+		closeButton.appendChild(closeImage);
 
 		// Build fileNameContainer
 		fileNameContainer.classList.add("file-name-container");
@@ -416,6 +424,10 @@ export class ScreenCaptureDevice {
 		//Camera specific identifier
 		screenCapContainer.id = `${this.getDeviceId()}`;
 
+		//Sharing screencap id with close
+		closeButton.id = screenCapContainer.id;
+		screenCapContainer.appendChild(closeButton);
+
 		screenCapContainer.appendChild(optionContainer); // Allows user to select screen/window to capture.
         screenCapContainer.appendChild(videoElement);
         screenCapContainer.appendChild(videoButtonsContainer);
@@ -462,7 +474,8 @@ export class ScreenCaptureDevice {
 
 	clearUI(){
 		this.#isVisible = false;
-		return false;
+		this.#recordCheckbox = null;
+		return;
 	}
 
 	/**

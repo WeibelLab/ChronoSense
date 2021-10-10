@@ -343,6 +343,11 @@ async function onCameraSelection(targetElement, device) {
 			await getPluginUI();
 		}
 
+		var buttonContainer = document.getElementById(device.getDeviceId()).querySelector(".close-button");
+		buttonContainer.addEventListener("click", () => {
+			targetElement.click();
+		})
+
 	} else {
 		//Make check mark invisible indicating the device is NOT "live"
 		targetElement.childNodes[1].style.visibility = "hidden";
