@@ -33,6 +33,7 @@ export async function getDevices() {
 }
 
 export function getForkedProcess() {
+	forked = fork('./JS_Files/postProcess.js');
 	return forked;
 }
 
@@ -42,8 +43,6 @@ document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
-		forked = fork('./JS_Files/postProcess.js');
-
 
 		//Set default directory to current date and time
 		// Used for setting file current date/time

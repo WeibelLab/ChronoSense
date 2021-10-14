@@ -76,7 +76,6 @@ export class AVRecorder {
 			// TODO: investigate log duplication, prints once the first time, twice the second, three the third, etc
 			console.log('Message from child', msg, Math.random()); 
 		});
-
 	}
 
 	/**
