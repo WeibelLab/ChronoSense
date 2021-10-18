@@ -1,5 +1,5 @@
 const fs = require("fs");
-import { getForkedProcess } from "./chronosense.js";
+import { getForkedProcess, incrementVP, decrementVP, incrementVR, decrementVR } from "./chronosense.js";
 
 export class AVRecorder {
 	#mediaStream = null;
@@ -73,8 +73,14 @@ export class AVRecorder {
 		this.#forked = getForkedProcess();
 
 		this.#forked.on('message', (msg) => {
-			// TODO: investigate log duplication, prints once the first time, twice the second, three the third, etc
-			console.log('Message from child', msg, Math.random()); 
+			// console.log('Message from child', msg);
+			if (msg.child_state == "processing"){
+				decrementVR();
+				incrementVP();
+			}
+			if (msg.child_state == "done"){
+				decrementVP();
+			}
 		});
 	}
 
@@ -93,7 +99,7 @@ export class AVRecorder {
 	 
 	stopRecording() {
 		this.#recorder.stop();
-
+		incrementVR();
 		// // ! Add call to EBML to turn 'raw' video files into proper, seekable video files
 		// this.postProcessVideoFile();
 		this.#forked.send({ dirName: this.#dirName, fileName: this.#fileName });

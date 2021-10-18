@@ -11,6 +11,7 @@ import { Camera } from "./camera.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 const { fork } = require('child_process');
 
+var window = null;
 var recordBtn = document.getElementById("record-all-btn");
 recordBtn.classList.add("notRecording");
 var recordDirInput = document.getElementById("recording-dir-path");
@@ -20,6 +21,9 @@ var isRecording = false;
 var isDirSetToDate = true;
 var forked = null;
 
+var videos_recorded = 0; // num of videos created by avRecorder that need processing
+var videos_processing = 0; // num of videos currently in post processing
+
 //Arrays for all devices
 var devices = []; // Generic Device Model -> Move to this instead of specific device arrays
 
@@ -28,7 +32,7 @@ const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 export async function getDevices() {
 	// get devices has a one second timeout to allow for list population
 	let _devices = [];
-	await wait(1000).then(() => _devices = devices)
+	await wait(1000).then(() => _devices = devices);
 	return _devices;
 }
 
@@ -37,13 +41,40 @@ export function getForkedProcess() {
 	return forked;
 }
 
+export function incrementVP(){
+	videos_processing++;
+	// console.log("VP:", getVP_count());
+}
+
+export function decrementVP(){
+	videos_processing--;
+	// console.log("VP:", getVP_count());
+}
+
+function getVP_count(){
+	return videos_processing;
+}
+
+export function incrementVR(){
+	videos_recorded++;
+	// console.log("VR:", getVR_count());
+}
+
+export function decrementVR(){
+	videos_recorded--;
+	// console.log("VR:", getVR_count());
+}
+
+function getVR_count(){
+	return videos_recorded;
+}
 
 // When document has loaded, initialize
 document.onreadystatechange = () => {
 	if (document.readyState == "complete") {
 		handleWindowControls();
 		setupDevices();
-
+		getForkedProcess(); // making function call at startup improves windows os performance with fork()
 		//Set default directory to current date and time
 		// Used for setting file current date/time
 		var currDate = new Date();
@@ -57,36 +88,36 @@ document.onreadystatechange = () => {
  *
  */
 async function handleWindowControls() {
-	let win = remote.getCurrentWindow();
+	window = remote.getCurrentWindow();
 
 	// Make minimise/maximise/restore/close buttons work when they are clicked
 	document.getElementById("min-button").addEventListener("click", (event) => {
-		win.minimize();
+		window.minimize();
 	});
 
 	document.getElementById("max-button").addEventListener("click", (event) => {
-		win.maximize();
+		window.maximize();
 	});
 
 	document
 		.getElementById("restore-button")
 		.addEventListener("click", (event) => {
-			win.unmaximize();
+			window.unmaximize();
 		});
 
 	document
 		.getElementById("close-button")
 		.addEventListener("click", (event) => {
-			win.close();
+			closeWindows();
 		});
 
 	// Toggle maximise/restore buttons when maximisation/unmaximisation occurs
 	toggleMaxRestoreButtons();
-	win.on("maximize", toggleMaxRestoreButtons);
-	win.on("unmaximize", toggleMaxRestoreButtons);
+	window.on("maximize", toggleMaxRestoreButtons);
+	window.on("unmaximize", toggleMaxRestoreButtons);
 
 	function toggleMaxRestoreButtons() {
-		if (win.isMaximized()) {
+		if (window.isMaximized()) {
 			document.body.classList.add("maximized");
 		} else {
 			document.body.classList.remove("maximized");
@@ -134,7 +165,12 @@ async function handleWindowControls() {
 
 
 function recordButtonClick() {
-	recordAllSelectedDevices();
+	if(videos_recorded != 0){
+		alert("Previous recording processing, try again in a moment");
+	}
+	else{
+		recordAllSelectedDevices();
+	}
 }
 
 /**
@@ -422,15 +458,22 @@ async function recordAllSelectedDevices() {
 	}
 }
 
-
 /**
  * Function that is called to make sure all devices are properly shut down
  * before the application shuts down.
- * Acts as an EventHandler for Node.
  */
-global.onbeforeunload = () => {
-	//Close all Kinects & cameras gracefully
+function closeWindows(){
 	for (let device of devices) {
+		device.stopRecording();
 		device.stop();
+	}
+	waitForProcessing();
+}
+
+function waitForProcessing() {  
+	if (getVR_count() == 0) {
+		window.close();
+	} else {
+		(async () => await wait(500).then(waitForProcessing))();
 	}
 };
