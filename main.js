@@ -33,7 +33,7 @@ function createWindow() {
     
     // // For debugging - show dev tool -> similar to chrome web browser tools (F12)
     // // ! Comment out before packaging as an executable !
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
     
     //Close window when closed
     mainWindow.on('closed', function() {
@@ -47,11 +47,9 @@ app.on('ready', () => {
   createWindow()
 })
 
-//If Mac, only close fully when all windows closed
 app.on('window-all-closed', function() {
-    if (process.platform != 'darwin')
-      app.quit();
-  });
+    app.quit();
+});
 
 app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
