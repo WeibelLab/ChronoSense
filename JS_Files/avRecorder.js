@@ -1,14 +1,7 @@
-const { spawn } = require("child_process");
-const Stream = require("stream");
-const path = require('path');
 const fs = require("fs");
-var isWin = process.platform === "win32";
-
-const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
-const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
+import { getForkedProcess, incrementVP, decrementVP, incrementVR, decrementVR } from "./chronosense.js";
 
 export class AVRecorder {
-
 	#mediaStream = null;
 	#blobs = [];
 	#dirName = null;
@@ -18,6 +11,7 @@ export class AVRecorder {
 
 	#storageStream = null;
 	#recorder = null;
+	#forked = null;
 
 	constructor(
 		mediaStream = null,
@@ -50,7 +44,7 @@ export class AVRecorder {
 			fileEndNum++;
 		}
 
-		this.#recorder = new MediaRecorder(mediaStream); //TODO: allow modification of options dict param by user. 
+		this.#recorder = new MediaRecorder(this.#mediaStream); //TODO: allow modification of options dict param by user. 
 
 		this.#storageStream = fs.createWriteStream(this.#dirName.concat("raw/").concat(this.#fileName));
 
@@ -76,6 +70,18 @@ export class AVRecorder {
 			}
 		};
 
+		this.#forked = getForkedProcess();
+
+		this.#forked.on('message', (msg) => {
+			// console.log('Message from child', msg);
+			if (msg.child_state == "processing"){
+				decrementVR();
+				incrementVP();
+			}
+			if (msg.child_state == "done"){
+				decrementVP();
+			}
+		});
 	}
 
 	/**
@@ -93,30 +99,10 @@ export class AVRecorder {
 	 
 	stopRecording() {
 		this.#recorder.stop();
-
-		// ! Add call to EBML to turn 'raw' video files into proper, seekable video files
-		this.postProcessVideoFile();
-	}
-
-	/**
-	 * Call FFMPEG to make video scrollable. Ingests the .webm file and turns it into a seekable
-	 * .mp4 file outside of the 'raw' directory.
-	 */
-	postProcessVideoFile() {
-		if (!isWin) {
-			spawn("ffmpeg", [
-				"-i",
-				this.#dirName.concat("raw/").concat(this.#fileName),
-				this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-			], {detached: true});
-		}
-		else {
-			spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
-				"-i",
-				this.#dirName.concat("raw/").concat(this.#fileName),
-				this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-			], {detached: true});
-		}
+		incrementVR();
+		// // ! Add call to EBML to turn 'raw' video files into proper, seekable video files
+		// this.postProcessVideoFile();
+		this.#forked.send({ dirName: this.#dirName, fileName: this.#fileName });
 	}
 
 } //End of AVRecorder Class
