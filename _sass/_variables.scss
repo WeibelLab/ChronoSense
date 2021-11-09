@@ -1,0 +1,64 @@
+// Theme overrides for Bootstrap variables
+// 
+// Only include variables that are overriden
+// or variables (indicated with !default) that are referred by other variables.
+// For all Bootstrap variables, see https://github.com/twbs/bootstrap/blob/v4-dev/scss/_variables.scss
+
+// Color system
+
+$theme-colors: (
+  "primary": $custom_link_color,
+  "secondary": $custom_banner_color,
+  "footer": $custom_footer_color
+);
+
+// Options
+// Spacing
+
+$spacer: 1rem !default;
+
+// Body
+// Links
+// Paragraphs
+// Grid breakpoints
+// Grid containers
+// Grid columns
+// Components
+// Fonts
+
+$font-family-base: "Roboto", sans-serif;
+
+$headings-margin-bottom: $spacer;
+
+// Tables
+// Buttons + Forms
+// Buttons
+// Forms
+// Form validation
+// Z-index master list
+// Navs
+// Navbar
+// Dropdowns
+// Pagination
+// Jumbotron
+// Cards
+// Tooltips
+// Popovers
+// Toasts
+// Badges
+
+$badge-font-weight: normal;
+
+// Modals
+// Alerts
+// Progress bars
+// List group
+// Image thumbnails
+// Figures
+// Breadcrumbs
+// Carousel
+// Spinners
+// Close
+// Code
+// Utilities
+// Printing
