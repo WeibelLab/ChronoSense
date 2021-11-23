@@ -1,0 +1,8 @@
+# Links listed below will be included in your site's navbar (navigation at the top)
+
+- text: Home # Note that users can also reach the homepage by clicking the site's title on the left in the navbar
+  href: /
+- text: Team
+  href: /team/
+- text: Downloads
+  href: /usage/

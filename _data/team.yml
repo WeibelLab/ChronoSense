@@ -1,0 +1,28 @@
+# Project team members listed below will appear on the /team page
+
+- name: Steven Rick
+  role: Ph.D Candidate # Will appear next to name
+  image:  # Can be external link
+  description: > # Can be Markdown
+    Brief Description
+  email: your.email@example.com
+  github: github_name
+  twitter: twitter_name
+
+- name: Alexander Schonken
+  image: 
+
+- name: Richard Duong
+  image: 
+  
+- name: Vish Ramesh
+  image:
+  
+- name: Nadir Weibel
+  image:
+  
+- name: Gauri Iyer
+  image:
+
+- name: Calvin Chan
+  image:

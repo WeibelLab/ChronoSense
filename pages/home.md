@@ -10,4 +10,12 @@ ChronoSense was born to serve researchers of all kinds helping them more easily 
 
 Moving beyond observational research we enter into interventional studies, where the goal is to not just study humans but to also generate some sort of artifact that may provide some sort of feedback, support behavior modification, or otherwise prompt reflection that facilitates changes. On this front ChronoSense seeks to empower researchers with a data capture tool that can be extended to also perform inference as well as inform intervention design.
 
+![ChronoSense-Example](../assets/img/ChronoSense_Img.png)
+
+Assists in helping people with multiple streaming devices sync up their recordings.
+
+Able to stream data to other application for real-time analysis and processing
+
+Easy to use and compatible for both Mac and Windows
+
 
