@@ -2,6 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
+const path = require('path');
 import { getPluginCount, getPluginUI, getPluginList, refreshPlugins } from "./plugin.js";
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
@@ -37,7 +38,9 @@ export async function getDevices() {
 }
 
 export function getForkedProcess() {
-	forked = fork('./JS_Files/postProcess.js');
+	const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
+	const POSTPROCESS_PATH = path.join(CHRONOSENSE_ROOT_DIR, 'JS_Files/postProcess.js');
+	forked = fork(POSTPROCESS_PATH);
 	return forked;
 }
 
