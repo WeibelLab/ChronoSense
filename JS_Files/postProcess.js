@@ -3,7 +3,7 @@ const path = require('path');
 
 var isWin = process.platform === "win32";
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
-const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, '/ffmpeg/');
+const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, 'ffmpeg');
 
 process.on('message', (msg) => {
     let pp = null;
@@ -25,21 +25,32 @@ class postProcesser {
     }
     postProcessVideoFile() {
         if (isWin) {
+            process.send("isWin true");
             this.#c = spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
                 "-i",
-                this.#dirName.concat("raw/").concat(this.#fileName),
-                this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
+                '"'+path.join(this.#dirName, "raw", this.#fileName)+'"',
+                '"'+path.join(this.#dirName, this.#fileName.substring(0, this.#fileName.length - 5).concat(".mp4"))+'"'
             ], {detached: true});
             process.send({ pid: this.#c.pid, child_state: "processing" });
         }
         else {
+            process.send("isWin false");
             this.#c = spawn("ffmpeg", [
                 "-i",
-                this.#dirName.concat("raw/").concat(this.#fileName),
-                this.#dirName.concat(this.#fileName.substring(0, this.#fileName.length - 5)).concat(".mp4")
-            ], {detached: true});
+                '"'+path.join(this.#dirName, "raw", this.#fileName)+'"',
+                '"'+path.join(this.#dirName, this.#fileName.substring(0, this.#fileName.length - 5).concat(".mp4"))+'"'
+            ], {detached: true, shell: true, PATH: process.env.PATH});
             process.send({ pid: this.#c.pid, child_state: "processing" });
         }
+
+        this.#c.stdout.on('data', (data) => {
+            process.send(`stdout: ${data}`);
+        });
+        
+        this.#c.stderr.on('data', (data) => {
+            process.send(`stderr: ${data}`);
+        });
+          
         this.#c.on('close', () => {
             process.send({ pid: this.#c.pid, child_state: "done" });
         });

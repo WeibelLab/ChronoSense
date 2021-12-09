@@ -1,7 +1,4 @@
 const electron = require('electron');
-const url = require('url');
-const path = require('path');
-
 const {app, BrowserWindow} = electron;
 
 let mainWindow;
@@ -33,7 +30,7 @@ function createWindow() {
     
     // // For debugging - show dev tool -> similar to chrome web browser tools (F12)
     // // ! Comment out before packaging as an executable !
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     
     //Close window when closed
     mainWindow.on('closed', function() {

@@ -73,7 +73,7 @@ export class AVRecorder {
 		this.#forked = getForkedProcess();
 
 		this.#forked.on('message', (msg) => {
-			// console.log('Message from child', msg);
+			console.log('Message from child', msg);
 			if (msg.child_state == "processing"){
 				decrementVR();
 				incrementVP();
