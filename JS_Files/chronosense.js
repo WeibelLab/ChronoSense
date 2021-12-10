@@ -2,7 +2,7 @@
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
-const path = require('path');
+const path = require("path");
 import { getPluginCount, getPluginUI, getPluginList, refreshPlugins } from "./plugin.js";
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
@@ -11,6 +11,11 @@ import { Camera } from "./camera.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
 const { fork } = require('child_process');
+const fixPath = require('fix-path');
+fixPath();
+
+const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
+const desktopDir = path.join(homeDir, "Desktop");
 
 var window = null;
 var recordBtn = document.getElementById("record-all-btn");
@@ -39,8 +44,9 @@ export async function getDevices() {
 
 export function getForkedProcess() {
 	const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
-	const POSTPROCESS_PATH = path.join(CHRONOSENSE_ROOT_DIR, 'JS_Files/postProcess.js');
+	const POSTPROCESS_PATH = path.join(CHRONOSENSE_ROOT_DIR, 'JS_Files', 'postProcess.js');
 	forked = fork(POSTPROCESS_PATH);
+	// console.log(forked);
 	return forked;
 }
 
@@ -80,8 +86,7 @@ document.onreadystatechange = () => {
 		getForkedProcess(); // making function call at startup improves windows os performance with fork()
 		//Set default directory to current date and time
 		// Used for setting file current date/time
-		var currDate = new Date();
-		recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+		recordDirInput.value = desktopDir;
 	}
 };
 
@@ -149,8 +154,7 @@ async function handleWindowControls() {
 				} else if (recordDirInput.value.localeCompare("") == 0) {
 					// Default set to current directory + date/time sequence
 					// Used for setting file current date/time
-					var currDate = new Date();
-					recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+					recordDirInput.value = desktopDir;
 					isDirSetToDate = true;
 				}
 			})
@@ -420,8 +424,7 @@ async function recordAllSelectedDevices() {
 		// First, change directory to most up to date time if not set by user
 		if (isDirSetToDate) {
 			// Used for setting file current date/time
-			var currDate = new Date();
-			recordDirInput.value = "./".concat(currDate.getFullYear().toString()).concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString());
+			recordDirInput.value = desktopDir;
 		}
 
 		// Start recording on all devices that are selected. Keep running total of devices recording
@@ -429,7 +432,8 @@ async function recordAllSelectedDevices() {
 		devices.forEach((device) => {
 			if (device.getRecordStatus()) {
 				// Start recording
-				device.setDirName(recordDirInput.value);
+				var currDate = new Date();
+				device.setDirName(path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString())));
 				device.startRecording();
 				numRecording++;
 			} 

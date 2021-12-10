@@ -1,6 +1,6 @@
 {
 	"name": "ChronoSense",
-	"version": "1.5.1",
+	"version": "1.5.2",
 	"description": "Chronosense Electron Application",
 	"main": "main.js",
 	"scripts": {
@@ -16,6 +16,7 @@
 		"electron": "^11.5.0",
 		"electron-packager": "^15.2.0",
 		"extract-zip": "2.0.1",
+		"fix-path": "^3.0.0",
 		"fs-extra": "^8.1.0"
 	},
 	"devDependencies": {

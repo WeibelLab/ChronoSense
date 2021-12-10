@@ -1,4 +1,6 @@
 const fs = require("fs");
+const path = require('path');
+
 import { getForkedProcess, incrementVP, decrementVP, incrementVR, decrementVR } from "./chronosense.js";
 
 export class AVRecorder {
@@ -20,14 +22,13 @@ export class AVRecorder {
 	) {
 		this.#mediaStream = mediaStream;
 		this.#dirName = dirName  //.replace(/\s/g,''); //regex away whitespace characters. Note: unnecessary due to dialog box selection.
-		this.#dirName = this.#dirName.concat("/");
 		// Check if directory exists, if not then create it
 		if (!fs.existsSync(this.#dirName)) {
 			fs.mkdirSync(this.#dirName);
 		}
 		// Add an 'raw' folder inside the directory that contains the unseekable video files
-		if (!fs.existsSync(this.#dirName.concat("raw/"))) {
-			fs.mkdirSync(this.#dirName.concat("raw/"));
+		if (!fs.existsSync(path.join(this.#dirName,"raw"))) {
+			fs.mkdirSync(path.join(this.#dirName,"raw"));
 		}
 
 		this.#fileName = fileName;
@@ -36,7 +37,7 @@ export class AVRecorder {
 		this.#fileName = this.#fileName.concat(".webm"); //Add file extension at the end of the file
 		// Check if filename exists and if so add a 1 at the end
 		let fileEndNum = 1;
-		while (fs.existsSync(this.#dirName.concat("raw/").concat(this.#fileName))) {
+		while (fs.existsSync(path.join(this.#dirName,"raw",this.#fileName))) {
 			// File name exists, change name and check again
 			this.#fileName = this.#fileName.slice(0, this.#fileName.length - 4);
 			this.#fileName = this.#fileName.concat(fileEndNum.toString());
@@ -46,7 +47,7 @@ export class AVRecorder {
 
 		this.#recorder = new MediaRecorder(this.#mediaStream); //TODO: allow modification of options dict param by user. 
 
-		this.#storageStream = fs.createWriteStream(this.#dirName.concat("raw/").concat(this.#fileName));
+		this.#storageStream = fs.createWriteStream(path.join(this.#dirName,"raw",this.#fileName));
 
 		this.#blobReader = new FileReader();
 
