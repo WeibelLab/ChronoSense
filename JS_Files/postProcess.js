@@ -26,10 +26,11 @@ class postProcesser {
     postProcessVideoFile() {
         if (isWin) {
             process.send("isWin true");
-            this.#c = spawn(FFMPEG_DIR.concat("ffmpeg.exe"), [
+            process.send(FFMPEG_DIR);
+            this.#c = spawn(path.join(FFMPEG_DIR,"ffmpeg.exe"), [
                 "-i",
-                '"'+path.join(this.#dirName, "raw", this.#fileName)+'"',
-                '"'+path.join(this.#dirName, this.#fileName.substring(0, this.#fileName.length - 5).concat(".mp4"))+'"'
+                path.join(this.#dirName, "raw", this.#fileName),
+                path.join(this.#dirName, this.#fileName.substring(0, this.#fileName.length - 5).concat(".mp4"))
             ], {detached: true});
             process.send({ pid: this.#c.pid, child_state: "processing" });
         }

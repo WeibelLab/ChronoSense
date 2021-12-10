@@ -87,7 +87,7 @@ document.onreadystatechange = () => {
 		//Set default directory to current date and time
 		// Used for setting file current date/time
 		var currDate = new Date();
-		recordDirInput.value = path.join(desktopDir, currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
+		recordDirInput.value = desktopDir;
 	}
 };
 
@@ -155,8 +155,7 @@ async function handleWindowControls() {
 				} else if (recordDirInput.value.localeCompare("") == 0) {
 					// Default set to current directory + date/time sequence
 					// Used for setting file current date/time
-					var currDate = new Date();
-					recordDirInput.value = path.join(desktopDir, currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
+					recordDirInput.value = desktopDir;
 					isDirSetToDate = true;
 				}
 			})
