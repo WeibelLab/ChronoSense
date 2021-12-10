@@ -22,8 +22,6 @@ export class AVRecorder {
 	) {
 		this.#mediaStream = mediaStream;
 		this.#dirName = dirName  //.replace(/\s/g,''); //regex away whitespace characters. Note: unnecessary due to dialog box selection.
-		var currDate = new Date();
-		this.#dirName = path.join(this.#dirName,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
 		// Check if directory exists, if not then create it
 		if (!fs.existsSync(this.#dirName)) {
 			fs.mkdirSync(this.#dirName);
