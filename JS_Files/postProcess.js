@@ -7,7 +7,7 @@ const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, 'ffmpeg');
 
 process.on('message', (msg) => {
     let pp = null;
-    console.log('Message from parent:', msg);
+    // console.log('Message from parent:', msg);
     dirName = msg.dirName;
     fileName = msg.fileName;
     pp = new postProcesser(dirName, fileName)
@@ -25,8 +25,7 @@ class postProcesser {
     }
     postProcessVideoFile() {
         if (isWin) {
-            process.send("isWin true");
-            process.send(FFMPEG_DIR);
+            // process.send("isWin true");
             this.#c = spawn(path.join(FFMPEG_DIR,"ffmpeg.exe"), [
                 "-i",
                 path.join(this.#dirName, "raw", this.#fileName),
@@ -35,7 +34,7 @@ class postProcesser {
             process.send({ pid: this.#c.pid, child_state: "processing" });
         }
         else {
-            process.send("isWin false");
+            // process.send("isWin false");
             this.#c = spawn("ffmpeg", [
                 "-i",
                 '"'+path.join(this.#dirName, "raw", this.#fileName)+'"',
@@ -44,16 +43,16 @@ class postProcesser {
             process.send({ pid: this.#c.pid, child_state: "processing" });
         }
 
-        this.#c.stdout.on('data', (data) => {
-            process.send(`stdout: ${data}`);
-        });
+        // this.#c.stdout.on('data', (data) => {
+        //     process.send(`stdout: ${data}`);
+        // });
         
-        this.#c.stderr.on('data', (data) => {
-            process.send(`stderr: ${data}`);
-        });
+        // this.#c.stderr.on('data', (data) => {
+        //     process.send(`stderr: ${data}`);
+        // });
           
-        this.#c.on('close', () => {
-            process.send({ pid: this.#c.pid, child_state: "done" });
-        });
+        // this.#c.on('close', () => {
+        //     process.send({ pid: this.#c.pid, child_state: "done" });
+        // });
     }
 }

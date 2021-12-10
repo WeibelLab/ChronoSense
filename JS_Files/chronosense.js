@@ -15,7 +15,7 @@ const fixPath = require('fix-path');
 fixPath();
 
 const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
-const desktopDir = `${homeDir}/Desktop`;
+const desktopDir = path.join(homeDir, "Desktop");
 
 var window = null;
 var recordBtn = document.getElementById("record-all-btn");
@@ -46,7 +46,7 @@ export function getForkedProcess() {
 	const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 	const POSTPROCESS_PATH = path.join(CHRONOSENSE_ROOT_DIR, 'JS_Files', 'postProcess.js');
 	forked = fork(POSTPROCESS_PATH);
-	console.log(forked);
+	// console.log(forked);
 	return forked;
 }
 
