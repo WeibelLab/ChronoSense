@@ -1,14 +1,14 @@
 # SITE SETTINGS
 title: ChronoSense                      # Title in top navigation bar (navbar) and <head>
-description: Jekyll theme for research project websites # Site description in <head>
-author: Peter Desmet                    # Used for copyright statement in footer
-# url: "https://peterdesmet.github.io"  # No slash at the end
+description: Multimodal Data Capture and Inference # Site description in <head>
+author: HXI Lab                   # Used for copyright statement in footer
+url: "https://hxi.ucsd.edu/"  # No slash at the end
 # baseurl: "/petridish"                 # Only required if your site is on a subdomain e.g. https://username.github.io/sitename
                                         # which has url: "https://username.github.io" (no slash) and baseurl: "/sitename" (leading slash)
                                         # A baseurl affects internal links, see http://peterdesmet.github.io/petridish/about/#links
 
 # SOCIAL PROFILES
-email: your.email@example.com           # Social icon in footer
+email:            # Social icon in footer
 
 # THEME SETTINGS (ALL OPTIONAL)
 remote_theme: peterdesmet/petridish@1.1

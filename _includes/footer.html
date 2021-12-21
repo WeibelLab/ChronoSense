@@ -58,9 +58,11 @@
     </div>
 
     <div class="small mt-2">
-      {% if site.author %}
-        <p>© {{ site.author }}</p>
-      {% endif %}
+      Copyright &copy; {{ site.time | date: '%Y' }} HXI Lab. Powered by <a href="http://jekyllrb.com">Jekyll</a>.
+          <br /><br />
+          <iframe src="http://ghbtns.com/github-btn.html?user=WeibelLab&repo=ChronoSense&type=fork&count=false" allowtransparency="true" frameborder="0" scrolling="0" width="60" height="20"></iframe>
+          <iframe src="http://ghbtns.com/github-btn.html?user=WeibelLab&repo=ChronoSense&type=watch&count=false" allowtransparency="true" frameborder="0" scrolling="0" width="60" height="20"></iframe>
+          <br /><br />
       {% if site.data.footer.license %}
         {{ site.data.footer.license | markdownify }}
       {% endif %}

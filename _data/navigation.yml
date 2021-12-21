@@ -1,8 +1,6 @@
 # Links listed below will be included in your site's navbar (navigation at the top)
 
-- text: Home # Note that users can also reach the homepage by clicking the site's title on the left in the navbar
-  href: /
-- text: Team
-  href: /team/
-- text: Downloads
-  href: /usage/
+- text: Download Latest Version # Note that users can also reach the homepage by clicking the site's title on the left in the navbar
+  href: https://github.com/WeibelLab/ChronoSense/releases/latest
+- text: About Our Team
+  href: https://hxi.ucsd.edu/project/chronosense/
