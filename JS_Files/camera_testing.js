@@ -136,29 +136,30 @@ export class Camera {
 	 *
 	 */
 	setInputAndOutput(video, canvas) {
+		// Removed
 		//Set input Video HTML element
-		if (video instanceof HTMLVideoElement && video !== null) {
-			this.#videoElement = video;
-		} else {
+		// if (video instanceof HTMLVideoElement && video !== null) {
+		// 	this.#videoElement = video;
+		// } else {
 			
-			console.log(
-				"[camera.js:setInputAndOutput()] - ERROR: Video element argument passed is INVALID"
-			);
+		// 	console.log(
+		// 		"[camera.js:setInputAndOutput()] - ERROR: Video element argument passed is INVALID"
+		// 	);
+			
+		// 	return;
+		// }
+		// //Set output Canvas HTML element
+		// if (canvas instanceof HTMLCanvasElement && canvas !== null) {
+		// 	this.#canvasElement = canvas;
+		// 	this.#canvasContext = canvas.getContext("2d");
+		// } else {
+			
+		// 	console.log(
+		// 		"[camera.js:setInputAndOutput()] - ERROR: Canvas element argument passed is INVALID"
+		// 	);
 			
 			return;
-		}
-		//Set output Canvas HTML element
-		if (canvas instanceof HTMLCanvasElement && canvas !== null) {
-			this.#canvasElement = canvas;
-			this.#canvasContext = canvas.getContext("2d");
-		} else {
-			
-			console.log(
-				"[camera.js:setInputAndOutput()] - ERROR: Canvas element argument passed is INVALID"
-			);
-			
-			return;
-		}
+		// }
 	}
 
 	monitorAudio(stream) {
@@ -199,33 +200,35 @@ export class Camera {
 	 */
 
 	async startStream() {
-		/* First check that the canvas and video elements are valid */
-		if (this.#videoElement == null || this.#canvasElement == null) {
-			console.log(
-				"[camera.js:startStream()] - ERROR: Video and canvas elements not set"
-			);
+		// Removed
+		// /* First check that the canvas and video elements are valid */
+		// if (this.#videoElement == null || this.#canvasElement == null) {
+		// 	console.log(
+		// 		"[camera.js:startStream()] - ERROR: Video and canvas elements not set"
+		// 	);
 			
-			return false;
-		}
+		// 	return false;
+		// }
 
-		/* Second check that this object has a deviceId set */
-		if (this.#deviceId === null) {
-			console.log(
-				"[camera.js:startStream()] - ERROR: deviceId NOT set"
-			);
+		// /* Second check that this object has a deviceId set */
+		// if (this.#deviceId === null) {
+		// 	console.log(
+		// 		"[camera.js:startStream()] - ERROR: deviceId NOT set"
+		// 	);
 			
-			return false;
-		}
+		// 	return false;
+		// }
 
 		/* Try to open and start the stream */
 		try {
 			this.#stream = await navigator.mediaDevices.getUserMedia(this.#constraints);
-			if (this.#videoCheckbox.checked){
-				this.#videoElement.srcObject = this.#stream;
-			}
+			// if (this.#videoCheckbox.checked){
+			// 	this.#videoElement.srcObject = this.#stream;
+			// }
 			if (this.#audioCheckbox.checked){
 				this.monitorAudio(this.#stream);
 			}
+
 		} catch (err) {
 			console.log(
 				`camera.js:startStream()] - ERROR: ${err.message}`
@@ -236,29 +239,30 @@ export class Camera {
 		return true;
 	}
 
-	/**
-	 * Draws the Video frames to the Canvas element and continuously calls itself
-	 * until stopped.
-	 *
-	 * @param {HTML Video Element} video - Video element camera originally streams to
-	 * @param {HTML Canvas Element 2D Context} canvasContext - 2D Canvas context taken from the desired output Canvas
-	 * @param {number} canvasWidth - Width of the desired output Canvas
-	 * @param {number} canvasHeight - Height of the desired output Canvas
-	 *
-	 */
-	drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
-		//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
-		if (video.readyState === video.HAVE_ENOUGH_DATA) {
-			canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
-			this.recordFrame(); // Checks for recording status in function
-		}
-		var frameId = requestAnimationFrame(() => {
-			this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
-		});
-		if (!this.#videoCheckbox.checked) {
-			cancelAnimationFrame(frameId);
-		}
-	}
+	// Removed
+	// /**
+	//  * Draws the Video frames to the Canvas element and continuously calls itself
+	//  * until stopped.
+	//  *
+	//  * @param {HTML Video Element} video - Video element camera originally streams to
+	//  * @param {HTML Canvas Element 2D Context} canvasContext - 2D Canvas context taken from the desired output Canvas
+	//  * @param {number} canvasWidth - Width of the desired output Canvas
+	//  * @param {number} canvasHeight - Height of the desired output Canvas
+	//  *
+	//  */
+	// drawToCanvas(video, canvasContext, canvasWidth, canvasHeight) {
+	// 	//canvasContext.clearRect(0, 0, canvasWidth, canvasHeight);
+	// 	if (video.readyState === video.HAVE_ENOUGH_DATA) {
+	// 		canvasContext.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+	// 		this.recordFrame(); // Checks for recording status in function
+	// 	}
+	// 	var frameId = requestAnimationFrame(() => {
+	// 		this.drawToCanvas(video, canvasContext, canvasWidth, canvasHeight);
+	// 	});
+	// 	if (!this.#videoCheckbox.checked) {
+	// 		cancelAnimationFrame(frameId);
+	// 	}
+	// }
 
 	async closeAudioContext(){
 		try{
@@ -286,13 +290,12 @@ export class Camera {
 			})
 		}
 		try {
-			//if (this.#isVisible){
-				// Checking for false b/c true value is updated to false on click
-				if (!this.#audioCheckbox.checked){
+			if (this.#isVisible){
+				if (this.#audioCheckbox.checked){
 					// console.log("closing audio");
 					await this.closeAudioContext();
 				}
-			//}
+			}
 		}
 		catch {
 			console.log("camera not open");
@@ -308,14 +311,7 @@ export class Camera {
 	updateConstraints() {
 		this.stopStream();
 		this.checkboxConstraintHelper();
-		// Enabling and Disabling Recording with isVisible & starting Stream if one platform exist
-		if(this.#videoCheckbox.checked || this.#audioCheckbox.checked) {
-			this.#isVisible = true
-			this.startStream();
-		}
-		if(!this.#videoCheckbox.checked && !this.#audioCheckbox.checked) {
-			this.#isVisible = false;
-		}
+		this.startStream();
 	}
 
 	/**
@@ -508,8 +504,6 @@ export class Camera {
 		});
 
 		audioCheckContainer.addEventListener("click", () => {
-			// this.#audio/videoCheckbox value is being updated instantly to false
-			//console.log(this.#audioCheckbox.checked);
 			this.updateConstraints();
 		});
 
