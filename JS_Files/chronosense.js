@@ -10,6 +10,8 @@ import { Camera } from "./camera.js";
 //import { AudioRecorder } from "./audio_recorder.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
+// Checks for latest ChronoSense version when project is launched
+import {} from "./version.js"
 const { fork } = require('child_process');
 const fixPath = require('fix-path');
 fixPath();
