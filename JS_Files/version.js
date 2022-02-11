@@ -29,7 +29,7 @@ var callback = function(response) {
         // Convert data from page into a parsed json
         parsed_json = JSON.parse(str);
         if (parsed_json.tag_name != local_version) {
-            if(window.confirm('Click "ok" to be redirected to the latest version of Chronosense')) {
+            if(window.confirm('A newer version of ChronoSense is available. Click OK to open the download page.')) {
                 // Redirects users to latest version of ChronoSense via external browser
                 shell.openExternal('https://github.com/WeibelLab/ChronoSense/releases/latest')
 
