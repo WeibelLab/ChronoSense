@@ -2,11 +2,11 @@ import { AVRecorder } from "./avRecorder.js";
 
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
-export class Camera {
-	#deviceId = null;
-	#groupId = null;
-	#kind = null;
-	#label = null;
+export class Audio {
+	#deviceId = "Audio";
+	#groupId = "Audio";
+	#kind = "audioinput";
+	#label = "Audio Only";
 	#videoElement = null;
 	#canvasElement = null;
 	#canvasContext = null;
@@ -36,12 +36,14 @@ export class Camera {
 	 * @param {string} kind - Identifier for type of input from device.
 	 * @param {string} label - Name Identifier (Sensical to user for reading).
 	 */
+
 	constructor(deviceId, groupId, kind, label) {
-		this.#deviceId = deviceId;
-		this.#groupId = groupId;
-		this.#kind = kind;
-		this.#label = label;
+		this.#deviceId = "Audio";
+		this.#groupId = "Audio";
+		this.#kind = "audioinput";
+		this.#label = "Audio Only";
 	}
+
 
 	async getPluginDiv() {
 		let _pluginDiv;
@@ -226,6 +228,7 @@ export class Camera {
 			if (this.#audioCheckbox.checked){
 				this.monitorAudio(this.#stream);
 			}
+
 		} catch (err) {
 			console.log(
 				`camera.js:startStream()] - ERROR: ${err.message}`
@@ -286,13 +289,12 @@ export class Camera {
 			})
 		}
 		try {
-			//if (this.#isVisible){
-				// Checking for false b/c true value is updated to false on click
+			// if (this.#isVisible){
 				if (!this.#audioCheckbox.checked){
 					// console.log("closing audio");
 					await this.closeAudioContext();
 				}
-			//}
+			// }
 		}
 		catch {
 			console.log("camera not open");
@@ -308,12 +310,11 @@ export class Camera {
 	updateConstraints() {
 		this.stopStream();
 		this.checkboxConstraintHelper();
-		// Enabling and Disabling Recording with isVisible & starting Stream if one platform exist
-		if(this.#videoCheckbox.checked || this.#audioCheckbox.checked) {
-			this.#isVisible = true
+		if(this.#audioCheckbox.checked) {
+			this.#isVisible = true;
 			this.startStream();
 		}
-		if(!this.#videoCheckbox.checked && !this.#audioCheckbox.checked) {
+		else {
 			this.#isVisible = false;
 		}
 	}
@@ -422,11 +423,11 @@ export class Camera {
 
 		//Set correct properties
 		//Video element is NOT inserted into DOM since it is used as translation to canvas
-		videoElement.width = "1280";
-		videoElement.height = "720";
-		videoElement.autoplay = true;
-		videoElement.muted = true;
-		videoElement.classList.add("camera-canvas");
+		videoElement.width = "0";
+		videoElement.height = "0";
+		videoElement.autoplay = false;
+		videoElement.muted = false;
+		//videoElement.classList.add("camera-canvas");
 
 		this.setInputAndOutput(videoElement, canvasElement); //Connect elements to class variables.
 	
@@ -472,13 +473,15 @@ export class Camera {
 
 		// Build avCheckContainer 
 		avCheckContainer.classList.add("av-check-container");
+		// Matches record checkbox for audio only
+		avCheckContainer.style.height = "2em";
 		
 		audioCheckContainer.classList.add("av-inner-container");
 		videoCheckContainer.classList.add("av-inner-container");
 
 		this.#videoCheckbox = document.createElement("input");
 		this.#videoCheckbox.type = 'checkbox';
-		this.#videoCheckbox.checked = true;
+		this.#videoCheckbox.checked = false;
 		var videoLabel = document.createElement('label');
 		videoLabel.htmlFor = this.#videoCheckbox;
 		videoLabel.appendChild(document.createTextNode('Video: '));
@@ -508,8 +511,6 @@ export class Camera {
 		});
 
 		audioCheckContainer.addEventListener("click", () => {
-			// this.#audio/videoCheckbox value is being updated instantly to false
-			//console.log(this.#audioCheckbox.checked);
 			this.updateConstraints();
 		});
 
@@ -520,7 +521,7 @@ export class Camera {
 		audioCheckContainer.append(audioLabel);
 		audioCheckContainer.appendChild(this.#audioCheckbox);
 		
-		avCheckContainer.appendChild(videoCheckContainer);
+		//avCheckContainer.appendChild(videoCheckContainer);
 		avCheckContainer.appendChild(audioCheckContainer);
 
 		// var recordBtn = document.getElementById("record-all-btn");
@@ -537,6 +538,9 @@ export class Camera {
 
 		// Attach all to div in the correct order and add to the page
 		cameraContainer.classList.add("camera-inner-container");
+		// Matches width with other screen/video container
+		cameraContainer.style.width = "480";
+
 		//Camera specific identifier
 		cameraContainer.id = `${this.getDeviceId()}`;
 
@@ -662,64 +666,66 @@ export class Camera {
 	 * @return {array} List of instantiated device objects 
 	 */
 	static getDeviceObjects() {
-		var cameraDevices = []
+		var audioDevices = []
+		audioDevices.push(new Audio());
+		return audioDevices;
 		
-		return navigator.mediaDevices.enumerateDevices().then((devices) => {
-			var uniqueInputDevices = [];
-			for (var i = 0; i < devices.length; i++) {
-				// console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
-				if (devices[i].kind.localeCompare("videoinput") == 0) {
-					//Now search through added devices if it already exists
-					var matched = false;
-					for (var j = 0; j < uniqueInputDevices.length; j++) {
-						if (
-							uniqueInputDevices[j].groupId.localeCompare(
-								devices[i].groupId
-							) == 0
-						) {
-							matched = true;
-							break; //If match, break out and don't add to
-						}
-					}
+		// return navigator.mediaDevices.enumerateDevices().then((devices) => {
+		// 	var uniqueInputDevices = [];
+		// 	for (var i = 0; i < devices.length; i++) {
+		// 		// console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
+		// 		if (devices[i].kind.localeCompare("audioinput") == 0) {
+		// 			//Now search through added devices if it already exists
+		// 			var matched = false;
+		// 			for (var j = 0; j < uniqueInputDevices.length; j++) {
+		// 				if (
+		// 					uniqueInputDevices[j].groupId.localeCompare(
+		// 						devices[i].groupId
+		// 					) == 0
+		// 				) {
+		// 					matched = true;
+		// 					break; //If match, break out and don't add to
+		// 				}
+		// 			}
 	
-					if (
-						!matched &&
-						devices[i].deviceId.localeCompare("default") != 0 &&
-						devices[i].deviceId.localeCompare("communications") != 0
-					) {
-						//Filter out "default" and "communications" so there is a alphanumeric
-						//identifier and no duplicates.
-						uniqueInputDevices.push(devices[i]);
-					}
-				}
-			}
-			return new Promise((resolve, reject) => {
-				resolve(uniqueInputDevices);
-			});
-		}).then((currentDevices) => {
-			//console.log(currentDevices);
-			for (var k = 0; k < currentDevices.length; k++) {
-				//if (
-				//	!(
-				//		currentDevices[k].label.includes("kinect") ||
-				//		currentDevices[k].label.includes("Kinect")
-				//	)
-				//) {
-					//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-				var camera = new Camera(
-					currentDevices[k].deviceId,
-					currentDevices[k].groupId,
-					currentDevices[k].kind,
-					currentDevices[k].label
-				);
-				cameraDevices.push(camera);
-				}
-			//} 
-			//console.log(cameraDevices);
-			return new Promise((resolve, reject) => {
-				resolve(cameraDevices);
-			});
-		});
+		// 			if (
+		// 				!matched &&
+		// 				devices[i].deviceId.localeCompare("default") != 0 &&
+		// 				devices[i].deviceId.localeCompare("communications") != 0
+		// 			) {
+		// 				//Filter out "default" and "communications" so there is a alphanumeric
+		// 				//identifier and no duplicates.
+		// 				uniqueInputDevices.push(devices[i]);
+		// 			}
+		// 		}
+		// 	}
+		// 	return new Promise((resolve, reject) => {
+		// 		resolve(uniqueInputDevices);
+		// 	});
+		// }).then((currentDevices) => {
+		// 	//console.log(currentDevices);
+		// 	for (var k = 0; k < currentDevices.length; k++) {
+		// 		//if (
+		// 		//	!(
+		// 		//		currentDevices[k].label.includes("kinect") ||
+		// 		//		currentDevices[k].label.includes("Kinect")
+		// 		//	)
+		// 		//) {
+		// 			//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
+		// 		var audio = new (
+		// 			currentDevices[k].deviceId,
+		// 			currentDevices[k].groupId,
+		// 			currentDevices[k].kind,
+		// 			currentDevices[k].label
+		// 		);
+		// 		audioDevices.push(audio);
+		// 		}
+		// 	//} 
+		// 	//console.log(cameraDevices);
+		// 	return new Promise((resolve, reject) => {
+		// 		resolve(audioDevices);
+		// 	});
+		//  });
 
 	}
 

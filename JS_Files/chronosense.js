@@ -7,6 +7,7 @@ import { getPluginCount, getPluginUI, getPluginList, refreshPlugins } from "./pl
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
+import { Audio } from "./audio.js";
 //import { AudioRecorder } from "./audio_recorder.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
@@ -208,6 +209,10 @@ function setupDevices() {
 	 */
 	devices = devices.concat(ScreenCaptureDevice.getDeviceObjects());
 
+	// Adding on audio devices
+	// Not too sure how this affects multiple audio devices
+	devices = devices.concat(Audio.getDeviceObjects());
+
 	/*
 	 * Complete an initial scan for Camera devices already plugged in and
 	 * populate the Camera Devices list in the UI.
@@ -219,7 +224,7 @@ function setupDevices() {
 	Camera.getDeviceObjects().then((cameraDevices) => {
 		devices = devices.concat(cameraDevices);
 
-		//console.log(devices);
+		// console.log(devices);
 		// Once done getting all device objects, add to dropdown menu
 		populateDeviceList(document.getElementById("device-dropdown-content"));
 	})
@@ -236,8 +241,8 @@ function populateDeviceList(dropdown) {
 	clearDropdown(dropdown);
 
 	for (var i = 0; i < devices.length; i++) {
-		let deviceName = devices[i].getLabel();
-		let deviceID = devices[i].getDeviceId();
+		let	deviceName = devices[i].getLabel();
+		let	deviceID = devices[i].getDeviceId();
 
 		addDropdownMenuOption(dropdown, deviceID, deviceName, devices[i]);
 	}

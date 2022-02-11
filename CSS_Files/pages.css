@@ -231,6 +231,7 @@
 	flex-direction: row;
 	flex-wrap: wrap;
 	align-content: flex-start;
+	align-items: flex-start;
 
 
 	width: 100%;
