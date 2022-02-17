@@ -286,16 +286,12 @@ export class Camera {
 			})
 		}
 		try {
-			//if (this.#isVisible){
-				// Checking for false b/c true value is updated to false on click
-				if (!this.#audioCheckbox.checked){
-					// console.log("closing audio");
-					await this.closeAudioContext();
-				}
-			//}
+			if (this.#audioContext.state != "closed"){
+				await this.closeAudioContext();
+			}
 		}
 		catch {
-			console.log("camera not open");
+			console.log("audio not open");
 		}
 		//console.log("[camera.js:stopStream()] - Camera has been stopped");
 
