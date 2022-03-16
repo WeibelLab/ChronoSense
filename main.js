@@ -1,5 +1,5 @@
 const electron = require('electron');
-const {app, BrowserWindow} = electron;
+const {app, BrowserWindow, systemPreferences} = electron;
 
 let mainWindow;
 let electronScreen;
@@ -36,6 +36,13 @@ function createWindow() {
     mainWindow.on('closed', function() {
         mainWindow = null;
       });
+
+    // Can run this code below rather than running another js file
+    // if(process.platform === "darwin") {
+    //     console.log("systemPreference check in main")
+    //     systemPreferences.askForMediaAccess("camera");
+    //     systemPreferences.askForMediaAccess("microphone");
+    // }
 }
 
 // Listen for application to be ready
