@@ -2,12 +2,6 @@ const { spawn } = require("child_process");
 const path = require('path');
 
 var isWin = process.platform === "win32";
-//Checking if a system is a mac device
-var isMac = process.platform === "darwin";
-if(isMac) {
-    // If mac then run macOS.js file which should ask for camera & microphone access
-    require("./macOS.js")
-}
 
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, 'ffmpeg');
