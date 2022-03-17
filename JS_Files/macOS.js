@@ -1,9 +1,12 @@
+const { systemPreferences } = require('electron').remote
 
-export function fixPermissions(){
-    // https://stackoverflow.com/questions/39468688/electron-cant-find-module-remote-in-the-renderer-process
+export async function fixPermissions(){
     if(process.platform === "darwin") {
-        const { systemPreferences } = require('electron')
-        systemPreferences.askForMediaAccess("camera");
-        systemPreferences.askForMediaAccess("microphone");
+        if(systemPreferences.getMediaAccessStatus("camera") != "granted"){
+            await systemPreferences.askForMediaAccess("camera");
+        }
+        if(systemPreferences.getMediaAccessStatus("microphone") != "granted"){
+            await systemPreferences.askForMediaAccess("microphone");
+        }
     }
 }
