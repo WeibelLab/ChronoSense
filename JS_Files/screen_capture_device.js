@@ -41,6 +41,7 @@ export class ScreenCaptureDevice {
 			this.#constraints.audio = false;
 			this.#audioCheckbox.classList.remove('checkbox-disabled');
 			this.#audioCheckbox.disabled = true;
+			this.#audioCheckbox.checked = false;
 		}
 	}
 
