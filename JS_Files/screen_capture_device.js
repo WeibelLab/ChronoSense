@@ -36,6 +36,14 @@ export class ScreenCaptureDevice {
         this.getCaptureSources();
     }
 
+	fixForMacOS() {
+		if(process.platform === "darwin") {
+			this.#constraints.audio = false;
+			this.#audioCheckbox.classList.remove('checkbox-disabled');
+			this.#audioCheckbox.disabled = true;
+		}
+	}
+
 	async getPluginDiv() {
 		let _pluginDiv;
 		if (this.#isVisible){
@@ -122,6 +130,9 @@ export class ScreenCaptureDevice {
 							chromeMediaSource: 'desktop'
 						}
 					};
+
+					this.fixForMacOS();
+
 					this.startCaptureStream();
 					this.hideSourceOptions();
 				};
