@@ -13,7 +13,7 @@
 	"license": "ISC",
 	"dependencies": {
 		"download": "^6.2.5",
-		"electron": "^11.5.0",
+		"electron": "^13.6.6",
 		"electron-packager": "^15.2.0",
 		"extract-zip": "2.0.1",
 		"fix-path": "^3.0.0",
