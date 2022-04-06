@@ -121,9 +121,6 @@ dist
 # Build file created by GYP
 build/
 
-# JSON Package Lock file (created on install/run)
-package-lock.json
-
 # Ignore built ffmpeg files
 ffmpeg/*
 
