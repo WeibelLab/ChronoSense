@@ -1,4 +1,5 @@
 import { AVRecorder } from "./avRecorder.js";
+import { updateRecordButton } from "./chronosense.js"
 
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
@@ -222,6 +223,17 @@ export class Camera {
 			this.#stream = await navigator.mediaDevices.getUserMedia(this.#constraints);
 			if (this.#videoCheckbox.checked){
 				this.#videoElement.srcObject = this.#stream;
+				const [track] = this.#stream.getVideoTracks()
+				var _this = this;
+				function onStreamDisconnected() {
+					_this.stopStream();
+					updateRecordButton();
+				}
+				track.addEventListener('ended', function() {
+					//Things to do when stream disconnects mid-stream
+					onStreamDisconnected();
+					console.log("stream disconnected")
+				})
 			}
 			if (this.#audioCheckbox.checked){
 				this.monitorAudio(this.#stream);
@@ -356,6 +368,7 @@ export class Camera {
 	 */
 	async stopRecording() {
 		if (this.#isRecording) {
+			console.log('Stop recording')
 			this.#recorder.stopRecording();
 			this.#isRecording = false;
 			// Reenable recording file name after finished recording
