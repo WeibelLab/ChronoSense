@@ -38,6 +38,8 @@ var devices = []; // Generic Device Model -> Move to this instead of specific de
 
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
+
+
 export async function getDevices() {
 	// get devices has a one second timeout to allow for list population
 	let _devices = [];
@@ -436,11 +438,12 @@ async function recordAllSelectedDevices() {
 
 		// Start recording on all devices that are selected. Keep running total of devices recording
 		let numRecording = 0;
+		var currDate = new Date();
+		let recordDirectory = path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
 		devices.forEach((device) => {
 			if (device.getRecordStatus()) {
 				// Start recording
-				var currDate = new Date();
-				device.setDirName(path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString())));
+				device.setDirName(recordDirectory);
 				device.startRecording();
 				numRecording++;
 			} 
