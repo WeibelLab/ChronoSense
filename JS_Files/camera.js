@@ -226,6 +226,7 @@ export class Camera {
 				const [track] = this.#stream.getVideoTracks()
 				var _this = this;
 				function onStreamDisconnected() {
+					swal('Stream Disconnected')
 					_this.stopStream();
 					updateRecordButton();
 				}
