@@ -194,7 +194,7 @@ export class ScreenCaptureDevice {
 				this.#stream = await navigator.mediaDevices.getUserMedia(this.#constraints)
 				this.#videoElement.srcObject = this.#stream;
 			} catch (error) {
-				console.log("STARTCAPTURE:"+error);
+				swal("STARTCAPTURE:"+error);
 				return false;
 			}
 			return true;

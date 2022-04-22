@@ -449,7 +449,7 @@ async function recordAllSelectedDevices() {
 		});
 
 		if (numRecording == 0) {
-			console.log("Error: No device(s) have been selected to record.");
+			swal("Error: No device(s) have been selected to record.");
 		} else {
 			recordBtn.innerText = "Stop Recording";
 			recordBtn.classList.remove("notRecording");
