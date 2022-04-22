@@ -81,6 +81,17 @@ export function decrementVR(){
 	// console.log("VR:", getVR_count());
 }
 
+export function updateRecordButton() {
+	if (isRecording) {
+		recordBtn.innerText = "Start Recording";
+		recordBtn.classList.remove("recording");
+		recordBtn.classList.add("notRecording");
+
+		isRecording = false;
+	}
+	
+}
+
 function getVR_count(){
 	return videos_recorded;
 }
