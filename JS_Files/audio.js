@@ -111,7 +111,7 @@ export class Audio {
 	async startStream() {
 		/* Second check that this object has a deviceId set */
 		if (this.#deviceId === null) {
-			console.log(
+			swal(
 				"[audio.js:startStream()] - ERROR: deviceId NOT set"
 			);
 			
@@ -126,7 +126,7 @@ export class Audio {
 			}
 
 		} catch (err) {
-			console.log(
+			swal(
 				`audio.js:startStream()] - ERROR: ${err.message}`
 			);
 			return false;
@@ -139,7 +139,7 @@ export class Audio {
 		try{
 			await this.#audioContext.close();
 		} catch (err) {
-			console.log("#audioContext not open")
+			swal("#audioContext not open")
 		}
 		var cnvs = this.#audioMonitorUI;
 		var cnvs_cntxt = cnvs.getContext("2d");
@@ -157,7 +157,7 @@ export class Audio {
 			}
 		}
 		catch {
-			console.log("audio not open");
+			swal("audio not open");
 		}
 		//console.log("[audio.js:stopStream()] - Camera has been stopped");
 

@@ -8,6 +8,7 @@ const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { Audio } from "./audio.js";
+import { fixPermissions } from "./macOS.js";
 //import { AudioRecorder } from "./audio_recorder.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
@@ -16,6 +17,7 @@ import {} from "./version.js"
 const { fork } = require('child_process');
 const fixPath = require('fix-path');
 fixPath();
+fixPermissions();
 
 const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
 const desktopDir = path.join(homeDir, "Desktop");
@@ -37,6 +39,8 @@ var videos_processing = 0; // num of videos currently in post processing
 var devices = []; // Generic Device Model -> Move to this instead of specific device arrays
 
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
+
+
 
 export async function getDevices() {
 	// get devices has a one second timeout to allow for list population
@@ -447,18 +451,19 @@ async function recordAllSelectedDevices() {
 
 		// Start recording on all devices that are selected. Keep running total of devices recording
 		let numRecording = 0;
+		var currDate = new Date();
+		let recordDirectory = path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
 		devices.forEach((device) => {
 			if (device.getRecordStatus()) {
 				// Start recording
-				var currDate = new Date();
-				device.setDirName(path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString())));
+				device.setDirName(recordDirectory);
 				device.startRecording();
 				numRecording++;
 			} 
 		});
 
 		if (numRecording == 0) {
-			console.log("Error: No device(s) have been selected to record.");
+			swal("Error: No device(s) have been selected to record.");
 		} else {
 			recordBtn.innerText = "Stop Recording";
 			recordBtn.classList.remove("notRecording");

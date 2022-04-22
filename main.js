@@ -23,8 +23,9 @@ function createWindow() {
         show: false
      });
     mainWindow.once('ready-to-show', () => {
-        mainWindow.show()
-      })
+        mainWindow.show();
+    })
+
     // Load html into window
     mainWindow.loadFile('HTML_Files/index.html');   //Change back to index.html before ready
     
@@ -36,6 +37,8 @@ function createWindow() {
     mainWindow.on('closed', function() {
         mainWindow = null;
       });
+    
+    
 }
 
 // Listen for application to be ready

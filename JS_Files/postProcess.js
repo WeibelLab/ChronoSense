@@ -2,6 +2,7 @@ const { spawn } = require("child_process");
 const path = require('path');
 
 var isWin = process.platform === "win32";
+
 const CHRONOSENSE_ROOT_DIR = path.join(path.resolve(__dirname), '../');
 const FFMPEG_DIR = path.join(CHRONOSENSE_ROOT_DIR, 'ffmpeg');
 
