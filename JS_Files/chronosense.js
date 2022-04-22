@@ -8,6 +8,7 @@ const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { Audio } from "./audio.js";
+import { fixPermissions } from "./macOS.js";
 //import { AudioRecorder } from "./audio_recorder.js";
 //import { GenericDevice } from "./generic_device.js";
 import { ScreenCaptureDevice } from "./screen_capture_device.js";
@@ -16,6 +17,7 @@ import {} from "./version.js"
 const { fork } = require('child_process');
 const fixPath = require('fix-path');
 fixPath();
+fixPermissions();
 
 const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
 const desktopDir = path.join(homeDir, "Desktop");
@@ -450,7 +452,7 @@ async function recordAllSelectedDevices() {
 		});
 
 		if (numRecording == 0) {
-			console.log("Error: No device(s) have been selected to record.");
+			swal("Error: No device(s) have been selected to record.");
 		} else {
 			recordBtn.innerText = "Stop Recording";
 			recordBtn.classList.remove("notRecording");

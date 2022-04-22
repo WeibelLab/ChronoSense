@@ -141,7 +141,7 @@ export class Camera {
 			this.#videoElement = video;
 		} else {
 			
-			console.log(
+			swal(
 				"[camera.js:setInputAndOutput()] - ERROR: Video element argument passed is INVALID"
 			);
 			
@@ -153,7 +153,7 @@ export class Camera {
 			this.#canvasContext = canvas.getContext("2d");
 		} else {
 			
-			console.log(
+			swal(
 				"[camera.js:setInputAndOutput()] - ERROR: Canvas element argument passed is INVALID"
 			);
 			
@@ -201,7 +201,7 @@ export class Camera {
 	async startStream() {
 		/* First check that the canvas and video elements are valid */
 		if (this.#videoElement == null || this.#canvasElement == null) {
-			console.log(
+			swal(
 				"[camera.js:startStream()] - ERROR: Video and canvas elements not set"
 			);
 			
@@ -210,7 +210,7 @@ export class Camera {
 
 		/* Second check that this object has a deviceId set */
 		if (this.#deviceId === null) {
-			console.log(
+			swal(
 				"[camera.js:startStream()] - ERROR: deviceId NOT set"
 			);
 			
@@ -227,7 +227,7 @@ export class Camera {
 				this.monitorAudio(this.#stream);
 			}
 		} catch (err) {
-			console.log(
+			swal(
 				`camera.js:startStream()] - ERROR: ${err.message}`
 			);
 			return false;
@@ -264,7 +264,7 @@ export class Camera {
 		try{
 			await this.#audioContext.close();
 		} catch (err) {
-			console.log("#audioContext not open")
+			swal("#audioContext not open")
 		}
 		var cnvs = this.#audioMonitorUI;
 		var cnvs_cntxt = cnvs.getContext("2d");
@@ -291,7 +291,7 @@ export class Camera {
 			}
 		}
 		catch {
-			console.log("audio not open");
+			swal("audio not open");
 		}
 		//console.log("[camera.js:stopStream()] - Camera has been stopped");
 

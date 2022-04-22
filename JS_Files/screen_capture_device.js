@@ -36,6 +36,15 @@ export class ScreenCaptureDevice {
         this.getCaptureSources();
     }
 
+	fixForMacOS() {
+		if(process.platform === "darwin") {
+			this.#constraints.audio = false;
+			this.#audioCheckbox.classList.remove('checkbox-disabled');
+			this.#audioCheckbox.disabled = true;
+			this.#audioCheckbox.checked = false;
+		}
+	}
+
 	async getPluginDiv() {
 		let _pluginDiv;
 		if (this.#isVisible){
@@ -122,6 +131,9 @@ export class ScreenCaptureDevice {
 							chromeMediaSource: 'desktop'
 						}
 					};
+
+					this.fixForMacOS();
+
 					this.startCaptureStream();
 					this.hideSourceOptions();
 				};
@@ -182,7 +194,7 @@ export class ScreenCaptureDevice {
 				this.#stream = await navigator.mediaDevices.getUserMedia(this.#constraints)
 				this.#videoElement.srcObject = this.#stream;
 			} catch (error) {
-				console.log("STARTCAPTURE:"+error);
+				swal("STARTCAPTURE:"+error);
 				return false;
 			}
 			return true;
