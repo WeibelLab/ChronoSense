@@ -1,6 +1,6 @@
 {
 	"name": "ChronoSense",
-	"version": "1.7.0",
+	"version": "1.7.1",
 	"description": "Chronosense Electron Application",
 	"main": "main.js",
 	"scripts": {
