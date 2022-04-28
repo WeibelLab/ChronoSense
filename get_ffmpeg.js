@@ -68,7 +68,7 @@ function recFindByExt(base,ext,files,result)
 
     files.forEach( 
         function (file) {
-            var newbase = path.join(base,file)
+            let newbase = path.join(base,file)
             if ( fs.statSync(newbase).isDirectory() )
             {
                 result = recFindByExt(newbase,ext,fs.readdirSync(newbase),result)

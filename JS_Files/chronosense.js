@@ -3,6 +3,7 @@
 // All of the Node.js APIs are available in this process.
 const remote = require("electron").remote;
 const path = require("path");
+const fs = require("fs");
 import { getPluginCount, getPluginUI, getPluginList, refreshPlugins } from "./plugin.js";
 const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
@@ -29,14 +30,15 @@ var recordDirInput = document.getElementById("recording-dir-path");
 var recordDirBtn = document.getElementById("record-path-btn");
 
 var isRecording = false;
-var isDirSetToDate = true;
+var customDirectory = false;
 var forked = null;
 
 var videos_recorded = 0; // num of videos created by avRecorder that need processing
 var videos_processing = 0; // num of videos currently in post processing
 
-//Arrays for all devices
-var devices = []; // Generic Device Model -> Move to this instead of specific device arrays
+var devices = [];
+var selectedDevices = [];
+var isDeviceListOpen = false;
 
 const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
@@ -168,12 +170,12 @@ async function handleWindowControls() {
 			dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
 				if (!promise.canceled) {
 					recordDirInput.value = promise.filePaths[0];
-					isDirSetToDate = false; // Change to false if user selects their own folder.
+					customDirectory = true; // Change to true if user selects their own folder.
 				} else if (recordDirInput.value.localeCompare("") == 0) {
 					// Default set to current directory + date/time sequence
 					// Used for setting file current date/time
 					recordDirInput.value = desktopDir;
-					isDirSetToDate = true;
+					customDirectory = false;
 				}
 			})
 		}
@@ -257,7 +259,7 @@ function populateDeviceList(dropdown) {
 	/* First clear the list */
 	clearDropdown(dropdown);
 
-	for (var i = 0; i < devices.length; i++) {
+	for (let i = 0; i < devices.length; i++) {
 		let	deviceName = devices[i].getLabel();
 		let	deviceID = devices[i].getDeviceId();
 
@@ -275,6 +277,7 @@ async function refreshDevices() {
 		await device.stop();
 	}
 	devices = [];
+	selectedDevices = [];
 	// Clear out the list of devices
 	clearPageContent(document.getElementById("camera-video-feed-container"));
 	clearDropdown(document.getElementById("device-dropdown-content"));
@@ -307,8 +310,6 @@ function clearContainer(container) {
 		container.removeChild(container.lastElementChild);
 	}
 }
-
-var isDeviceListOpen = false;
 
 /**
  * Opens or closes device dropdown menus to account for clicking outside options to close & open seamlessly.
@@ -362,9 +363,9 @@ async function addDropdownMenuOption(
 	device
 ) {
 	//Create necessary elements with outer div wrapper and inner content
-	var parentDiv = document.createElement("div");
-	var childDiv = document.createElement("div");
-	var checkImg = document.createElement("img");
+	let parentDiv = document.createElement("div");
+	let childDiv = document.createElement("div");
+	let checkImg = document.createElement("img");
 
 	parentDiv.id = "Device" + dropdownID;
 	childDiv.innerText = dropdownName;
@@ -376,7 +377,7 @@ async function addDropdownMenuOption(
 	// Currently the plan is to have a single "device" page. So only focus on camera page functions
 	// * Camera Dropdown Option
 	parentDiv.addEventListener("click", (evt) => {
-		onCameraSelection(evt.currentTarget, device);
+		onDeviceSelection(evt.currentTarget, device);
 	});
 
 	// Add elements to
@@ -389,7 +390,7 @@ async function addDropdownMenuOption(
  * @param {HTML Element} targetElement - HTML div element associated with the dropdown menu option that was selected.
  * @param {Video Object} device - Camera Class object used to attach canvas/video for output and control.
  */
-async function onCameraSelection(targetElement, device) {
+async function onDeviceSelection(targetElement, device) {
 	//If VISIBLE, make check invisible, clear out HTML elements, close feed.
 	//If INVISIBLE, make visible, create HTML elements, start feed.
 	if (
@@ -407,7 +408,9 @@ async function onCameraSelection(targetElement, device) {
 			await getPluginUI();
 		}
 
-		var buttonContainer = document.getElementById(device.getDeviceId()).querySelector(".close-button");
+		selectedDevices.push(device);
+
+		let buttonContainer = document.getElementById(device.getDeviceId()).querySelector(".close-button");
 		buttonContainer.addEventListener("click", () => {
 			targetElement.click();
 		})
@@ -426,12 +429,21 @@ async function onCameraSelection(targetElement, device) {
 		}
 
 		await device.stop();
-		device.clearUI();
+		
+		selectedDevices = selectedDevices.filter(item => item !== device)
 
 		while (outermostDiv.lastElementChild) {
 			outermostDiv.removeChild(outermostDiv.lastElementChild);
 		}
 		outermostDiv.remove();
+	}
+}
+
+function checkRecordDirectoryExists(path){
+	if (fs.existsSync(path)) {
+		return true;
+	} else {
+		return false;
 	}
 }
 
@@ -444,23 +456,27 @@ async function recordAllSelectedDevices() {
 	if (!isRecording) {
 		// Not recording - start
 		// First, change directory to most up to date time if not set by user
-		if (isDirSetToDate) {
+		if (!customDirectory) {
 			// Used for setting file current date/time
 			recordDirInput.value = desktopDir;
 		}
-
-		// Start recording on all devices that are selected. Keep running total of devices recording
 		let numRecording = 0;
-		var currDate = new Date();
-		let recordDirectory = path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
-		devices.forEach((device) => {
-			if (device.getRecordStatus()) {
+		let recordDirExists = checkRecordDirectoryExists(recordDirInput.value)
+
+		if(recordDirExists){
+			// Start recording on all devices that are selected. Keep running total of devices recording
+			let currDate = new Date();
+			let recordDirectory = path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
+			selectedDevices.forEach((device) => {
 				// Start recording
 				device.setDirName(recordDirectory);
 				device.startRecording();
 				numRecording++;
-			} 
-		});
+			});
+		}
+		else{
+			swal("Error: Record directory does not exist. Choose a new location.");
+		}
 
 		if (numRecording == 0) {
 			swal("Error: No device(s) have been selected to record.");
@@ -470,13 +486,12 @@ async function recordAllSelectedDevices() {
 			recordBtn.classList.add("recording");
 			isRecording = true;
 		}
+
 	} else {
 		// Currently recording - stop 
-		devices.forEach((device) => {
-			if (device.getRecordStatus()) {
-				// Stop Recording
-				device.stopRecording();
-			} 
+		selectedDevices.forEach((device) => {
+			// Stop recording
+			device.stopRecording();
 		});
 
 		recordBtn.innerText = "Start Recording";

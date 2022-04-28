@@ -24,7 +24,6 @@ export class ScreenCaptureDevice {
 
 	#dirName = null;
 
-	#isVisible = false;
 	#isRecording = false;
 	#stream = null;
 
@@ -45,18 +44,9 @@ export class ScreenCaptureDevice {
 		}
 	}
 
-	async getPluginDiv() {
-		let _pluginDiv;
-		if (this.#isVisible){
-			_pluginDiv = this.#pluginDiv;
-			return _pluginDiv;
-		}
-		else{
-			await wait(100).then( () => {
-				_pluginDiv = this.#pluginDiv;
-				return _pluginDiv;
-			});
-		}
+	getPluginDiv() {
+		let _pluginDiv = this.#pluginDiv;
+		return _pluginDiv;
 	}
 
 	/**
@@ -227,7 +217,7 @@ export class ScreenCaptureDevice {
 	 * Starts recording video/audio from the currently streaming source.
 	 */
 	startRecording() {
-		if (!this.#isRecording && this.#isVisible) {
+		if (!this.#isRecording) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
 				this.#dirName,
@@ -447,7 +437,6 @@ export class ScreenCaptureDevice {
 
 
 		this.displaySourceOptions(recordCheckContainer);
-		this.#isVisible = true;
 		return screenCapContainer;
 	}
 
@@ -482,26 +471,6 @@ export class ScreenCaptureDevice {
 	 */
 	async stop() {
 		await this.stopCaptureStream(this.#videoElement);
-	}
-
-	clearUI(){
-		this.#isVisible = false;
-		this.#recordCheckbox = null;
-		return;
-	}
-
-	/**
-	 * Returns the boolean value of record selection status
-	 * 
-	 * @returns {bool} - True if selected to record, false otherwise.
-	 */
-	 getRecordStatus() {
-		try{
-			return this.#recordCheckbox.checked;
-		}
-		catch{
-			return false;
-		}
 	}
 
 	/**
