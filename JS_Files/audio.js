@@ -9,7 +9,6 @@ export class Audio {
 	#label = "Audio Only";
 	#videoElement = null;
 	#audioSelector = null;
-	#recordCheckbox = null;
 	#audioCheckbox = null;
 	#audioMonitorUI = null;
 	#audioContext = null;
@@ -256,7 +255,6 @@ export class Audio {
 		let avCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
-		let recordCheckContainer = document.createElement("div");
 		let closeButton = document.createElement("button");
 		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
@@ -300,19 +298,6 @@ export class Audio {
 		fileNameContainer.appendChild(fileUpperContainer);
 		fileNameContainer.appendChild(lowerTextBox);
 
-		// Build recordCheckContainer
-		recordCheckContainer.classList.add("record-check-container");
-
-		this.#recordCheckbox = document.createElement("input");
-		this.#recordCheckbox.type = 'checkbox';
-		this.#recordCheckbox.checked = true;
-		let recordLabel = document.createElement('label');
-		recordLabel.htmlFor = this.#recordCheckbox;
-		recordLabel.appendChild(document.createTextNode('Record:  '));
-
-		recordCheckContainer.appendChild(recordLabel);
-		recordCheckContainer.appendChild(this.#recordCheckbox);
-
 		// Build avCheckContainer 
 		avCheckContainer.classList.add("av-check-container");
 		// Matches record checkbox for audio only
@@ -327,16 +312,9 @@ export class Audio {
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
-		this.#recordCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
-
-		this.#recordCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 		//this.#audioSelector.classList.add('checkbox-disabled')
-
-		recordCheckContainer.addEventListener("click", () => {
-			this.updateRecordStatus();
-		});
 
 		audioCheckContainer.addEventListener("click", () => {
 			this.updateConstraints();
@@ -351,8 +329,6 @@ export class Audio {
 		// Start adding buttons and containers to the full video element
 		cameraButtonsContainer.classList.add("camera-buttons-container");
 		cameraButtonsContainer.classList.add("camera-buttons-container-spacing");
-		// Add recordCheckContainer
-		cameraButtonsContainer.appendChild(recordCheckContainer);
 		// Add fileNameContainer
 		cameraButtonsContainer.appendChild(fileNameContainer);
 		// Add avCheckContainer 
@@ -409,8 +385,6 @@ export class Audio {
 			// Preview is off and audio isn't checked, so check
 			this.#constraints.audio = false;
 		}
-
-		// this.#recordStatus = this.#recordCheckbox.checked;
 	}
 
 	/**
@@ -436,20 +410,6 @@ export class Audio {
 	 */
 	async stop() {
 		await this.stopStream();
-	}
-
-	/**
-	 * Returns the boolean value of record selection status
-	 * 
-	 * @returns {bool} - True if selected to record, false otherwise.
-	 */
-	 getRecordStatus() {
-		try{
-			return this.#recordCheckbox.checked;
-		}
-		catch{
-			return false;
-		}
 	}
 
 	/**

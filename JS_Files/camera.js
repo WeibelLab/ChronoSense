@@ -12,7 +12,6 @@ export class Camera {
 	#canvasElement = null;
 	#canvasContext = null;
 	#audioSelector = null;
-	#recordCheckbox = null;
 	#videoCheckbox = null;
 	#audioCheckbox = null;
 	#audioMonitorUI = null;
@@ -405,7 +404,6 @@ export class Camera {
 		let videoCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
-		let recordCheckContainer = document.createElement("div");
 		let closeButton = document.createElement("button");
 		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
@@ -451,22 +449,8 @@ export class Camera {
 		fileNameContainer.appendChild(fileUpperContainer);
 		fileNameContainer.appendChild(lowerTextBox);
 
-		// Build recordCheckContainer
-		recordCheckContainer.classList.add("record-check-container");
-
-		this.#recordCheckbox = document.createElement("input");
-		this.#recordCheckbox.type = 'checkbox';
-		this.#recordCheckbox.checked = true;
-		let recordLabel = document.createElement('label');
-		recordLabel.htmlFor = this.#recordCheckbox;
-		recordLabel.appendChild(document.createTextNode('Record:  '));
-
-		recordCheckContainer.appendChild(recordLabel);
-		recordCheckContainer.appendChild(this.#recordCheckbox);
-
 		// Build avCheckContainer 
 		avCheckContainer.classList.add("av-check-container");
-		
 		audioCheckContainer.classList.add("av-inner-container");
 		videoCheckContainer.classList.add("av-inner-container");
 
@@ -484,18 +468,12 @@ export class Camera {
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
-		this.#recordCheckbox.classList.add('flipswitch');
 		this.#videoCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
 
-		this.#recordCheckbox.classList.add('checkbox-disabled');
 		this.#videoCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 		//this.#audioSelector.classList.add('checkbox-disabled')
-
-		recordCheckContainer.addEventListener("click", () => {
-			this.updateRecordStatus();
-		});
 		
 		videoCheckContainer.addEventListener("click", () => {
 			this.updateConstraints();
@@ -520,8 +498,6 @@ export class Camera {
 		// Start adding buttons and containers to the full video element
 		cameraButtonsContainer.classList.add("camera-buttons-container");
 		cameraButtonsContainer.classList.add("camera-buttons-container-spacing");
-		// Add recordCheckContainer
-		cameraButtonsContainer.appendChild(recordCheckContainer);
 		// Add fileNameContainer
 		cameraButtonsContainer.appendChild(fileNameContainer);
 		// Add avCheckContainer 
@@ -589,8 +565,6 @@ export class Camera {
 			// Preview is off and audio isn't checked, so check
 			this.#constraints.audio = false;
 		}
-
-		// this.#recordStatus = this.#recordCheckbox.checked;
 	}
 
 	/**
@@ -616,20 +590,6 @@ export class Camera {
 	 */
 	async stop() {
 		await this.stopStream();
-	}
-
-	/**
-	 * Returns the boolean value of record selection status
-	 * 
-	 * @returns {bool} - True if selected to record, false otherwise.
-	 */
-	 getRecordStatus() {
-		try{
-			return this.#recordCheckbox.checked;
-		}
-		catch{
-			return false;
-		}
 	}
 
 	/**
