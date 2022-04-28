@@ -337,7 +337,7 @@ export class ScreenCaptureDevice {
 		this.#recordCheckbox = document.createElement("input");
 		this.#recordCheckbox.type = 'checkbox';
 		this.#recordCheckbox.checked = true;
-		var recordLabel = document.createElement('label');
+		let recordLabel = document.createElement('label');
 		recordLabel.htmlFor = this.#recordCheckbox;
 		recordLabel.appendChild(document.createTextNode('Record:  '));
 		
@@ -353,14 +353,14 @@ export class ScreenCaptureDevice {
 		this.#videoCheckbox = document.createElement("input");
 		this.#videoCheckbox.type = 'checkbox';
 		this.#videoCheckbox.checked = true;
-		var videoLabel = document.createElement('label');
+		let videoLabel = document.createElement('label');
 		videoLabel.htmlFor = this.#videoCheckbox;
 		videoLabel.appendChild(document.createTextNode('Video: '));
 
 		this.#audioCheckbox = document.createElement("input");
 		this.#audioCheckbox.type = 'checkbox';
 		this.#audioCheckbox.checked = true;
-		var audioLabel = document.createElement('label');
+		let audioLabel = document.createElement('label');
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
@@ -488,7 +488,7 @@ export class ScreenCaptureDevice {
 	 * @return {array} List of instantiated device objects 
 	 */
 	static getDeviceObjects() {
-        var captureDevices = []
+        let captureDevices = []
         captureDevices.push(new ScreenCaptureDevice());
         return captureDevices;
 
