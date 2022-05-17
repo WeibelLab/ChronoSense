@@ -476,10 +476,12 @@ async function recordAllSelectedDevices() {
 		}
 		else{
 			swal("Error: Record directory does not exist. Choose a new location.");
+			return;
 		}
 
 		if (numRecording == 0) {
 			swal("Error: No device(s) have been selected to record.");
+			return;
 		} else {
 			recordBtn.innerText = "Stop Recording";
 			recordBtn.classList.remove("notRecording");
