@@ -288,12 +288,14 @@ export class Camera {
 			})
 		}
 		try {
-			if (this.#audioContext.state != "closed"){
-				await this.closeAudioContext();
+			if(this.#audioContext){
+				if (this.#audioContext.state != "closed"){
+					await this.closeAudioContext();
+				}
 			}
 		}
 		catch {
-			swal("audio not open");
+			console.log("audio not open");
 		}
 		//console.log("[camera.js:stopStream()] - Camera has been stopped");
 
