@@ -9,8 +9,8 @@
 		"postinstall": "node ./get_ffmpeg.js",
 		"package": "electron-packager ."
 	},
-	"author": "Alexander Schonken",
-	"license": "ISC",
+	"author": "WeibelLab",
+	"license": "GPL-3.0-or-later",
 	"dependencies": {
 		"download": "^6.2.5",
 		"electron": "^13.6.6",
