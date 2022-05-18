@@ -467,6 +467,17 @@ async function recordAllSelectedDevices() {
 			// Start recording on all devices that are selected. Keep running total of devices recording
 			let currDate = new Date();
 			let recordDirectory = path.join(recordDirInput.value,currDate.getFullYear().toString().concat('_').concat((currDate.getMonth() + 1).toString()).concat("_").concat(currDate.getDate().toString()).concat('_').concat(currDate.getHours().toString()).concat('_').concat(currDate.getMinutes().toString()).concat('_').concat(currDate.getSeconds().toString()));
+			
+			// Prevents the user from recording any devices if screen capture is not selected
+			// Looks through all devices before attempting to record to check if there is a null screen capture
+			selectedDevices.forEach((device) => {
+				if(device.getLabel() == "Screen Capture") {
+					if(device.getScreenCaptureStatus() == null) {
+						swal("Select a screen to record")
+						throw new Error('Select a screen to record')
+					}
+				}
+			})
 			selectedDevices.forEach((device) => {
 				// Start recording
 				device.setDirName(recordDirectory);
