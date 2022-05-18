@@ -498,6 +498,7 @@ async function recordAllSelectedDevices() {
 			recordBtn.classList.remove("notRecording");
 			recordBtn.classList.add("recording");
 			isRecording = true;
+			disable_on_rec_buttons(true);
 		}
 
 	} else {
@@ -512,9 +513,24 @@ async function recordAllSelectedDevices() {
 		recordBtn.classList.add("notRecording");
 
 		isRecording = false;
+		disable_on_rec_buttons(false);
 		
 	}
 }
+
+function disable_on_rec_buttons(disable){
+	if(disable){
+		document.querySelectorAll('.disable_on_rec').forEach(elem => {
+			elem.disabled = true;
+		});
+	}
+	else{
+		document.querySelectorAll('.disable_on_rec').forEach(elem => {
+			elem.disabled = false;
+		});
+	}
+}
+
 
 /**
  * Function that is called to make sure all devices are properly shut down
