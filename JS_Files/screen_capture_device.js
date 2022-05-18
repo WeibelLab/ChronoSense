@@ -227,7 +227,7 @@ export class ScreenCaptureDevice {
 			// Disable the record filename input when recording
 			this.#fileNameInputElement.disabled = true;
 			//Disables record/video/audio checkbox option when recording starts
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
     			elem.disabled = true;
 			});
 		} else {
@@ -246,7 +246,7 @@ export class ScreenCaptureDevice {
 			// Reenable recording file name after finished recording
 			this.#fileNameInputElement.disabled = false;
 			//Enables record/video/audio checkbox option when recording stops
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
     			elem.disabled = false;
 			});
 			this.#recorder = null;

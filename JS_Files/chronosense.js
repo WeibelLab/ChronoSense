@@ -498,6 +498,7 @@ async function recordAllSelectedDevices() {
 			recordBtn.classList.remove("notRecording");
 			recordBtn.classList.add("recording");
 			isRecording = true;
+			
 		}
 
 	} else {

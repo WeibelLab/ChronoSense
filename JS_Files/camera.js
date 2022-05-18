@@ -333,7 +333,7 @@ export class Camera {
 			this.#fileNameInputElement.disabled = true;
 			this.#audioSelector.disabled = true;
 			//Disables record/video/audio checkbox option when recording starts
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
     			elem.disabled = true;
 			});
 		} else {
@@ -361,7 +361,7 @@ export class Camera {
 			this.#fileNameInputElement.disabled = false;
 			this.#audioSelector.disabled = false;
 			//Enables record/video/audio checkbox option when recording stops
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
+			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
     			elem.disabled = false;
 			});
 			this.#recorder = null;
