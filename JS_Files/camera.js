@@ -327,15 +327,7 @@ export class Camera {
 				this.#fileNameInputElement.value
 			);
 			this.#recorder.startRecording();
-			//this.#recorder.recorderSetup(0); //0 for video only
 			this.#isRecording = true;
-			// Disable the record filename input when recording
-			this.#fileNameInputElement.disabled = true;
-			this.#audioSelector.disabled = true;
-			//Disables record/video/audio checkbox option when recording starts
-			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
-    			elem.disabled = true;
-			});
 		} else {
 			this.stopRecording();
 		}
@@ -357,13 +349,6 @@ export class Camera {
 		if (this.#isRecording) {
 			this.#recorder.stopRecording();
 			this.#isRecording = false;
-			// Reenable recording file name after finished recording
-			this.#fileNameInputElement.disabled = false;
-			this.#audioSelector.disabled = false;
-			//Enables record/video/audio checkbox option when recording stops
-			document.querySelectorAll('.checkbox-disabled').forEach(elem => {
-    			elem.disabled = false;
-			});
 			this.#recorder = null;
 		}
 	}
@@ -473,9 +458,11 @@ export class Camera {
 		this.#videoCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
 
-		this.#videoCheckbox.classList.add('checkbox-disabled');
-		this.#audioCheckbox.classList.add('checkbox-disabled');
-		//this.#audioSelector.classList.add('checkbox-disabled')
+		this.#videoCheckbox.classList.add('disable_on_rec');
+		this.#audioCheckbox.classList.add('disable_on_rec');
+		this.#audioSelector.classList.add('disable_on_rec');
+		this.#fileNameInputElement.classList.add('disable_on_rec');
+		closeButton.classList.add('disable_on_rec');
 		
 		videoCheckContainer.addEventListener("click", () => {
 			this.updateConstraints();

@@ -36,27 +36,22 @@
 			<div id="camera-page">
 				<div class="camera-btn-container">
 					<div class="top-left-btn-container"> 
-						<div class="chrono-dropdown checkbox-disabled" id="device-dropdown">
-							<a
-								href="#"
-								class="chrono-dropdown-btn"
-								id="camera-dropdown-btn"
-								>Devices</a
-							>
+						<button class="chrono-dropdown chrono-dropdown-btn disable_on_rec" id="device-dropdown">
+							Devices
 							<div
 								class="chrono-dropdown-content"
 								id="device-dropdown-content"
 							>
 								<!-- Dynamically fill when camera devices are connected -->
 							</div>
-						</div>
-						<button class="general-btn checkbox-disabled" id="refresh-cameras-btn">Refresh Devices</button>
+						</button>
+						<button class="general-btn disable_on_rec" id="refresh-cameras-btn">Refresh Devices</button>
 					</div>
 					<div class="record-dir-container">
 						<button class="general-btn" id="record-all-btn">Start Recording</button>
 						<div class="general-btn dir-container">
 							<input type="text" disabled="true" id="recording-dir-path" value="./">
-							<button class="general-btn" id="record-path-btn">Select Record Directory</button>
+							<button class="general-btn disable_on_rec" id="record-path-btn">Select Record Directory</button>
 						</div>
 					</div>
 				</div>
