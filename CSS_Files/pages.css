@@ -31,7 +31,6 @@
 
 .chrono-dropdown {
 	position: relative;
-	width: 8em;
 	user-select: none;
 }
 
@@ -43,7 +42,7 @@
 	text-decoration: none;
 	display: block;
 	text-align: center;
-	width: 8em;
+	width: 9.5em;
 	color: var(--primaryDarkContrastColor);
 	background-color: #e4e4e4;
 	font-weight: 700;
@@ -64,10 +63,10 @@
 	display: none; /* Change to block when button clicked */
 	position: absolute;
 	background-color: #ffffff;
-	min-width: 8em;
+	min-width: 9.5em;
 	width: auto;
-	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
-	z-index: 1;
+	box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+	z-index: 5;
 }
 
 .chrono-dropdown-content > div {
@@ -112,9 +111,6 @@
 	font-weight: 400;
 	height: 2em;
 	cursor: pointer;
-
-	margin: 2px;
-
 }
 
 .general-txt {
@@ -164,7 +160,7 @@
 	flex-direction: row;
 	align-items: center;
 	height: 5em;
-
+	margin-right: 10px;
 }
 
 .notRecording {
