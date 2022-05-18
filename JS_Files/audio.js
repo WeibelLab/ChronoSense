@@ -304,7 +304,6 @@ export class Audio {
 		this.#audioCheckbox.classList.add('disable_on_rec');
 		this.#audioSelector.classList.add('disable_on_rec');
 		this.#fileNameInputElement.classList.add('disable_on_rec');
-		closeButton.classList.add('disable_on_rec');
 
 		audioCheckContainer.addEventListener("click", () => {
 			this.updateConstraints();

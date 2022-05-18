@@ -344,7 +344,6 @@ export class ScreenCaptureDevice {
 		this.#videoCheckbox.classList.add('disable_on_rec');
 		this.#audioCheckbox.classList.add('disable_on_rec');
 		this.#fileNameInputElement.classList.add('disable_on_rec');
-		closeButton.classList.add('disable_on_rec');
 
 		videoCheckContainer.addEventListener("click", () => {
 			if(this.#videoCheckbox.checked) {
