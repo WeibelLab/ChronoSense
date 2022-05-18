@@ -309,3 +309,11 @@ body {
 	color: lightgray;
 	background: gray;
 }
+
+.general-btn.disable_on_rec:disabled {
+	opacity: 0.3;
+}
+
+.chrono-dropdown-btn.disable_on_rec:disabled {
+	opacity: 0.3;
+}

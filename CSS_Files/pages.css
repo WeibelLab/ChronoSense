@@ -254,11 +254,11 @@
 
 }
 
-.camera-inner-container:hover .close-button{
+.camera-inner-container:hover .close-button.disable_on_rec:enabled {
 	display:block;
   }
 
-.screen-cap-inner-container:hover .close-button{
+.screen-cap-inner-container:hover .close-button.disable_on_rec:enabled{
 	display:block;
 }
 

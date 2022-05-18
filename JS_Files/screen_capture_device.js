@@ -292,6 +292,7 @@ export class ScreenCaptureDevice {
 		
 		// Build Close Button
 		closeButton.classList.add("close-button");
+		closeButton.classList.add('disable_on_rec');
 		closeImage.classList.add("close-button-image")
 		closeImage.setAttribute("src","../images/x.svg");
 		closeButton.appendChild(closeImage);
