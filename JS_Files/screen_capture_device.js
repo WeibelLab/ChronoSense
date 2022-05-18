@@ -216,6 +216,11 @@ export class ScreenCaptureDevice {
 	 * Starts recording video/audio from the currently streaming source.
 	 */
 	startRecording() {
+		// Prevents the creation of an empty folder when nothing is selected to be recorded
+		if(this.#stream == null) {
+			swal("Select a screen to record")
+			throw new Error('Select a screen to record')
+		}
 		if (!this.#isRecording) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
