@@ -16,8 +16,8 @@ var options = {
 };
 
 var callback = function(response) {
-    var str = '';
-    var parsed_json = '';
+    let str = '';
+    let parsed_json = '';
 
   //append data on page into str
     response.on('data', function (chunk) {

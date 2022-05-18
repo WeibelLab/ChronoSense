@@ -14,7 +14,6 @@ export class ScreenCaptureDevice {
 	#fileNameInputElement = null;
 	#pluginDiv = null;
 
-	#recordCheckbox = null;
 	#videoCheckbox = null;
 	#audioCheckbox = null;
 	#constraints = {audio: false, video: false}
@@ -24,7 +23,6 @@ export class ScreenCaptureDevice {
 
 	#dirName = null;
 
-	#isVisible = false;
 	#isRecording = false;
 	#stream = null;
 
@@ -45,18 +43,9 @@ export class ScreenCaptureDevice {
 		}
 	}
 
-	async getPluginDiv() {
-		let _pluginDiv;
-		if (this.#isVisible){
-			_pluginDiv = this.#pluginDiv;
-			return _pluginDiv;
-		}
-		else{
-			await wait(100).then( () => {
-				_pluginDiv = this.#pluginDiv;
-				return _pluginDiv;
-			});
-		}
+	getPluginDiv() {
+		let _pluginDiv = this.#pluginDiv;
+		return _pluginDiv;
 	}
 
 	/**
@@ -79,7 +68,7 @@ export class ScreenCaptureDevice {
 	 * Displays previews for all capture options and allows the user to click them to start streaming.
 	 *
 	 */
-	displaySourceOptions(recordCheckContainer) {
+	displaySourceOptions() {
 		// Display source options on top of video element with thumbnail & name.
 		// User can click on one to select it and start streaming in video/audio.
 		
@@ -227,7 +216,7 @@ export class ScreenCaptureDevice {
 	 * Starts recording video/audio from the currently streaming source.
 	 */
 	startRecording() {
-		if (!this.#isRecording && this.#isVisible) {
+		if (!this.#isRecording) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
 				this.#dirName,
@@ -289,7 +278,6 @@ export class ScreenCaptureDevice {
 		let avCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
-		let recordCheckContainer = document.createElement("div");
 		let closeButton = document.createElement("button");
 		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
@@ -340,19 +328,6 @@ export class ScreenCaptureDevice {
 		fileUpperContainer.appendChild(fileUpperTextContainer)
 		fileNameContainer.appendChild(fileUpperContainer);
 		fileNameContainer.appendChild(lowerTextBox);
-
-		// Build recordCheckContainer
-		recordCheckContainer.classList.add("record-check-container");
-
-		this.#recordCheckbox = document.createElement("input");
-		this.#recordCheckbox.type = 'checkbox';
-		this.#recordCheckbox.checked = true;
-		var recordLabel = document.createElement('label');
-		recordLabel.htmlFor = this.#recordCheckbox;
-		recordLabel.appendChild(document.createTextNode('Record:  '));
-		
-		recordCheckContainer.appendChild(recordLabel);
-		recordCheckContainer.appendChild(this.#recordCheckbox);
 		
 		// Build avCheckContainer 
 		avCheckContainer.classList.add("av-check-container");
@@ -363,22 +338,20 @@ export class ScreenCaptureDevice {
 		this.#videoCheckbox = document.createElement("input");
 		this.#videoCheckbox.type = 'checkbox';
 		this.#videoCheckbox.checked = true;
-		var videoLabel = document.createElement('label');
+		let videoLabel = document.createElement('label');
 		videoLabel.htmlFor = this.#videoCheckbox;
 		videoLabel.appendChild(document.createTextNode('Video: '));
 
 		this.#audioCheckbox = document.createElement("input");
 		this.#audioCheckbox.type = 'checkbox';
 		this.#audioCheckbox.checked = true;
-		var audioLabel = document.createElement('label');
+		let audioLabel = document.createElement('label');
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
-		this.#recordCheckbox.classList.add('flipswitch');
 		this.#videoCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
 
-		this.#recordCheckbox.classList.add('checkbox-disabled');
 		this.#videoCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 
@@ -386,7 +359,7 @@ export class ScreenCaptureDevice {
 		videoCheckContainer.addEventListener("click", () => {
 			if(this.#videoCheckbox.checked) {
 				this.stopCaptureStream();
-				this.displaySourceOptions(recordCheckContainer);
+				this.displaySourceOptions();
 				this.#audioCheckbox.checked = true;
 			} else {
 				this.stopCaptureStream();
@@ -423,8 +396,6 @@ export class ScreenCaptureDevice {
 		// Start adding buttons and containers to the full video element
 		videoButtonsContainer.classList.add("camera-buttons-container");
 		videoButtonsContainer.classList.add("camera-buttons-container-spacing");
-		// Add recordCheckContainer
-		videoButtonsContainer.appendChild(recordCheckContainer);
 		// Add fileNameContainer
 		videoButtonsContainer.appendChild(fileNameContainer);
 		// Add avCheckContainer 
@@ -446,8 +417,7 @@ export class ScreenCaptureDevice {
 		screenCapContainer.appendChild(this.#pluginDiv);
 
 
-		this.displaySourceOptions(recordCheckContainer);
-		this.#isVisible = true;
+		this.displaySourceOptions();
 		return screenCapContainer;
 	}
 
@@ -484,26 +454,6 @@ export class ScreenCaptureDevice {
 		await this.stopCaptureStream(this.#videoElement);
 	}
 
-	clearUI(){
-		this.#isVisible = false;
-		this.#recordCheckbox = null;
-		return;
-	}
-
-	/**
-	 * Returns the boolean value of record selection status
-	 * 
-	 * @returns {bool} - True if selected to record, false otherwise.
-	 */
-	 getRecordStatus() {
-		try{
-			return this.#recordCheckbox.checked;
-		}
-		catch{
-			return false;
-		}
-	}
-
 	/**
 	 * 
 	 * @param {string} dirName - (path + name) of directory for recordings to be stored.
@@ -513,13 +463,21 @@ export class ScreenCaptureDevice {
 	}
 
 	/**
+	 * Getter function to check if there is an active screen capture
+	 *
+	 */
+	 getScreenCaptureStatus() {
+		return this.#stream;
+	}
+
+	/**
 	 * Creates and returns all the current device's objects that can be instantiated
 	 * from the connected devices.
 	 * 
 	 * @return {array} List of instantiated device objects 
 	 */
 	static getDeviceObjects() {
-        var captureDevices = []
+        let captureDevices = []
         captureDevices.push(new ScreenCaptureDevice());
         return captureDevices;
 

@@ -9,7 +9,6 @@ export class Audio {
 	#label = "Audio Only";
 	#videoElement = null;
 	#audioSelector = null;
-	#recordCheckbox = null;
 	#audioCheckbox = null;
 	#audioMonitorUI = null;
 	#audioContext = null;
@@ -17,7 +16,6 @@ export class Audio {
 	#constraints = {audio: false, video: false}
 	#stream = null;
 
-	#isVisible = false;
 	#isRecording = false;
 	#fileNameInputElement = null;
 	#recorder;
@@ -38,19 +36,9 @@ export class Audio {
 		this.#label = "Audio Only";
 	}
 
-
-	async getPluginDiv() {
-		let _pluginDiv;
-		if (this.#isVisible){
-			_pluginDiv = this.#pluginDiv;
-			return _pluginDiv;
-		}
-		else{
-			await wait(100).then( () => {
-				_pluginDiv = this.#pluginDiv;
-				return _pluginDiv;
-			});
-		}
+	getPluginDiv() {
+		let _pluginDiv = this.#pluginDiv;
+		return _pluginDiv;
 	}
 
 	/**
@@ -72,21 +60,21 @@ export class Audio {
 	}
 
 	monitorAudio(stream) {
-		var max_level_L = 0;
-		var old_level_L = 0;
-		var cnvs = this.#audioMonitorUI;
-		var cnvs_cntxt = cnvs.getContext("2d");
+		let max_level_L = 0;
+		let old_level_L = 0;
+		let cnvs = this.#audioMonitorUI;
+		let cnvs_cntxt = cnvs.getContext("2d");
 		this.#audioContext = new AudioContext();
-		var microphone = this.#audioContext.createMediaStreamSource(stream);
-		var javascriptNode = this.#audioContext.createScriptProcessor(1024, 1, 1);
+		let microphone = this.#audioContext.createMediaStreamSource(stream);
+		let javascriptNode = this.#audioContext.createScriptProcessor(1024, 1, 1);
 		
 		microphone.connect(javascriptNode);
 		javascriptNode.connect(this.#audioContext.destination);
 		javascriptNode.onaudioprocess = function(event){
-			var inpt_L = event.inputBuffer.getChannelData(0);
-			var instant_L = 0.0;
-			var sum_L = 0.0;
-			for(var i = 0; i < inpt_L.length; ++i) {
+			let inpt_L = event.inputBuffer.getChannelData(0);
+			let instant_L = 0.0;
+			let sum_L = 0.0;
+			for(let i = 0; i < inpt_L.length; ++i) {
 				sum_L += inpt_L[i] * inpt_L[i];
 			}
 			instant_L = Math.sqrt(sum_L / inpt_L.length);
@@ -141,8 +129,8 @@ export class Audio {
 		} catch (err) {
 			swal("#audioContext not open")
 		}
-		var cnvs = this.#audioMonitorUI;
-		var cnvs_cntxt = cnvs.getContext("2d");
+		let cnvs = this.#audioMonitorUI;
+		let cnvs_cntxt = cnvs.getContext("2d");
 		cnvs_cntxt.clearRect(0, 0, cnvs.width, cnvs.height);
 	}
 
@@ -152,12 +140,14 @@ export class Audio {
 	 */
 	async stopStream() {
 		try {
-			if (this.#audioContext.state != "closed"){
-				await this.closeAudioContext();
+			if(this.#audioContext){
+				if (this.#audioContext.state != "closed"){
+					await this.closeAudioContext();
+				}
 			}
 		}
 		catch {
-			swal("audio not open");
+			console.log("audio not open");
 		}
 		//console.log("[audio.js:stopStream()] - Camera has been stopped");
 
@@ -171,11 +161,7 @@ export class Audio {
 		this.stopStream();
 		this.checkboxConstraintHelper();
 		if(this.#audioCheckbox.checked) {
-			this.#isVisible = true;
 			this.startStream();
-		}
-		else {
-			this.#isVisible = false;
 		}
 	}
 
@@ -186,7 +172,7 @@ export class Audio {
 	 *
 	 */
 	async startRecording() {
-		if (!this.#isRecording && this.#isVisible) {
+		if (!this.#isRecording) {
 			this.#recorder = new AVRecorder(
 				this.#stream,
 				this.#dirName,
@@ -271,7 +257,6 @@ export class Audio {
 		let avCheckContainer = document.createElement("div");
 		let audioCheckContainer = document.createElement("div");
 		let fileNameContainer = document.createElement("div");
-		let recordCheckContainer = document.createElement("div");
 		let closeButton = document.createElement("button");
 		let closeImage = document.createElement("img");
 		this.#pluginDiv = document.createElement("div");
@@ -315,19 +300,6 @@ export class Audio {
 		fileNameContainer.appendChild(fileUpperContainer);
 		fileNameContainer.appendChild(lowerTextBox);
 
-		// Build recordCheckContainer
-		recordCheckContainer.classList.add("record-check-container");
-
-		this.#recordCheckbox = document.createElement("input");
-		this.#recordCheckbox.type = 'checkbox';
-		this.#recordCheckbox.checked = true;
-		var recordLabel = document.createElement('label');
-		recordLabel.htmlFor = this.#recordCheckbox;
-		recordLabel.appendChild(document.createTextNode('Record:  '));
-
-		recordCheckContainer.appendChild(recordLabel);
-		recordCheckContainer.appendChild(this.#recordCheckbox);
-
 		// Build avCheckContainer 
 		avCheckContainer.classList.add("av-check-container");
 		// Matches record checkbox for audio only
@@ -338,20 +310,13 @@ export class Audio {
 		this.#audioCheckbox = document.createElement("input");
 		this.#audioCheckbox.type = 'checkbox';
 		this.#audioCheckbox.checked = true;
-		var audioLabel = document.createElement('label');
+		let audioLabel = document.createElement('label');
 		audioLabel.htmlFor = this.#audioCheckbox;
 		audioLabel.appendChild(document.createTextNode('Audio: '));
 
-		this.#recordCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
-
-		this.#recordCheckbox.classList.add('checkbox-disabled');
 		this.#audioCheckbox.classList.add('checkbox-disabled');
 		//this.#audioSelector.classList.add('checkbox-disabled')
-
-		recordCheckContainer.addEventListener("click", () => {
-			this.updateRecordStatus();
-		});
 
 		audioCheckContainer.addEventListener("click", () => {
 			this.updateConstraints();
@@ -363,13 +328,9 @@ export class Audio {
 		//avCheckContainer.appendChild(videoCheckContainer);
 		avCheckContainer.appendChild(audioCheckContainer);
 
-		// var recordBtn = document.getElementById("record-all-btn");
-
 		// Start adding buttons and containers to the full video element
 		cameraButtonsContainer.classList.add("camera-buttons-container");
 		cameraButtonsContainer.classList.add("camera-buttons-container-spacing");
-		// Add recordCheckContainer
-		cameraButtonsContainer.appendChild(recordCheckContainer);
 		// Add fileNameContainer
 		cameraButtonsContainer.appendChild(fileNameContainer);
 		// Add avCheckContainer 
@@ -407,7 +368,6 @@ export class Audio {
 		// Autostart camera with all options selected
 		this.checkboxConstraintHelper();
 		this.startStream();
-		this.#isVisible = true;
 		return cameraContainer;
 	}
 
@@ -427,8 +387,6 @@ export class Audio {
 			// Preview is off and audio isn't checked, so check
 			this.#constraints.audio = false;
 		}
-
-		// this.#recordStatus = this.#recordCheckbox.checked;
 	}
 
 	/**
@@ -456,26 +414,6 @@ export class Audio {
 		await this.stopStream();
 	}
 
-	clearUI(){
-		this.#isVisible = false;
-		this.#recordCheckbox = null;
-		return;
-	}
-
-	/**
-	 * Returns the boolean value of record selection status
-	 * 
-	 * @returns {bool} - True if selected to record, false otherwise.
-	 */
-	 getRecordStatus() {
-		try{
-			return this.#recordCheckbox.checked;
-		}
-		catch{
-			return false;
-		}
-	}
-
 	/**
 	 * 
 	 * @param {string} dirName - (path + name) of directory for recordings to be stored.
@@ -491,67 +429,8 @@ export class Audio {
 	 * @return {array} List of instantiated device objects 
 	 */
 	static getDeviceObjects() {
-		var audioDevices = []
+		let audioDevices = []
 		audioDevices.push(new Audio());
 		return audioDevices;
-		
-		// return navigator.mediaDevices.enumerateDevices().then((devices) => {
-		// 	var uniqueInputDevices = [];
-		// 	for (var i = 0; i < devices.length; i++) {
-		// 		// console.log(devices[i].kind + ": " + devices[i].label + " id = " + devices[i].deviceId);
-		// 		if (devices[i].kind.localeCompare("audioinput") == 0) {
-		// 			//Now search through added devices if it already exists
-		// 			var matched = false;
-		// 			for (var j = 0; j < uniqueInputDevices.length; j++) {
-		// 				if (
-		// 					uniqueInputDevices[j].groupId.localeCompare(
-		// 						devices[i].groupId
-		// 					) == 0
-		// 				) {
-		// 					matched = true;
-		// 					break; //If match, break out and don't add to
-		// 				}
-		// 			}
-	
-		// 			if (
-		// 				!matched &&
-		// 				devices[i].deviceId.localeCompare("default") != 0 &&
-		// 				devices[i].deviceId.localeCompare("communications") != 0
-		// 			) {
-		// 				//Filter out "default" and "communications" so there is a alphanumeric
-		// 				//identifier and no duplicates.
-		// 				uniqueInputDevices.push(devices[i]);
-		// 			}
-		// 		}
-		// 	}
-		// 	return new Promise((resolve, reject) => {
-		// 		resolve(uniqueInputDevices);
-		// 	});
-		// }).then((currentDevices) => {
-		// 	//console.log(currentDevices);
-		// 	for (var k = 0; k < currentDevices.length; k++) {
-		// 		//if (
-		// 		//	!(
-		// 		//		currentDevices[k].label.includes("kinect") ||
-		// 		//		currentDevices[k].label.includes("Kinect")
-		// 		//	)
-		// 		//) {
-		// 			//ONLY add devices that are NOT Kinects (use Kinect SDK instead)
-		// 		var audio = new (
-		// 			currentDevices[k].deviceId,
-		// 			currentDevices[k].groupId,
-		// 			currentDevices[k].kind,
-		// 			currentDevices[k].label
-		// 		);
-		// 		audioDevices.push(audio);
-		// 		}
-		// 	//} 
-		// 	//console.log(cameraDevices);
-		// 	return new Promise((resolve, reject) => {
-		// 		resolve(audioDevices);
-		// 	});
-		//  });
-
 	}
-
-} //End of Camera Class
+}
