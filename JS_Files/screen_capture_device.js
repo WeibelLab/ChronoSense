@@ -1,7 +1,5 @@
-const { desktopCapturer } = require('electron');
+const remote = require('@electron/remote');
 import { AVRecorder } from './avRecorder.js';
-
-const wait=ms=>new Promise(resolve => setTimeout(resolve, ms));
 
 export class ScreenCaptureDevice {
 
@@ -55,7 +53,7 @@ export class ScreenCaptureDevice {
 	 */
     getCaptureSources() {
 		return new Promise((resolve, reject) => {
-			desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: {width: 900, height: 900} }).then(sources => {
+			remote.desktopCapturer.getSources({ types: ['window', 'screen'], thumbnailSize: {width: 900, height: 900} }).then(sources => {
 			            this.#sources = sources;
 			            //console.log(sources);
 						resolve(1);

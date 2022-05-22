@@ -1,5 +1,8 @@
 const electron = require('electron');
-const {app, BrowserWindow} = electron;
+const remoteMain = require('@electron/remote/main');
+remoteMain.initialize();
+// const { app, BrowserWindow } = electron;
+// require('@electron/remote/main').initialize();
 
 let mainWindow;
 let electronScreen;
@@ -8,7 +11,7 @@ function createWindow() {
     //Fill size of the monitor natively
     const { width, height } = electronScreen.getPrimaryDisplay().workAreaSize
     //Create new window
-    mainWindow = new BrowserWindow({ 
+    mainWindow = new electron.BrowserWindow({ 
         width: width, 
         height: height, 
         minWidth: 1050,
@@ -18,8 +21,7 @@ function createWindow() {
           nodeIntegrationInWorker: true,
           nodeIntegration: true,
           contextIsolation: false,
-          webviewTag: true,
-          enableRemoteModule: true
+          webviewTag: true
         },
         show: false
      });
@@ -32,27 +34,28 @@ function createWindow() {
     
     // // For debugging - show dev tool -> similar to chrome web browser tools (F12)
     // // ! Comment out before packaging as an executable !
-    // mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools();
     
     //Close window when closed
     mainWindow.on('closed', function() {
         mainWindow = null;
       });
     
+    remoteMain.enable(mainWindow.webContents);
     
 }
 
 // Listen for application to be ready
-app.on('ready', () => {
+electron.app.on('ready', () => {
   electronScreen = electron.screen
   createWindow()
 })
 
-app.on('window-all-closed', function() {
-    app.quit();
+electron.app.on('window-all-closed', function() {
+    electron.app.quit();
 });
 
-app.on('activate', function () {
+electron.app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (mainWindow === null) {
@@ -61,6 +64,6 @@ app.on('activate', function () {
 });
 
 //Set path for saved recording files
-app.setPath("userData", __dirname + "/saved_recordings");
+electron.app.setPath("userData", __dirname + "/saved_recordings");
 
-app.allowRendererProcessReuse = false
+electron.app.allowRendererProcessReuse = false
