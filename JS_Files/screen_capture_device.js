@@ -35,7 +35,7 @@ export class ScreenCaptureDevice {
 	fixForMacOS() {
 		if(process.platform === "darwin") {
 			this.#constraints.audio = false;
-			this.#audioCheckbox.classList.remove('checkbox-disabled');
+			this.#audioCheckbox.classList.remove('disable_on_rec');
 			this.#audioCheckbox.disabled = true;
 			this.#audioCheckbox.checked = false;
 		}
@@ -222,12 +222,6 @@ export class ScreenCaptureDevice {
 			);
 			this.#recorder.startRecording();
 			this.#isRecording = true;
-			// Disable the record filename input when recording
-			this.#fileNameInputElement.disabled = true;
-			//Disables record/video/audio checkbox option when recording starts
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
-    			elem.disabled = true;
-			});
 		} else {
 			this.stopRecording();
 		}
@@ -241,12 +235,6 @@ export class ScreenCaptureDevice {
 		if (this.#isRecording) {
 			this.#recorder.stopRecording();
 			this.#isRecording = false;
-			// Reenable recording file name after finished recording
-			this.#fileNameInputElement.disabled = false;
-			//Enables record/video/audio checkbox option when recording stops
-			document.querySelectorAll('input.checkbox-disabled').forEach(elem => {
-    			elem.disabled = false;
-			});
 			this.#recorder = null;
 		}
 	}
@@ -302,6 +290,7 @@ export class ScreenCaptureDevice {
 		
 		// Build Close Button
 		closeButton.classList.add("close-button");
+		closeButton.classList.add('disable_on_rec');
 		closeImage.classList.add("close-button-image")
 		closeImage.setAttribute("src","../images/x.svg");
 		closeButton.appendChild(closeImage);
@@ -350,9 +339,9 @@ export class ScreenCaptureDevice {
 		this.#videoCheckbox.classList.add('flipswitch');
 		this.#audioCheckbox.classList.add('flipswitch');
 
-		this.#videoCheckbox.classList.add('checkbox-disabled');
-		this.#audioCheckbox.classList.add('checkbox-disabled');
-
+		this.#videoCheckbox.classList.add('disable_on_rec');
+		this.#audioCheckbox.classList.add('disable_on_rec');
+		this.#fileNameInputElement.classList.add('disable_on_rec');
 
 		videoCheckContainer.addEventListener("click", () => {
 			if(this.#videoCheckbox.checked) {
@@ -458,6 +447,14 @@ export class ScreenCaptureDevice {
 	 */
 	 setDirName(dirName) {
 		this.#dirName = dirName;
+	}
+
+	/**
+	 * Getter function to check if there is an active screen capture
+	 *
+	 */
+	 getScreenCaptureStatus() {
+		return this.#stream;
 	}
 
 	/**
