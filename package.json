@@ -25,7 +25,8 @@
 						"repository": {
 							"owner": "WeibelLab",
 							"name": "ChronoSense"
-						}
+						},
+						"draft": true
 					}
 				}
 			]
