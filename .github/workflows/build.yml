@@ -17,7 +17,5 @@ jobs:
         node-version: 16
     - name: install dependencies
       run: npm install
-    - name: publish
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run package
+    - name: build
+      run: npm run make
