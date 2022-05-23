@@ -1,9 +1,9 @@
 name: Release Electron app
 
 on:
-  release:
-    types:
-      - created
+  push:
+    tags:
+      - 'v*'
 
 jobs:
   release:
