@@ -8,7 +8,7 @@ ChronoSense is a foundational piece of recording software built on webtech with 
 *ChronoSense pushes the starting line forward for any AV research or development project.*
 
 ## Run ChronoSense Electron App:
-1.   CD into chronosense folder and enter the command `npm install` to make sure you have all the needed dependencies & Electron.
+1.   CD into chronosense folder and enter the command `npm ci` to make sure you have all the needed dependencies & Electron.
 2.   Next enter `npm start` and the application window will open up.  
 
 ## Get Up and Running for Developing:
@@ -18,7 +18,7 @@ ChronoSense is a foundational piece of recording software built on webtech with 
 2.  Make sure you have [Node.js](https://nodejs.org/en/) installed (includes node and npm commands).
 
 3.  Navigate to where you cloned the ChronoSense folder and run the command:  
-    `npm install`
+    `npm ci`
 
     *  **(MacOS only)** Be sure `ffmpeg` is available in your PATH, we recommend using [Homebrew](https://brew.sh/) with `brew install ffmpeg`
 
@@ -31,6 +31,6 @@ ChronoSense is a foundational piece of recording software built on webtech with 
 
 ## Create Executable Package  
 1. Clone the repository  
-2. Run `npm install` in the cloned repo directory  
-3. Run `npm run package`  
+2. Run `npm ci` in the cloned repo directory  
+3. Run `npm run make`  
 4. Look for newly created directory inside of your current repo directory which will contain the created executable for ChronoSense

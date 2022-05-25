@@ -1,25 +1,48 @@
 {
 	"name": "ChronoSense",
-	"version": "1.7.1",
+	"version": "1.7.2",
 	"description": "Chronosense Electron Application",
 	"main": "main.js",
 	"scripts": {
-		"start": "electron --no-sandbox --use-gl=swiftshader .",
-		"install": "node ./install_helper.js",
-		"postinstall": "node ./get_ffmpeg.js",
-		"package": "electron-packager ."
+		"start": "electron-forge start",
+		"make": "electron-forge make",
+		"publish": "electron-forge publish"
 	},
 	"author": "WeibelLab",
 	"license": "GPL-3.0-or-later",
+	"config": {
+		"forge": {
+			"packagerConfig": {},
+			"makers": [
+				{
+					"name": "@electron-forge/maker-zip"
+				}
+			],
+			"publishers": [
+				{
+					"name": "@electron-forge/publisher-github",
+					"config": {
+						"repository": {
+							"owner": "WeibelLab",
+							"name": "ChronoSense"
+						},
+						"draft": true
+					}
+				}
+			]
+		}
+	},
 	"dependencies": {
+		"@electron/remote": "^2.0.8",
 		"download": "^6.2.5",
-		"electron": "^13.6.6",
-		"electron-packager": "^15.2.0",
 		"extract-zip": "2.0.1",
 		"fix-path": "^3.0.0",
 		"fs-extra": "^8.1.0"
 	},
 	"devDependencies": {
-		"electron-rebuild": "^3.2.5"
+		"@electron-forge/cli": "^6.0.0-beta.63",
+		"@electron-forge/maker-zip": "^6.0.0-beta.63",
+		"@electron-forge/publisher-github": "^6.0.0-beta.63",
+		"electron": "18.2.4"
 	}
 }

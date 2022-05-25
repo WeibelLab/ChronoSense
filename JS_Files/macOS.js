@@ -1,6 +1,4 @@
-const { systemPreferences } = require('electron').remote
-
-export async function fixPermissions(){
+export async function fixPermissions(systemPreferences){
     if(process.platform === "darwin") {
         if(systemPreferences.getMediaAccessStatus("camera") == "not-determined"){
             await systemPreferences.askForMediaAccess("camera");

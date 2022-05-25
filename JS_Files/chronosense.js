@@ -1,11 +1,11 @@
 // This file is required by the index.html file and will
 // be executed in the renderer process for that window.
 // All of the Node.js APIs are available in this process.
-const remote = require("electron").remote;
+
+const remote = require('@electron/remote');
 const path = require("path");
 const fs = require("fs");
 import { getPluginCount, getPluginUI, getPluginList, refreshPlugins } from "./plugin.js";
-const { dialog } = remote;
 //import { Kinect } from "./kinect.js";   ** Commented out due to Kinect currently treated as generic camera
 import { Camera } from "./camera.js";
 import { Audio } from "./audio.js";
@@ -17,13 +17,16 @@ import { ScreenCaptureDevice } from "./screen_capture_device.js";
 import {} from "./version.js"
 const { fork } = require('child_process');
 const fixPath = require('fix-path');
+
 fixPath();
-fixPermissions();
+const remoteMain = remote.require("@electron/remote/main");
+var window = remote.getCurrentWindow();
+remoteMain.enable(window.webContents);
+fixPermissions(remote.systemPreferences);
 
 const homeDir = require('os').homedir(); // See: https://www.npmjs.com/package/os
 const desktopDir = path.join(homeDir, "Desktop");
 
-var window = null;
 var recordBtn = document.getElementById("record-all-btn");
 recordBtn.classList.add("notRecording");
 var recordDirInput = document.getElementById("recording-dir-path");
@@ -116,8 +119,6 @@ document.onreadystatechange = () => {
  *
  */
 async function handleWindowControls() {
-	window = remote.getCurrentWindow();
-
 	// Make minimise/maximise/restore/close buttons work when they are clicked
 	document.getElementById("min-button").addEventListener("click", (event) => {
 		window.minimize();
@@ -167,7 +168,7 @@ async function handleWindowControls() {
 	recordDirBtn.addEventListener("click", () => {
 		// Only allow button to set directory if it is not currently recording.
 		if (!isRecording) {
-			dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
+			remote.dialog.showOpenDialog({ title: "Select Directory for Recording", defaultPath: "./", properties: ["openDirectory"] }).then((promise) => {
 				if (!promise.canceled) {
 					recordDirInput.value = promise.filePaths[0];
 					customDirectory = true; // Change to true if user selects their own folder.
