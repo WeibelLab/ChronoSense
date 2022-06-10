@@ -395,6 +395,15 @@ export class Audio {
 	}
 
 	/**
+	 * Getter function to retrieve the device recording status based on video and audio
+	 *
+	 * @return {string} - Device identifier used to describe device recording status
+	 */
+	getRecordStatus() {
+		return (this.#audioCheckbox.checked);
+	}
+
+	/**
 	 * Function used to stop the device from transmitting data/running
 	 */
 	async stop() {
