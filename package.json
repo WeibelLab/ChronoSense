@@ -6,7 +6,8 @@
 	"scripts": {
 		"start": "electron-forge start",
 		"make": "electron-forge make",
-		"publish": "electron-forge publish"
+		"publish": "electron-forge publish",
+		"postinstall": "node get_ffmpeg.js"
 	},
 	"author": "WeibelLab",
 	"license": "GPL-3.0-or-later",
