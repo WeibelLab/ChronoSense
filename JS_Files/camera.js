@@ -70,8 +70,8 @@ export class Camera {
 	 *
 	 * @return {string} - Device identifier used to describe device recording status
 	 */
-		 getRecordStatus() {
-			return (this.#audioCheckbox.checked || this.#videoCheckbox.checked);
+	getRecordStatus() {
+		return (this.#audioCheckbox.checked || this.#videoCheckbox.checked);
 	}
 
 

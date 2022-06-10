@@ -481,14 +481,11 @@ async function recordAllSelectedDevices() {
 			})
 			selectedDevices.forEach((device) => {
 				// Checks whether or not Audio or Video is selected if not do not start
-				if (device.getRecordStatus() == false) {
-					console.log('Audio and Video are both off')
-				}
-				else {
-				// Start recording
-				device.setDirName(recordDirectory);
-				device.startRecording();
-				numRecording++;
+				if (device.getRecordStatus()) {
+					// Start recording
+					device.setDirName(recordDirectory);
+					device.startRecording();
+					numRecording++;
 				}
 			});
 		}
