@@ -65,6 +65,15 @@ export class Camera {
 		return this.#kind;
 	}
 
+	/**
+	 * Getter function to retrieve the device recording status based on video and audio
+	 *
+	 * @return {string} - Device identifier used to describe device recording status
+	 */
+		 getRecordStatus() {
+			return (this.#audioCheckbox.checked || this.#videoCheckbox.checked);
+	}
+
 
 	/**
 	 * Set width and height for the input of the camera feed.
