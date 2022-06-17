@@ -472,7 +472,7 @@ async function recordAllSelectedDevices() {
 			// Prevents the user from recording any devices if screen capture is not selected
 			// Looks through all devices before attempting to record to check if there is a null screen capture
 			selectedDevices.forEach((device) => {
-				if(device.getLabel() == "Screen Capture") {
+				if(device.getLabel() == "ScreenCapture") {
 					if(device.getScreenCaptureStatus() == null) {
 						swal("Select a screen to record")
 						throw new Error('Select a screen to record')
