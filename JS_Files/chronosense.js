@@ -472,7 +472,7 @@ async function recordAllSelectedDevices() {
 			// Prevents the user from recording any devices if screen capture is not selected
 			// Looks through all devices before attempting to record to check if there is a null screen capture
 			selectedDevices.forEach((device) => {
-				if(device.getLabel() == "Screen Capture") {
+				if(device.getLabel() == "ScreenCapture") {
 					if(device.getScreenCaptureStatus() == null) {
 						swal("Select a screen to record")
 						throw new Error('Select a screen to record')
@@ -481,14 +481,11 @@ async function recordAllSelectedDevices() {
 			})
 			selectedDevices.forEach((device) => {
 				// Checks whether or not Audio or Video is selected if not do not start
-				if (device.getRecordStatus() == false) {
-					console.log('Audio and Video are both off')
-				}
-				else {
-				// Start recording
-				device.setDirName(recordDirectory);
-				device.startRecording();
-				numRecording++;
+				if (device.getRecordStatus()) {
+					// Start recording
+					device.setDirName(recordDirectory);
+					device.startRecording();
+					numRecording++;
 				}
 			});
 		}

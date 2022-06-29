@@ -2,9 +2,10 @@ const remote = require('@electron/remote');
 import { AVRecorder } from './avRecorder.js';
 
 export class ScreenCaptureDevice {
-
-    #label = "Screen Capture";
-    #deviceId = "ScreenCaptureModule";
+	#deviceId = "ScreenCapture";
+	#groupId = "ScreenCapture";
+	#kind = "screencapture";
+	#label = "ScreenCapture";
 	#videoElement = null;
 	#optionContainer = null;
 	#sources = []
@@ -27,10 +28,51 @@ export class ScreenCaptureDevice {
 	/**
 	 * Constructor for a ScreenCaptureDevice object that captures stream of video/audio from user screens & windows.
 	 *
+	 * @param {string} deviceId - Identifier for the device used in input capture.
+	 * @param {string} groupId - Identifier for the device group used in input capture.
+	 * @param {string} kind - Identifier for type of input from device.
+	 * @param {string} label - Name Identifier (Sensical to user for reading).
 	 */
-    constructor() {
-        this.getCaptureSources();
-    }
+	constructor(deviceId, groupId, kind, label) {
+		this.#deviceId = "ScreenCapture";
+		this.#groupId = "ScreenCapture";
+		this.#kind = "screencapture";
+		this.#label = "ScreenCapture";
+
+		this.getCaptureSources();
+	}
+
+	getPluginDiv() {
+		let _pluginDiv = this.#pluginDiv;
+		return _pluginDiv;
+	}
+
+	/**
+	 * Getter function to retrieve the object's Group ID
+	 *
+	 * @return {string} - Group identifier used to connect it to other similar devices
+	 */
+	getGroupId() {
+		return this.#groupId;
+	}
+
+	/**
+	 * Getter function to retrieve the object's "kind"
+	 *
+	 * @return {string} - Device identifier used to describe device output
+	 */
+	getKind() {
+		return this.#kind;
+	}
+
+	/**
+	 * Getter function to retrieve the device recording status based on video and audio
+	 *
+	 * @return {string} - Device identifier used to describe device recording status
+	 */
+	getRecordStatus() {
+		return (this.#videoCheckbox.checked);
+	}
 
 	fixForMacOS() {
 		if(process.platform === "darwin") {
@@ -45,6 +87,8 @@ export class ScreenCaptureDevice {
 		let _pluginDiv = this.#pluginDiv;
 		return _pluginDiv;
 	}
+
+
 
 	/**
 	 * Collects all of the possible screen and window sources into an array for later use.
